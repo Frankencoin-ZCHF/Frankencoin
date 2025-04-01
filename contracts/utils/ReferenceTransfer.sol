@@ -1,17 +1,10 @@
 // SPDX-License-Identifier: MIT
-//
-// From https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol
-//
-// Modifications:
-// - Replaced Context._msgSender() with msg.sender
-// - Made leaner
-
 pragma solidity ^0.8.0;
 
 import "../interface/IERC20.sol";
 
 /**
- * @dev A module that allows to transfer frankencoins with a reference number
+ * @dev A module for Frankencoin transfers with a reference number
  */
 contract ReferenceTransfer {
 
@@ -35,13 +28,15 @@ contract ReferenceTransfer {
 
     function transfer(address recipient, uint256 amount, string calldata ref) public returns (bool) {
         emit Transfer(msg.sender, recipient, amount, ref);
-        return executeTransfer(msg.sender, recipient, amount);
+        executeTransfer(msg.sender, recipient, amount);
+        return true;
     }
 
     function transferFrom(address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
-        if (TOKEN.allowance(owner, msg.sender) < INFINITY) revert TransferFromRequiresInfiniteAllowance(owner, msg.sender);        
+        if (ZCHF.allowance(owner, msg.sender) < INFINITY) revert TransferFromRequiresInfiniteAllowance(owner, msg.sender);        
         emit Transfer(owner, recipient, amount, ref);
-        return executeTransfer(owner, recipient, amount);
+        executeTransfer(owner, recipient, amount);
+        return true;
     }
 
     function setAutoSave(bool enabled) external {
@@ -56,19 +51,19 @@ contract ReferenceTransfer {
         return settings[owner] & FORWARD_TO_SAVINGS == FORWARD_TO_SAVINGS;
     }
 
-    function executeTransfer(address from, address to, uint256 amount) internal returns (bool) {
+    function executeTransfer(address from, address to, uint256 amount) internal {
         if (hasAutoSave(to)){
-            TOKEN.transferFrom(from, address(this), amount);
-            SAVINGS.save(to, amount);
+            ZCHF.transferFrom(from, address(this), amount);
+            SAVINGS.save(to, uint192(amount));
         } else {
-            TOKEN.transferFrom(from, to, amount);
+            ZCHF.transferFrom(from, to, amount);
         }
     }
 
 }
 
 interface ISavings {
-    function save(address owner, uint192 amount) public;
+    function save(address owner, uint192 amount) external;
 }
 
 
