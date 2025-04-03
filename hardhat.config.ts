@@ -12,13 +12,26 @@ import { getChildFromSeed } from "./helper/wallet";
 import dotenv from "dotenv";
 dotenv.config();
 
+// ---------------------------------------------------------------------------------------
+
+const index = process.env.DEPLOYER_SEED_INDEX;
+const start = index && index?.length > 0 ? parseInt(index) : 0;
+
 const seed = process.env.DEPLOYER_ACCOUNT_SEED;
 if (!seed) throw new Error("Failed to import the seed string from .env");
-const w0 = getChildFromSeed(seed, 0); // deployer
+const wallet = getChildFromSeed(seed, start); // deployer
+console.log("### Deployer Wallet ###");
+console.log(wallet.address, `index: `, wallet.index);
 
 const alchemy = process.env.ALCHEMY_RPC_KEY;
 if (alchemy?.length == 0 || !alchemy)
   console.log("WARN: No Alchemy Key found in .env");
+
+const etherscan = process.env.ETHERSCAN_API;
+if (etherscan?.length == 0 || !etherscan)
+  console.log("WARN: No Etherscan Key found in .env");
+
+// ---------------------------------------------------------------------------------------
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,11 +41,6 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
-      outputSelection: {
-        "*": {
-          "*": ["storageLayout"],
-        },
-      },
     },
   },
   networks: {
@@ -41,7 +49,8 @@ const config: HardhatUserConfig = {
       chainId: 1,
       gas: "auto",
       gasPrice: "auto",
-      accounts: [w0.privateKey],
+      gasMultiplier: 0.7,
+      accounts: [wallet.privateKey],
       timeout: 50_000,
     },
     polygon: {
@@ -49,28 +58,47 @@ const config: HardhatUserConfig = {
       chainId: 137,
       gas: "auto",
       gasPrice: "auto",
-      accounts: [w0.privateKey],
+      accounts: [wallet.privateKey],
       timeout: 50_000,
     },
+    citrea: {
+      url: `https://rpc.testnet.citrea.xyz`,
+      chainId: 5115,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+    },
+  },
+  etherscan: {
+    apiKey: etherscan,
+    // apiKey: {
+    // citrea: 'your API key',
+    // },
+    // customChains: [
+    // 	{
+    // 		network: 'citrea',
+    // 		chainId: 5115,
+    // 		urls: {
+    // 			apiURL: 'https://explorer.testnet.citrea.xyz/api',
+    // 			browserURL: 'https://explorer.testnet.citrea.xyz',
+    // 		},
+    // 	},
+    // ],
+  },
+  sourcify: {
+    enabled: true,
   },
   namedAccounts: {
     deployer: {
       default: 0,
     },
   },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API,
-  },
-  sourcify: {
-    enabled: true,
-  },
   paths: {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
-    deploy: "./scripts/deployment/deploy",
-    deployments: "./scripts/deployment/deployments",
   },
   contractSizer: {
     alphaSort: false,
@@ -84,7 +112,7 @@ const config: HardhatUserConfig = {
   abiExporter: [
     {
       path: "./abi",
-      clear: true,
+      clear: false,
       runOnCompile: true,
       flat: false,
       spacing: 4,
@@ -92,7 +120,7 @@ const config: HardhatUserConfig = {
     },
     {
       path: "./abi/signature",
-      clear: true,
+      clear: false,
       runOnCompile: true,
       flat: false,
       spacing: 4,
