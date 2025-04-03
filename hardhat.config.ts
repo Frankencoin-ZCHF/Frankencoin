@@ -17,7 +17,7 @@ dotenv.config();
 const index = process.env.DEPLOYER_SEED_INDEX;
 const start = index && index?.length > 0 ? parseInt(index) : 0;
 
-const seed = process.env.DEPLOYER_ACCOUNT_SEED;
+const seed = process.env.DEPLOYER_SEED ?? process.env.DEPLOYER_ACCOUNT_SEED;
 if (!seed) throw new Error("Failed to import the seed string from .env");
 const wallet = getChildFromSeed(seed, start); // deployer
 console.log("### Deployer Wallet ###");

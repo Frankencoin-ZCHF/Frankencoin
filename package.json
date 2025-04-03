@@ -1,6 +1,6 @@
 {
   "name": "@frankencoin/zchf",
-  "version": "0.2.17",
+  "version": "0.2.18",
   "description": "It shall support a wide range of collateralized minting methods that are governed by a democratic process.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -16,8 +16,8 @@
     "coverage": "npx hardhat coverage",
     "deploy": "npx hardhat ignition deploy",
     "verify": "npx hardhat verify",
-    "build": "tsup",
-    "publish": "npm publish --access public",
+    "npm:build": "tsup",
+    "npm:publish": "npm publish --access public",
     "deploy:network": "npx hardhat deploy --network",
     "deploynotesttoken:network": "export deploymode=base && export deploymode=base && npx hardhat deploy --network",
     "redeploynotesttoken:network": "export deployoption=notesttoken && export deploymode=base && npx hardhat deploy --reset --network",

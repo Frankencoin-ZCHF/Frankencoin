@@ -13,6 +13,7 @@ export interface ChainAddress {
   positionFactoryV1: Address;
   mintingHubV2: Address;
   positionFactoryV2: Address;
+  referenceTransfer: Address;
 
   bridgePolygonFrankencoin?: Address;
   bridgePolygonWfps?: Address;
@@ -40,6 +41,8 @@ export const ADDRESS: Record<number, ChainAddress> = {
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
 
+    referenceTransfer: zeroAddress,
+
     // bridge contracts for ZCHF
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",
     bridgeArbitrumFrankencoin: "0xB33c4255938de7A6ec1200d397B2b2F329397F9B",
@@ -63,5 +66,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     positionFactoryV1: "0x56Fa604fD5F96e456798F2dB50c88528A8a81F57",
     mintingHubV2: "0xf214ea93D12F425F71Fc28b5D15F38E700e2daeC",
     positionFactoryV2: "0x151E58D4dAA67EC33f4809491441791e48d1Fe56",
+
+    referenceTransfer: "0x685fE606265465900bbeBA327eEc9223dAcfA424",
   },
 };
