@@ -18,6 +18,7 @@ export interface ChainAddress {
   roller: Address;
   mintingHubV2: Address;
   positionFactoryV2: Address;
+  referenceTransfer: Address;
 
   // stablecoin bridges
   stablecoinBridgeXCHF: Address;
@@ -51,6 +52,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     roller: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
+    referenceTransfer: zeroAddress,
 
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
     xchf: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
@@ -82,5 +84,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     positionFactoryV1: "0x56Fa604fD5F96e456798F2dB50c88528A8a81F57",
     mintingHubV2: "0xf214ea93D12F425F71Fc28b5D15F38E700e2daeC",
     positionFactoryV2: "0x151E58D4dAA67EC33f4809491441791e48d1Fe56",
+
+    referenceTransfer: "0x685fE606265465900bbeBA327eEc9223dAcfA424",
   },
 };
