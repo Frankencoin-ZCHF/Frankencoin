@@ -28,7 +28,7 @@ async function main() {
 
   const tx = await ccipAdmin.applyRemoveChain(targetParams?.chainSelector ?? 0);
   await tx.wait();
-  console.log(`Proposal sent ${tx.hash}`);
+  console.log(`Proposal applied ${tx.hash}`);
 }
 
 main();

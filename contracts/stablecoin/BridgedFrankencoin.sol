@@ -229,20 +229,41 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
      * Uses a multichain call to send home all accrued profits, if any
      */
     function synchronizeAccounting(bytes memory extraArgs) public payable {
-        uint256 reserveLeft = balanceOf(address(reserve));
-        uint256 _accuredLoss = accruedLoss;
-        accruedLoss = 0;
+        (uint256 reserveLeft, uint256 _accuredLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
 
+        if (_accuredLoss > 0) {
+            accruedLoss = 0;
+        }
         if (reserveLeft > 0) {
             _transfer(address(reserve), address(this), reserveLeft);
             _approve(address(this), address(ROUTER), reserveLeft);
         }
 
-        Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
-        tokenAmounts[0] = Client.EVMTokenAmount({token: address(this), amount: reserveLeft});
         Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accuredLoss), tokenAmounts, extraArgs);
         _send(MAINNET_CHAIN_SELECTOR, message);
         emit AccountingSynchronized(reserveLeft, _accuredLoss);
+    }
+
+    /**
+     * @notice Returns the CCIP fee required to synchronize accounting.
+     */
+    function getSynchronizeAccountingFee(bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        (uint256 reserveLeft, uint256 _accuredLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
+        Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accuredLoss), tokenAmounts, nativeToken, extraArgs);
+        return _calculateFee(MAINNET_CHAIN_SELECTOR, message);
+    }
+
+    /**
+     * @notice Returns the data required to synchronize accounting. Including the tokenAmounts array.
+     */
+    function getSynchronizeAccountingData() public view returns (uint256, uint256, Client.EVMTokenAmount[] memory) {
+        uint256 reserveLeft = balanceOf(address(reserve));
+        Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](0);
+        if (reserveLeft > 0) {
+            tokenAmounts = new Client.EVMTokenAmount[](1);
+            tokenAmounts[0] = Client.EVMTokenAmount({token: address(this), amount: reserveLeft});
+        }
+        return (reserveLeft, accruedLoss, tokenAmounts);
     }
 
     /**
