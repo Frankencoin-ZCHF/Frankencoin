@@ -46,6 +46,37 @@ abstract contract CrossChainERC20 is ERC20, CCIPSender {
         emit Transfer(msg.sender, targetChain, target, amount);
     }
 
+    /// @notice Gets the CCIP fee for a transfer.
+    /// @param targetChain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param amount The amount of tokens to transfer.
+    /// @param nativeToken Whether the token is a native token.
+    function getCCIPFee(uint64 targetChain, address target, uint256 amount, bool nativeToken) public view returns (uint256) {
+        return getCCIPFee(targetChain, _toReceiver(target), amount, nativeToken, "");
+    }
+
+    /// @notice Gets the CCIP fee for a transfer.
+    /// @param targetChain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param amount The amount of tokens to transfer.
+    /// @param nativeToken Whether the token is a native token.
+    /// @param extraArgs Extra arguments for CCIP
+    function getCCIPFee(uint64 targetChain, address target, uint256 amount, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        return getCCIPFee(targetChain, _toReceiver(target), amount, nativeToken, extraArgs);
+    }
+
+    /// @notice Gets the CCIP fee for a transfer.
+    /// @param targetChain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param amount The amount of tokens to transfer.
+    /// @param nativeToken Whether the token is a native token.
+    /// @param extraArgs Extra arguments for CCIP
+    function getCCIPFee(uint64 targetChain, bytes memory target, uint256 amount, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
+        tokenAmounts[0] = Client.EVMTokenAmount(address(this), amount);
+        return _calculateFee(targetChain, _constructMessage(target, "", tokenAmounts, nativeToken, extraArgs));
+    }
+
     /// @notice Construct a CCIP message.
     /// @dev This function will create an EVM2AnyMessage struct with all the necessary information for tokens transfer.
     /// @param receiver The address of the receiver.

@@ -64,6 +64,32 @@ contract LeadrateSender is CCIPSender {
         _sendLeadrate(chain, target, LEADRATE.currentRatePPM(), extraArgs);
     }
 
+    /// @notice Gets the CCIP fee.
+    /// @param chain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param nativeToken Whether to use native token for the fee.
+    function getCCIPFee(uint64 chain, address target, bool nativeToken) public view returns (uint256) {
+        return getCCIPFee(chain, _toReceiver(target), nativeToken, "");
+    }
+
+    /// @notice Gets the CCIP fee.
+    /// @param chain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param nativeToken Whether to use native token for the fee.
+    /// @param extraArgs Extra arguments for CCIP
+    function getCCIPFee(uint64 chain, address target, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        return getCCIPFee(chain, _toReceiver(target), nativeToken, extraArgs);
+    }
+
+    /// @notice Gets the CCIP fee.
+    /// @param chain The chain selector of the destination chain.
+    /// @param target The address of the recipient on the destination chain.
+    /// @param nativeToken Whether to use native token for the fee.
+    /// @param extraArgs Extra arguments for CCIP
+    function getCCIPFee(uint64 chain, bytes memory target, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        return _calculateFee(chain, _constructMessage(target, abi.encode(LEADRATE.currentRatePPM()), new Client.EVMTokenAmount[](0), nativeToken, extraArgs));
+    }
+
     /// @notice Constructs and sends the CCIP message.
     /// @param chain The chain selector of the destination chain.
     /// @param target The address of the recipient on the destination chain.

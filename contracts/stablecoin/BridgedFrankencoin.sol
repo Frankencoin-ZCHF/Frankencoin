@@ -247,6 +247,13 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
     /**
      * @notice Returns the CCIP fee required to synchronize accounting.
      */
+    function getSynchronizeAccountingFee(bool nativeToken) public view returns (uint256) {
+        return getSynchronizeAccountingFee(nativeToken, "");
+    }
+
+    /**
+     * @notice Returns the CCIP fee required to synchronize accounting.
+     */
     function getSynchronizeAccountingFee(bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
         (uint256 reserveLeft, uint256 _accuredLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
         Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accuredLoss), tokenAmounts, nativeToken, extraArgs);
