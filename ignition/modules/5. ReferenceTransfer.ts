@@ -1,6 +1,6 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { storeConstructorArgs } from "../../helper/store.args";
-import { args, params } from "../params/5. ReferenceTransfer - Polygon"; // <-- check for correct import
+import { args, params } from "../params/5. ReferenceTransfer - Mainnet"; // <-- check for correct import
 
 export const NAME: string = "ReferenceTransfer"; // <-- select smart contract
 export const MOD: string = NAME + "Module";
@@ -16,7 +16,7 @@ console.log("Constructor Args");
 console.log(args);
 
 // fail safe
-// process.exit();
+process.exit();
 
 export default buildModule(MOD, (m) => {
   return {

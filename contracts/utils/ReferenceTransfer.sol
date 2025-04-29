@@ -10,7 +10,7 @@ contract ReferenceTransfer {
     IERC20 public immutable ZCHF;
     ISavings public immutable SAVINGS;
 
-    uint256 internal constant INFINITY = (1 << 255); // @dev: half of type(uint256).max
+    uint256 internal constant INFINITY = (1 << 255); // @dev: copied from "./ERC20.sol"
 
     mapping(address => bool) public hasAutoSave;
 
