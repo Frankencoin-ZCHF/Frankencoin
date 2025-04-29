@@ -25,3 +25,6 @@ export * from "./abis/utils/StablecoinBridge";
 export * from "./abis/utils/FPSWrapper";
 export * from "./abis/utils/FPSUnlock";
 export * from "./abis/utils/ReferenceTransfer";
+
+// ignition params
+export * as ReferenceTransferParams from "../ignition/params/5. ReferenceTransfer";
