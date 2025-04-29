@@ -52,7 +52,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     roller: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
-    referenceTransfer: zeroAddress,
+    referenceTransfer: "0x46eadDe3d63612251a2fc962973Caa0f0bD80437",
 
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
     xchf: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
