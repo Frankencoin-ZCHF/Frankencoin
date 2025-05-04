@@ -56,7 +56,7 @@ abstract contract CCIPSender {
     }
 
     /// @notice Sends the message to the router and handles fee payment
-    /// @dev External call to msg.sender if fees are paid in native token. This function has a potential reentrancy.
+    /// @dev External call to msg.sender if fees are paid in native token. This function can lead to a potential reentrancy.
     /// @param chain The chain
     /// @param message The message
     /// @return The message id and fee
