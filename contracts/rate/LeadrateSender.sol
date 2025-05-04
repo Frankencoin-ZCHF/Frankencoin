@@ -19,17 +19,19 @@ contract LeadrateSender is CCIPSender {
     }
 
     /// @notice Push the current leadrate to the targets in bulk.
+    /// @dev Bulks only work with approved fee tokens and not native.
     /// @param chains The chain selectors of the destination chains.
     /// @param targets The addresses of the recipients on the destination chains.
-    function pushLeadrate(uint64[] calldata chains, bytes[] calldata targets) external payable {
+    function pushLeadrate(uint64[] calldata chains, bytes[] calldata targets) external {
         pushLeadrate(chains, targets, new bytes[](chains.length));
     }
 
     /// @notice Push the current leadrate to the targets in bulk.
+    /// @dev Bulks only work with approved fee tokens and not native.
     /// @param chains The chain selectors of the destination chains.
     /// @param targets The addresses of the recipients on the destination chains.
     /// @param extraArgs Extra arguments for CCIP
-    function pushLeadrate(uint64[] calldata chains, bytes[] calldata targets, bytes[] memory extraArgs) public payable {
+    function pushLeadrate(uint64[] calldata chains, bytes[] calldata targets, bytes[] memory extraArgs) public {
         if (chains.length != targets.length) revert LengthMismatch(chains.length, targets.length);
         if (chains.length != extraArgs.length) revert LengthMismatch(chains.length, extraArgs.length);
 
