@@ -132,7 +132,6 @@ describe("LeaderateSender", () => {
             [await bridgedLeadrate.getAddress()]
           ),
         ],
-        { value: 100 }
       );
       expect(await bridgedLeadrate.currentRatePPM()).to.equal(500);
     });
@@ -146,7 +145,6 @@ describe("LeaderateSender", () => {
         leadrateSender["pushLeadrate(uint64[],bytes[])"](
           [ccipLocalSimulatorConfig.chainSelector_],
           [],
-          { value: 100 }
         )
       ).revertedWithCustomError(leadrateSender, "LengthMismatch");
     });
@@ -165,7 +163,6 @@ describe("LeaderateSender", () => {
             ),
           ],
           [],
-          { value: 100 }
         )
       ).revertedWithCustomError(leadrateSender, "LengthMismatch");
     });
