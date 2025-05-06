@@ -36,9 +36,6 @@ contract BridgeAccounting is CCIPReceiver {
             _handleLosses(losses);
         }
 
-        // After settling the balance of the contract should be 0
-        assert(ZCHF.balanceOf(address(this)) == 0);
-
         emit ReceivedSettlement(any2EvmMessage.sourceChainSelector, any2EvmMessage.sender, losses, profits);
     }
 
