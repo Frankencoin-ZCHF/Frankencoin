@@ -12,10 +12,8 @@ contract ReferenceTransfer {
     ISavings public immutable SAVINGS;
 
     uint256 internal constant INFINITY = (1 << 255);
-    uint256 internal constant EMPTY_SETTINGS = 0;
-    uint256 internal constant FORWARD_TO_SAVINGS = 1;
 
-    mapping(address => uint256) settings;
+    mapping(address => address) target;
 
     event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
 
@@ -39,8 +37,8 @@ contract ReferenceTransfer {
         return true;
     }
 
-    function setAutoSave(bool enabled) external {
-        settings[msg.sender] = enabled ? FORWARD_TO_SAVINGS : EMPTY_SETTINGS;
+    function setAutoSave(address target_) external {
+        target[msg.sender] = target_;
     }
 
     function hasAutoSave() external view returns(bool){
@@ -48,13 +46,13 @@ contract ReferenceTransfer {
     }
 
     function hasAutoSave(address owner) public view returns(bool){
-        return settings[owner] & FORWARD_TO_SAVINGS == FORWARD_TO_SAVINGS;
+        return target[owner] != address(0x0);
     }
 
     function executeTransfer(address from, address to, uint256 amount) internal {
         if (hasAutoSave(to)){
             ZCHF.transferFrom(from, address(this), amount);
-            SAVINGS.save(to, uint192(amount));
+            ISavings(target[to]).save(to, uint192(amount));
         } else {
             ZCHF.transferFrom(from, to, amount);
         }
