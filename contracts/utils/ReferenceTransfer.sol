@@ -14,6 +14,7 @@ contract ReferenceTransfer {
 
     mapping(address => address) target;
 
+    event AutoSave(address indexed target, address savings);
     event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
 
     error TransferFromRequiresInfiniteAllowance(address owner, address spender);
@@ -35,8 +36,13 @@ contract ReferenceTransfer {
         return true;
     }
 
-    function setAutoSave(address target_) external {
+    function disableAutoSave() external {
+        setAutoSave(address(0x0));
+    }
+
+    function setAutoSave(address target_) public {
         target[msg.sender] = target_;
+        emit AutoSave(msg.sender, target_);
     }
 
     function hasAutoSave() external view returns(bool){
