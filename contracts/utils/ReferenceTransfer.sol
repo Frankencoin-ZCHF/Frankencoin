@@ -9,7 +9,6 @@ import "../interface/IERC20.sol";
 contract ReferenceTransfer {
 
     IERC20 public immutable ZCHF;
-    ISavings public immutable SAVINGS;
 
     uint256 internal constant INFINITY = (1 << 255);
 
@@ -19,9 +18,8 @@ contract ReferenceTransfer {
 
     error TransferFromRequiresInfiniteAllowance(address owner, address spender);
 
-    constructor(address token, address savings) {
+    constructor(address token) {
         ZCHF = IERC20(token);
-        SAVINGS = ISavings(savings);
     }
 
     function transfer(address recipient, uint256 amount, string calldata ref) public returns (bool) {
