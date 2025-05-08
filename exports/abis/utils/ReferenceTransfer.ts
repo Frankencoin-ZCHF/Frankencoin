@@ -6,11 +6,6 @@ export const ReferenceTransferABI = [
         name: "token",
         type: "address",
       },
-      {
-        internalType: "address",
-        name: "savings",
-        type: "address",
-      },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
@@ -30,6 +25,25 @@ export const ReferenceTransferABI = [
     ],
     name: "InfiniteAllowanceRequired",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "target",
+        type: "address",
+      },
+    ],
+    name: "AutoSave",
+    type: "event",
   },
   {
     anonymous: false,
@@ -64,19 +78,6 @@ export const ReferenceTransferABI = [
   },
   {
     inputs: [],
-    name: "SAVINGS",
-    outputs: [
-      {
-        internalType: "contract ISavings",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "ZCHF",
     outputs: [
       {
@@ -86,6 +87,13 @@ export const ReferenceTransferABI = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "clearAutoSave",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -99,9 +107,9 @@ export const ReferenceTransferABI = [
     name: "hasAutoSave",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "address",
         name: "",
-        type: "bool",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -110,9 +118,9 @@ export const ReferenceTransferABI = [
   {
     inputs: [
       {
-        internalType: "bool",
-        name: "enabled",
-        type: "bool",
+        internalType: "address",
+        name: "target",
+        type: "address",
       },
     ],
     name: "setAutoSave",

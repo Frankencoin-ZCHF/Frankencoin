@@ -3,11 +3,13 @@ import { Address, zeroAddress } from "viem";
 
 export interface ChainAddress {
   // core
-  frankenCoin: Address;
+  frankenCoin: Address; // ZCHF token
   equity: Address; // FPS token
 
   // utils
   wFPS: Address; // wrapped FPS
+  referenceTransfer: Address;
+  savingsDetached: Address;
 
   // minting hub v1
   mintingHubV1: Address;
@@ -18,7 +20,6 @@ export interface ChainAddress {
   roller: Address;
   mintingHubV2: Address;
   positionFactoryV2: Address;
-  referenceTransfer: Address;
 
   // stablecoin bridges
   stablecoinBridgeXCHF: Address;
@@ -33,9 +34,6 @@ export interface ChainAddress {
   bridgeArbitrumWfps?: Address;
   bridgeOptimismFrankencoin?: Address;
   bridgeOptimismWfps?: Address;
-
-  // accept any optional key
-  // [key: string]: Address | undefined;
 }
 
 export const ADDRESS: Record<number, ChainAddress> = {
@@ -44,6 +42,8 @@ export const ADDRESS: Record<number, ChainAddress> = {
     equity: "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
 
     wFPS: "0x5052D3Cc819f53116641e89b96Ff4cD1EE80B182",
+    referenceTransfer: "0x46eadDe3d63612251a2fc962973Caa0f0bD80437", // <-- targets savingsV2
+    savingsDetached: zeroAddress,
 
     mintingHubV1: "0x7546762fdb1a6d9146b33960545C3f6394265219",
     positionFactoryV1: "0x0CDE500e6940931ED190ded77bb48640c9486392",
@@ -52,7 +52,6 @@ export const ADDRESS: Record<number, ChainAddress> = {
     roller: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
-    referenceTransfer: "0x46eadDe3d63612251a2fc962973Caa0f0bD80437",
 
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
     xchf: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
@@ -85,6 +84,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     mintingHubV2: "0xf214ea93D12F425F71Fc28b5D15F38E700e2daeC",
     positionFactoryV2: "0x151E58D4dAA67EC33f4809491441791e48d1Fe56",
 
-    referenceTransfer: "0x685fE606265465900bbeBA327eEc9223dAcfA424",
+    referenceTransfer: "0x378424e6f2c8bFdbE8548E110f49c04f4d11C190",
+    savingsDetached: "0xCa1b5E0AC05Cfe141BC77153DeD7dCe1b69b8A29",
   },
 };
