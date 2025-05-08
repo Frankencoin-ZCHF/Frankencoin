@@ -42,7 +42,7 @@ export const ADDRESS: Record<number, ChainAddress> = {
     equity: "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
 
     wFPS: "0x5052D3Cc819f53116641e89b96Ff4cD1EE80B182",
-    referenceTransfer: "0x46eadDe3d63612251a2fc962973Caa0f0bD80437", // <-- targets savingsV2
+    referenceTransfer: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
     savingsDetached: zeroAddress,
 
     mintingHubV1: "0x7546762fdb1a6d9146b33960545C3f6394265219",
