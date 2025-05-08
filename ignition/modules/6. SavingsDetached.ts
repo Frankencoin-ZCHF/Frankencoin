@@ -11,12 +11,12 @@ console.log("Imported Params:");
 console.log(params);
 
 // export args
-storeConstructorArgs(NAME, args);
+storeConstructorArgs("6. SavingsDetached", args); // <-- name exported file
 console.log("Constructor Args");
 console.log(args);
 
 // fail safe
-// process.exit();
+process.exit();
 
 export default buildModule(MOD, (m) => {
   return {

@@ -5,7 +5,7 @@ export type DeploymentParams = {
 };
 
 export const params: DeploymentParams = {
-  zchf: "0x89C31867c878E4268C65de3CDf8Ea201310c5851", // <-- this is testnet polygon
+  zchf: "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
 };
 
 export type ConstructorArgs = [Address];
