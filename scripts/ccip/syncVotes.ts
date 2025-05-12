@@ -42,7 +42,7 @@ async function main() {
     sourceWallet
   );
 
-  const fee = await governanceSender["getSyncFee(uint64,address,address[],bool)"](
+  const fee = await governanceSender["getCCIPFee(uint64,address,address[],bool)"](
     targetParams?.chainSelector ?? '',
     targetAddress,
     voters,
@@ -50,7 +50,7 @@ async function main() {
   )
 
   console.log(`Fee: ${fee.toString()} in native`);
-  const tx = await governanceSender["syncVotes(uint64,address,address[])"](
+  const tx = await governanceSender["pushVotes(uint64,address,address[])"](
     targetParams?.chainSelector ?? '',
     targetAddress,
     voters,

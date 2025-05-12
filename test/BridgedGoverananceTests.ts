@@ -16,7 +16,7 @@ describe("Bridged Governance Tests", () => {
     voters: string[]
   ) {
     const fee = await governanceSender[
-      "getSyncFee(uint64,address,address[],bool)"
+      "getCCIPFee(uint64,address,address[],bool)"
     ](chainSelector, receiver, voters, feeToken === ethers.ZeroAddress);
 
     if (feeToken !== ethers.ZeroAddress) {
@@ -27,7 +27,7 @@ describe("Bridged Governance Tests", () => {
     }
     const tx = await governanceSender
       .connect(sender)
-      ["syncVotes(uint64,address,address[])"](chainSelector, receiver, voters);
+      ["pushVotes(uint64,address,address[])"](chainSelector, receiver, voters);
     await tx.wait();
   }
 
@@ -127,7 +127,7 @@ describe("Bridged Governance Tests", () => {
     };
   }
 
-  describe("syncVotesPayNative", () => {
+  describe("pushVotesPayNative", () => {
     it("should transfer single user votes", async () => {
       const {
         governanceSender,
@@ -378,7 +378,7 @@ describe("Bridged Governance Tests", () => {
     });
   });
 
-  describe("syncVotesPayToken", () => {
+  describe("pushVotesPayToken", () => {
     it("should transfer single user votes", async () => {
       const {
         governanceSender,
