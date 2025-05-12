@@ -15,7 +15,7 @@ abstract contract CrossChainERC20 is ERC20, CCIPSender {
     constructor(address router, address linkToken) CCIPSender(IRouterClient(router), linkToken) {}
 
     /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend the tokens.
+    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
     /// @param targetChain The chain selector of the destination chain.
     /// @param target The address of the recipient on the destination chain.
     /// @param amount The amount of tokens to transfer.
@@ -24,7 +24,7 @@ abstract contract CrossChainERC20 is ERC20, CCIPSender {
     }
 
     /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend the tokens.
+    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
     /// @param targetChain The chain selector of the destination chain.
     /// @param target The address of the recipient on the destination chain.
     /// @param amount The amount of tokens to transfer.
@@ -34,7 +34,7 @@ abstract contract CrossChainERC20 is ERC20, CCIPSender {
     }
 
     /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend the tokens.
+    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
     /// @param targetChain The chain selector of the destination chain.
     /// @param target The address of the recipient on the destination chain.
     /// @param amount The amount of tokens to transfer.
