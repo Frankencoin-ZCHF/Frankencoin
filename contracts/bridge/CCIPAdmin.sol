@@ -9,7 +9,7 @@ import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Rat
 import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
 import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
 
-// The admin for briding Frankencoins using CCIP.
+// The admin for bridging Frankencoins using CCIP.
 // Each chain needs an instance of this administrator.
 contract CCIPAdmin {
     struct RemotePoolUpdate {
@@ -48,7 +48,7 @@ contract CCIPAdmin {
     event RemotePoolRemoved(uint64 indexed chain, bytes indexed poolAddress);
     event ChainRemoved(uint64 id);
     event ChainAdded(ITokenPool.ChainUpdate config);
-    event AdminTransfered(address newAdmin);
+    event AdminTransferred(address newAdmin);
     event RateLimit(uint64 remoteChain, RateLimiter.Config inboundConfigs, RateLimiter.Config outboundConfig);
 
     modifier onlyQualified(address[] calldata helpers) {
@@ -73,7 +73,7 @@ contract CCIPAdmin {
     /// @param _tokenPool The token pool to administer
     /// @param chainsToAdd The chains to add to the token pool
     function registerToken(RegistryModuleOwnerCustom registry, ITokenPool _tokenPool, ITokenPool.ChainUpdate[] calldata chainsToAdd) external {
-        // This prevents from reregistering the inital ccipAdmin contract after it got superseeded by a new version
+        // This prevents from reregistering the inital ccipAdmin contract after it got superseded by a new version
         if (TOKEN_ADMIN_REGISTRY.getTokenConfig(ZCHF).administrator != address(0)) {
             revert AlreadyRegistered();
         }
@@ -190,7 +190,7 @@ contract CCIPAdmin {
         enact(keccak256(abi.encode("adminTransfer", newAdmin)));
         TOKEN_ADMIN_REGISTRY.transferAdminRole(ZCHF, newAdmin);
         if (address(tokenPool) != address(0)) tokenPool.transferOwnership(newAdmin);
-        emit AdminTransfered(newAdmin);
+        emit AdminTransferred(newAdmin);
     }
     
     /// @notice Denies and removes a pending proposal

@@ -47,7 +47,7 @@ abstract contract CCIPSender {
         return Client.EVM2AnyMessage(receiver, payload, tokenAmounts, nativeToken ? address(0) : LINK, extraArgs);
     }
 
-    /// @notice Gets the fee from the router for the given message and chain combition
+    /// @notice Gets the fee from the router for the given message and chain combination
     /// @param chain The chain
     /// @param message The message
     /// @return The fee

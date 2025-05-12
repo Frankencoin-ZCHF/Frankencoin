@@ -11,7 +11,7 @@ import "../erc20/CrossChainERC20.sol";
 /**
  * @title Bridged Frankencoin ERC-20 Token
  *
- * Like its mainnet counterpart, it has the capapbility to add minting modules. This allows to
+ * Like its mainnet counterpart, it has the capability to add minting modules. This allows to
  * potentially add similar collateralized minting methods as in the mainnet Frankencoin.
  *
  * However, there is only one FPS, the one on mainnet and voting power has to be projected onto the
@@ -228,9 +228,9 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
      * Uses a multichain call to send home all accrued profits, if any
      */
     function synchronizeAccounting(bytes memory extraArgs) public payable {
-        (uint256 reserveLeft, uint256 _accuredLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
+        (uint256 reserveLeft, uint256 _accruedLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
 
-        if (_accuredLoss > 0) {
+        if (_accruedLoss > 0) {
             accruedLoss = 0;
         }
         if (reserveLeft > 0) {
@@ -238,9 +238,9 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
             _approve(address(this), address(ROUTER), reserveLeft);
         }
 
-        Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accuredLoss), tokenAmounts, extraArgs);
+        Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accruedLoss), tokenAmounts, extraArgs);
         _send(MAINNET_CHAIN_SELECTOR, message);
-        emit AccountingSynchronized(reserveLeft, _accuredLoss);
+        emit AccountingSynchronized(reserveLeft, _accruedLoss);
     }
 
     /**
@@ -254,8 +254,8 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
      * @notice Returns the CCIP fee required to synchronize accounting.
      */
     function getSynchronizeAccountingFee(bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
-        (uint256 reserveLeft, uint256 _accuredLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
-        Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accuredLoss), tokenAmounts, nativeToken, extraArgs);
+        (uint256 reserveLeft, uint256 _accruedLoss, Client.EVMTokenAmount[] memory tokenAmounts) = getSynchronizeAccountingData();
+        Client.EVM2AnyMessage memory message = _constructMessage(_toReceiver(BRIDGE_ACCOUNTING), abi.encode(reserveLeft, _accruedLoss), tokenAmounts, nativeToken, extraArgs);
         return _calculateFee(MAINNET_CHAIN_SELECTOR, message);
     }
 
@@ -287,7 +287,7 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
     }
 
     /*
-     * @notice Used to register the token initialially in the CCIP environment
+     * @notice Used to register the token initially in the CCIP environment
      */
     function getCCIPAdmin() external view returns (address) {
         return CCIP_ADMIN;

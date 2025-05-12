@@ -68,7 +68,7 @@ abstract contract Governance is IGovernance {
     /**
      * @notice Checks whether the sender address is qualified given a list of helpers that delegated their votes
      * directly or indirectly to the sender. It is the responsiblity of the caller to figure out whether
-     * helpes are necessary and to identify them by scanning the blockchain for Delegation events.
+     * helps are necessary and to identify them by scanning the blockchain for Delegation events.
      */
     function checkQualified(address sender, address[] calldata helpers) public view override {
         uint256 _votes = votesDelegated(sender, helpers);
