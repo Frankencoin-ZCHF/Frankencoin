@@ -109,6 +109,25 @@ describe("BridgeAccounting", () => {
     ).revertedWithCustomError(bridgeAccounting, "InvalidSender");
   });
 
+  it("should fail if the remote sender is 0x00 and the chain is not supported", async () => {
+    const { bridgeAccounting, router } =
+    await loadFixture(deployFixture);
+
+
+    const abicoder = ethers.AbiCoder.defaultAbiCoder();
+
+    await expect(
+      bridgeAccounting.connect(router).ccipReceive({
+        messageId:
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+        sourceChainSelector: '12345',
+        sender: abicoder.encode(["address"], [ethers.ZeroAddress]),
+        data: abicoder.encode(["uint256", "uint256"], [0, 0]),
+        destTokenAmounts: [],
+      })
+    ).revertedWithCustomError(bridgeAccounting, "InvalidSender");
+  })
+
   it("should handle profits", async () => {
     const {
       bridgeAccounting,
