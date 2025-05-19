@@ -1,5 +1,6 @@
 // chain addresses and helpers
-export * from "./address.config";
+export * as mainnet from "./address.mainnet.config";
+export * as testnet from "./address.testnet.config";
 
 // abi exports
 export * from "./abis/core/Frankencoin";
