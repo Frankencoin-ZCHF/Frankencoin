@@ -1,49 +1,56 @@
 // SPDX-License-Identifier: MIT
-// Copied from https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol
-// and modified it.
-
 pragma solidity ^0.8.0;
 
-import {ERC20} from "./ERC20.sol";
-import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
-import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {IERC20} from "../erc20/IERC20.sol";
 import {CCIPSender} from "../bridge/CCIPSender.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
-abstract contract CrossChainERC20 is ERC20, CCIPSender {
-    event Transfer(address indexed from, uint64 toChain, bytes indexed to, uint256 value);
+/**
+ * @dev A module for Frankencoin transfers with a reference number, incl. cross chain transfers
+ */
+contract ReferenceTransfer is CCIPSender {
+    IERC20 public immutable zchf;
+    uint256 internal constant INFINITY = (1 << 255); // @dev: copied from "./ERC20.sol"
 
-    constructor(address router, address linkToken) CCIPSender(IRouterClient(router), linkToken) {}
+    event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
+    event CrossTransfer(address indexed from, uint64 toChain, address indexed to, uint256 amount, string ref);
 
-    /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
-    /// @param targetChain The chain selector of the destination chain.
-    /// @param target The address of the recipient on the destination chain.
-    /// @param amount The amount of tokens to transfer.
-    function transfer(uint64 targetChain, address target, uint256 amount) external payable {
-        transfer(targetChain, _toReceiver(target), amount, "");
+    error InfiniteAllowanceRequired(address owner, address spender);
+
+    constructor(address token, IRouterClient router, address link) CCIPSender(router, link) {
+        zchf = IERC20(token);
     }
 
-    /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
-    /// @param targetChain The chain selector of the destination chain.
-    /// @param target The address of the recipient on the destination chain.
-    /// @param amount The amount of tokens to transfer.
-    /// @param extraArgs Extra arguments for CCIP
-    function transfer(uint64 targetChain, address target, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs) external payable {
-        transfer(targetChain, _toReceiver(target), amount, Client._argsToBytes(extraArgs));
+    function transfer(address recipient, uint256 amount, string calldata ref) public returns (bool) {
+        zchf.transferFrom(msg.sender, recipient, amount);
+        emit Transfer(msg.sender, recipient, amount, ref);
+        return true;
     }
 
-    /// @notice Transfers tokens to the target chain
-    /// @dev Requires the caller to approve this contract to spend fee tokens if the CCIP fee is not paid in the chain native token.
-    /// @param targetChain The chain selector of the destination chain.
-    /// @param target The address of the recipient on the destination chain.
-    /// @param amount The amount of tokens to transfer.
-    /// @param extraArgs Extra arguments for CCIP
-    function transfer(uint64 targetChain, bytes memory target, uint256 amount, bytes memory extraArgs) public payable {
-        _transfer(msg.sender, address(this), amount);
-        _approve(address(this), address(ROUTER), amount);
+    function transferFrom(address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+        if (zchf.allowance(owner, msg.sender) < INFINITY) revert InfiniteAllowanceRequired(owner, msg.sender);
+        zchf.transferFrom(owner, recipient, amount);
+        emit Transfer(owner, recipient, amount, ref);
+        return true;
+    }
+
+    function crossTransfer(uint64 targetChain, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+        _crossTransfer(targetChain, msg.sender, _toReceiver(recipient), amount, "", ref);
+        return true;
+    }
+
+    function crossTransferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+        if (zchf.allowance(owner, msg.sender) < INFINITY) revert InfiniteAllowanceRequired(owner, msg.sender);
+        _crossTransfer(targetChain, owner, _toReceiver(recipient), amount, "", ref);
+        return true;
+    }
+
+    function _crossTransfer(uint64 targetChain, address from, bytes memory target, uint256 amount, bytes memory extraArgs, string calldata ref) private {
+        zchf.transferFrom(from, address(this), amount);
+        zchf.approve(address(ROUTER), amount);
         _send(targetChain, constructTransferMessage(target, amount, extraArgs));
-        emit Transfer(msg.sender, targetChain, target, amount);
+        emit CrossTransfer(msg.sender, targetChain, from, amount, ref);
     }
 
     /// @notice Gets the CCIP fee for a transfer.
