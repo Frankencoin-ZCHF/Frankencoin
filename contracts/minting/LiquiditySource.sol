@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interface/IERC20.sol";
-import "../interface/IFrankencoin.sol";
+import "../erc20/IERC20.sol";
+import "../stablecoin/IFrankencoin.sol";
 import "../utils/Ownable.sol";
 
 /**

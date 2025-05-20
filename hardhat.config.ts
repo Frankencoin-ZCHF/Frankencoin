@@ -58,7 +58,7 @@ const config: HardhatUserConfig = {
       chainId: 11155111,
       gas: "auto",
       gasPrice: "auto",
-      accounts: [w0.privateKey],
+      accounts: [wallet.privateKey],
       timeout: 50_000,
     },
     polygon: {
