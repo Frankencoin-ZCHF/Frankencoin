@@ -82,7 +82,7 @@ abstract contract CrossChainERC20 is ERC20, CCIPSender {
     /// @param receiver The address of the receiver.
     /// @param amount The amount of the token to be transferred.
     /// @return Client.EVM2AnyMessage Returns an EVM2AnyMessage struct which contains information for sending a CCIP message.
-    function constructTransferMessage(bytes memory receiver, uint256 amount, bytes memory extraArgs) private view returns (Client.EVM2AnyMessage memory) {
+    function constructTransferMessage(bytes memory receiver, uint256 amount, bytes memory extraArgs) internal view returns (Client.EVM2AnyMessage memory) {
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
         tokenAmounts[0] = Client.EVMTokenAmount(address(this), amount);
         return _constructMessage(receiver, "", tokenAmounts, extraArgs);

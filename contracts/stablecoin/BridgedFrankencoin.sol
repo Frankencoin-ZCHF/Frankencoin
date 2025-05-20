@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../equity/BridgedGovernance.sol";
+import "../erc20/CrossChainReference.sol";
 import "../erc20/ERC20PermitLight.sol";
-import "../equity/IGovernance.sol";
 import "../equity/Equity.sol";
+import "../equity/IGovernance.sol";
+import "../equity/BridgedGovernance.sol";
 import "./IBasicFrankencoin.sol";
-import "../erc20/CrossChainERC20.sol";
 
 /**
  * @title Bridged Frankencoin ERC-20 Token
@@ -17,7 +17,7 @@ import "../erc20/CrossChainERC20.sol";
  * However, there is only one FPS, the one on mainnet and voting power has to be projected onto the
  * side chains.
  */
-contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankencoin {
+contract BridgedFrankencoin is CrossChainReference, ERC20PermitLight, IBasicFrankencoin {
     /**
      * @notice Minimal fee and application period when suggesting a new minter.
      */
@@ -69,7 +69,7 @@ contract BridgedFrankencoin is CrossChainERC20, ERC20PermitLight, IBasicFrankenc
      * @notice Initiates the Frankencoin with the provided minimum application period for new plugins
      * in seconds, for example 10 days, i.e. 3600*24*10 = 864000
      */
-    constructor(IGovernance reserve_, address router_, uint256 _minApplicationPeriod, address _linkToken, uint64 _mainnetChainSelector, address _bridgeAccounting, address _ccipAdmin) ERC20(18) CrossChainERC20(router_, _linkToken) {
+    constructor(IGovernance reserve_, address router_, uint256 _minApplicationPeriod, address _linkToken, uint64 _mainnetChainSelector, address _bridgeAccounting, address _ccipAdmin) ERC20(18) CrossChainReference(router_, _linkToken) {
         MIN_APPLICATION_PERIOD = _minApplicationPeriod;
         reserve = reserve_;
         MAINNET_CHAIN_SELECTOR = _mainnetChainSelector;
