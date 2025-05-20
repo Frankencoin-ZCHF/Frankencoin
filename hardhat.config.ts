@@ -35,7 +35,7 @@ if (etherscan?.length == 0 || !etherscan)
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.24",
     settings: {
       optimizer: {
         enabled: true,
@@ -51,6 +51,14 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       gasMultiplier: 0.7,
       accounts: [wallet.privateKey],
+      timeout: 50_000,
+    },
+    sepolia: {
+      url: `https://eth-sepolia.g.alchemy.com/v2/${alchemy}`,
+      chainId: 11155111,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [w0.privateKey],
       timeout: 50_000,
     },
     polygon: {

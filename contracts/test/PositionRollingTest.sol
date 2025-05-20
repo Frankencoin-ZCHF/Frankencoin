@@ -3,15 +3,15 @@ pragma solidity ^0.8.0;
 
 import "./Strings.sol";
 import "./TestToken.sol";
-import "../Equity.sol";
+import "../equity/Equity.sol";
 import "../utils/Ownable.sol";
-import "../Position.sol";
-import "../MintingHub.sol";
-import "../StablecoinBridge.sol";
-import "../interface/IPosition.sol";
-import "../interface/IReserve.sol";
-import "../interface/IFrankencoin.sol";
-import "../interface/IERC20.sol";
+import "../minting/Position.sol";
+import "../minting/MintingHub.sol";
+import "../stablecoin/StablecoinBridge.sol";
+import "../minting/IPosition.sol";
+import "../equity/IGovernance.sol";
+import "../stablecoin/IFrankencoin.sol";
+import "../erc20/IERC20.sol";
 
 contract PositionRollingTest {
 

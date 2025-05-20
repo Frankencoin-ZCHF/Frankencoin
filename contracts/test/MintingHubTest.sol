@@ -3,15 +3,14 @@ pragma solidity ^0.8.0;
 
 import "./Strings.sol";
 import "./TestToken.sol";
-import "../Equity.sol";
+import "../equity/Equity.sol";
 import "../utils/Ownable.sol";
-import "../Position.sol";
-import "../MintingHub.sol";
-import "../StablecoinBridge.sol";
-import "../interface/IPosition.sol";
-import "../interface/IReserve.sol";
-import "../interface/IFrankencoin.sol";
-import "../interface/IERC20.sol";
+import "../minting/Position.sol";
+import "../minting/MintingHub.sol";
+import "../stablecoin/StablecoinBridge.sol";
+import "../minting/IPosition.sol";
+import "../stablecoin/IFrankencoin.sol";
+import "../erc20/IERC20.sol";
 
 contract MintingHubTest {
     MintingHub hub;
@@ -20,6 +19,7 @@ contract MintingHubTest {
     IERC20 xchf;
     TestToken col;
     IFrankencoin zchf;
+    Equity fps;
 
     User alice;
     User bob;
@@ -35,16 +35,17 @@ contract MintingHubTest {
         zchf = swap.zchf();
         alice = new User(zchf);
         bob = new User(zchf);
-        require(zchf.reserve().totalSupply() == 0, Strings.toString(zchf.reserve().totalSupply()));
+        fps = Equity(address(fps));
+        require(fps.totalSupply() == 0, Strings.toString(fps.totalSupply()));
     }
 
     function initiateEquity() public {
         require(zchf.equity() == 1003849100000000000001, Strings.toString(zchf.equity()));
-        require(zchf.reserve().totalSupply() == 0, Strings.toString(zchf.reserve().totalSupply()));
+        require(fps.totalSupply() == 0, Strings.toString(fps.totalSupply()));
         // ensure there is at least 25'000 ZCHF in equity
         bob.obtainFrankencoins(swap, 10000 ether);
         bob.invest(1000 ether);
-        require(zchf.reserve().totalSupply() == 1000 ether, Strings.toString(zchf.reserve().totalSupply()));
+        require(fps.totalSupply() == 1000 ether, Strings.toString(fps.totalSupply()));
         bob.invest(9000 ether);
         alice.obtainFrankencoins(swap, 15000 ether);
         alice.invest(15000 ether);
@@ -110,10 +111,10 @@ contract MintingHubTest {
     }
 
     function endChallenges() public {
-        uint256 reservesBefore = zchf.balanceOf(address(zchf.reserve())) - zchf.equity();
+        uint256 reservesBefore = zchf.balanceOf(address(fps)) - zchf.equity();
         // revertWith("reserves before ", reservesBefore);  // 21000.000000000000000000
         endChallenge(latestChallenge); // can be absorbed with equity
-        uint256 reservesAfter = zchf.balanceOf(address(zchf.reserve())) - zchf.equity();
+        uint256 reservesAfter = zchf.balanceOf(address(fps)) - zchf.equity();
         require(reservesBefore - reservesAfter == 10000 ether); // latest challenge was 50'000 with 20% reserve
         // revertWith("reserves before ", reservesAfter);  // 11000.000000000000000000
         // revertWith("reserves before ", zchf.equity());     //  8601.000000000000000003
@@ -162,7 +163,7 @@ contract MintingHubTest {
     uint256 number;
 
     function testExcessiveChallengePart1() public {
-        // revertWith("reserve ", zchf.balanceOf(address(zchf.reserve()))); // 50601000000000000000003
+        // revertWith("reserve ", zchf.balanceOf(address(fps))); // 50601000000000000000003
         Position pos = Position(latestPosition);
         //uint256 minted = pos.minted();
         //        require(minted == 10000 ether, Strings.toString(minted)); // assumes the other tests have been run before
@@ -180,21 +181,21 @@ contract MintingHubTest {
 
     function restructure() public {
         address[] memory empty = new address[](0);
-        zchf.reserve().checkQualified(address(alice), empty);
-        zchf.reserve().checkQualified(address(bob), empty);
+        fps.checkQualified(address(alice), empty);
+        fps.checkQualified(address(bob), empty);
         address[] memory list = new address[](1);
         list[0] = address(bob);
-        Equity equity = Equity(address(zchf.reserve()));
+        Equity equity = Equity(address(fps));
         uint256 totalVotes = equity.totalVotes();
         uint256 supplyBefore = equity.totalSupply();
         uint256 bobBefore = equity.balanceOf(address(bob));
         alice.restructure(empty, list);
-        zchf.reserve().checkQualified(address(alice), empty);
+        fps.checkQualified(address(alice), empty);
         require(equity.totalVotes() < totalVotes);
         require(equity.balanceOf(address(bob)) == 0);
         uint256 supplyAfter = equity.totalSupply();
         require(supplyAfter == supplyBefore - bobBefore);
-        // revertWith("Shortfall: ", zchf.minterReserve() - zchf.balanceOf(address(zchf.reserve()))); // 1000000000000000000000
+        // revertWith("Shortfall: ", zchf.minterReserve() - zchf.balanceOf(address(fps))); // 1000000000000000000000
         alice.obtainFrankencoins(swap, 4000 ether);
         alice.invest(4000 ether);
         require(supplyAfter + 1000 ether == equity.totalSupply());
@@ -224,9 +225,11 @@ contract MintingHubTest {
 
 contract User {
     IFrankencoin zchf;
+    Equity fps;
 
     constructor(IFrankencoin zchf_) {
         zchf = zchf_;
+        fps = Equity(address(zchf.reserve()));
     }
 
     function obtainFrankencoins(StablecoinBridge bridge, uint256 amount) public {
@@ -238,7 +241,7 @@ contract User {
     }
 
     function invest(uint256 amount) public {
-        zchf.reserve().invest(amount, 0);
+        fps.invest(amount, 0);
     }
 
     function transfer(IERC20 token, address target, uint256 amount) public {
@@ -357,6 +360,6 @@ contract User {
     }
 
     function restructure(address[] calldata helpers, address[] calldata addressesToWipe) public {
-        Equity(address(zchf.reserve())).restructureCapTable(helpers, addressesToWipe);
+        Equity(address(fps)).restructureCapTable(helpers, addressesToWipe);
     }
 }

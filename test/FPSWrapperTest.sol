@@ -22,7 +22,7 @@ contract FPSWrapperTest is Test {
     error General(uint256 val);
 
     constructor() {
-        zchf = new Frankencoin(0);
+        zchf = new Frankencoin(0, address(0), address(0));
         fps = Equity(address(zchf.reserve()));
         wfps = new FPSWrapper(fps);
         xchf = new TestToken("Base Franc", "BCHF", uint8(18));

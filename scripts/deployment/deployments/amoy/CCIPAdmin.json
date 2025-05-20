@@ -1,0 +1,1319 @@
+{
+  "address": "0x12e2A6616d7a0E37a10936dcA6FabBB2504A4DC3",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract TokenAdminRegistry",
+          "name": "tokenAdminRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IBasicFrankencoin",
+          "name": "zchf",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyRegistered",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProposalAlreadyMade",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenPoolNotSet",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "name": "TooEarly",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnknownProposal",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct ITokenPool.ChainUpdate",
+          "name": "update",
+          "type": "tuple"
+        }
+      ],
+      "name": "AddChainProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminTransferProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminTransfered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct ITokenPool.ChainUpdate",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "ChainAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "id",
+          "type": "uint64"
+        }
+      ],
+      "name": "ChainRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProposalDenied",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProposalEnacted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "name": "ProposalMade",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "remoteChain",
+          "type": "uint64"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "isEnabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint128",
+              "name": "capacity",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "rate",
+              "type": "uint128"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct RateLimiter.Config",
+          "name": "inboundConfigs",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "isEnabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint128",
+              "name": "capacity",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "rate",
+              "type": "uint128"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct RateLimiter.Config",
+          "name": "outboundConfig",
+          "type": "tuple"
+        }
+      ],
+      "name": "RateLimit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "chain",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes",
+          "name": "poolAddress",
+          "type": "bytes"
+        }
+      ],
+      "name": "RemotePoolAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "chain",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes",
+          "name": "poolAddress",
+          "type": "bytes"
+        }
+      ],
+      "name": "RemotePoolRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "add",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "chain",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "poolAddress",
+              "type": "bytes"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct CCIPAdmin.RemotePoolUpdate",
+          "name": "update",
+          "type": "tuple"
+        }
+      ],
+      "name": "RemotePoolUpdateProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "chain",
+          "type": "uint64"
+        }
+      ],
+      "name": "RemoveChainProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "tokenPool",
+          "type": "address"
+        }
+      ],
+      "name": "TokenPoolSet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DAY",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "GOVERNANCE",
+      "outputs": [
+        {
+          "internalType": "contract IGovernance",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TOKEN_ADMIN_REGISTRY",
+      "outputs": [
+        {
+          "internalType": "contract TokenAdminRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ZCHF",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ITokenPool",
+          "name": "_tokenPool",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct ITokenPool.ChainUpdate[]",
+          "name": "chainsToAdd",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "acceptAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct ITokenPool.ChainUpdate",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "applyAddChain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "applyAdminTransfer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "chain",
+          "type": "uint64"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "isEnabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint128",
+              "name": "capacity",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "rate",
+              "type": "uint128"
+            }
+          ],
+          "internalType": "struct RateLimiter.Config",
+          "name": "inbound",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "isEnabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint128",
+              "name": "capacity",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "rate",
+              "type": "uint128"
+            }
+          ],
+          "internalType": "struct RateLimiter.Config",
+          "name": "outbound",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "applyRateLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "add",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "chain",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "poolAddress",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct CCIPAdmin.RemotePoolUpdate",
+          "name": "update",
+          "type": "tuple"
+        }
+      ],
+      "name": "applyRemotePoolUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "chainId",
+          "type": "uint64"
+        }
+      ],
+      "name": "applyRemoveChain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "deny",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "proposals",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct ITokenPool.ChainUpdate",
+          "name": "config",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "proposeAddChain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "proposeAdminTransfer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "add",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "chain",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "poolAddress",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct CCIPAdmin.RemotePoolUpdate",
+          "name": "update",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "proposeRemotePoolUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "chainId",
+          "type": "uint64"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "proposeRemoveChain",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract RegistryModuleOwnerCustom",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ITokenPool",
+          "name": "_tokenPool",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "remoteChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "remotePoolAddresses",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "remoteTokenAddress",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "outboundRateLimiterConfig",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isEnabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "capacity",
+                  "type": "uint128"
+                },
+                {
+                  "internalType": "uint128",
+                  "name": "rate",
+                  "type": "uint128"
+                }
+              ],
+              "internalType": "struct RateLimiter.Config",
+              "name": "inboundRateLimiterConfig",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct ITokenPool.ChainUpdate[]",
+          "name": "chainsToAdd",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "registerToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tokenPool",
+      "outputs": [
+        {
+          "internalType": "contract ITokenPool",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xf48996a36327a6675bf4c327791c7af3207a2ce9e1c128d342c4f6246c3071f0",
+  "receipt": {
+    "to": null,
+    "from": "0xD92fE8B91aB9eC967eC4208eac1d4EA625cDFF03",
+    "contractAddress": "0x12e2A6616d7a0E37a10936dcA6FabBB2504A4DC3",
+    "transactionIndex": 0,
+    "gasUsed": "1917887",
+    "logsBloom": "0x00000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000008000000000000000000000400000000000000000000000000000000000800000000000000000000100001000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000004000000000000000000200000000000000000000000000000100000000000000000000000000000004000000000000000000001000000000000000000000000000000100000000000000000000000000000000000000000008000000000000000000000000000100000",
+    "blockHash": "0x8c0c99414c03b7cfeaa293da5915cec38144c1f0cedcb55a80520a13afd63411",
+    "transactionHash": "0xf48996a36327a6675bf4c327791c7af3207a2ce9e1c128d342c4f6246c3071f0",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 20893281,
+        "transactionHash": "0xf48996a36327a6675bf4c327791c7af3207a2ce9e1c128d342c4f6246c3071f0",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x000000000000000000000000d92fe8b91ab9ec967ec4208eac1d4ea625cdff03",
+          "0x0000000000000000000000004ad84f7014b7b44f723f284a85b1662337971439"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000002953c604b924c4e00000000000000000000000000000000000000000000000013add2dca88b1560000000000000000000000000000000000000000000000745833830a890d213de0000000000000000000000000000000000000000000000001118967c5cf8c91200000000000000000000000000000000000000000000074585cd6d08dc64602c",
+        "logIndex": 0,
+        "blockHash": "0x8c0c99414c03b7cfeaa293da5915cec38144c1f0cedcb55a80520a13afd63411"
+      }
+    ],
+    "blockNumber": 20893281,
+    "cumulativeGasUsed": "1917887",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x1e73f6842d7afDD78957ac143d1f315404Dd9e5B",
+    "0x800b47444a905BE45a20Ab19051F7dAA35d18234"
+  ],
+  "numDeployments": 3,
+  "solcInputHash": "efa01ce60d90f72ad68cf9172839578a",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract TokenAdminRegistry\",\"name\":\"tokenAdminRegistry\",\"type\":\"address\"},{\"internalType\":\"contract IBasicFrankencoin\",\"name\":\"zchf\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AlreadyRegistered\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"ProposalAlreadyMade\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TokenPoolNotSet\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"deadline\",\"type\":\"uint64\"}],\"name\":\"TooEarly\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"UnknownProposal\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proposer\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"struct ITokenPool.ChainUpdate\",\"name\":\"update\",\"type\":\"tuple\"}],\"name\":\"AddChainProposed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proposer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminTransferProposed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminTransfered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"indexed\":false,\"internalType\":\"struct ITokenPool.ChainUpdate\",\"name\":\"config\",\"type\":\"tuple\"}],\"name\":\"ChainAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"id\",\"type\":\"uint64\"}],\"name\":\"ChainRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"ProposalDenied\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"ProposalEnacted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"deadline\",\"type\":\"uint64\"}],\"name\":\"ProposalMade\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"remoteChain\",\"type\":\"uint64\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"indexed\":false,\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundConfigs\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"indexed\":false,\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundConfig\",\"type\":\"tuple\"}],\"name\":\"RateLimit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"poolAddress\",\"type\":\"bytes\"}],\"name\":\"RemotePoolAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"poolAddress\",\"type\":\"bytes\"}],\"name\":\"RemotePoolRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proposer\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"add\",\"type\":\"bool\"},{\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"internalType\":\"bytes\",\"name\":\"poolAddress\",\"type\":\"bytes\"}],\"indexed\":false,\"internalType\":\"struct CCIPAdmin.RemotePoolUpdate\",\"name\":\"update\",\"type\":\"tuple\"}],\"name\":\"RemotePoolUpdateProposed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"proposer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"}],\"name\":\"RemoveChainProposed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenPool\",\"type\":\"address\"}],\"name\":\"TokenPoolSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DAY\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"GOVERNANCE\",\"outputs\":[{\"internalType\":\"contract IGovernance\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"TOKEN_ADMIN_REGISTRY\",\"outputs\":[{\"internalType\":\"contract TokenAdminRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ZCHF\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract ITokenPool\",\"name\":\"_tokenPool\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"internalType\":\"struct ITokenPool.ChainUpdate[]\",\"name\":\"chainsToAdd\",\"type\":\"tuple[]\"}],\"name\":\"acceptAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"internalType\":\"struct ITokenPool.ChainUpdate\",\"name\":\"config\",\"type\":\"tuple\"}],\"name\":\"applyAddChain\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"applyAdminTransfer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inbound\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outbound\",\"type\":\"tuple\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"applyRateLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"add\",\"type\":\"bool\"},{\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"internalType\":\"bytes\",\"name\":\"poolAddress\",\"type\":\"bytes\"}],\"internalType\":\"struct CCIPAdmin.RemotePoolUpdate\",\"name\":\"update\",\"type\":\"tuple\"}],\"name\":\"applyRemotePoolUpdate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"chainId\",\"type\":\"uint64\"}],\"name\":\"applyRemoveChain\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"deny\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"proposals\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"deadline\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"internalType\":\"struct ITokenPool.ChainUpdate\",\"name\":\"config\",\"type\":\"tuple\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"proposeAddChain\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"proposeAdminTransfer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"bool\",\"name\":\"add\",\"type\":\"bool\"},{\"internalType\":\"uint64\",\"name\":\"chain\",\"type\":\"uint64\"},{\"internalType\":\"bytes\",\"name\":\"poolAddress\",\"type\":\"bytes\"}],\"internalType\":\"struct CCIPAdmin.RemotePoolUpdate\",\"name\":\"update\",\"type\":\"tuple\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"proposeRemotePoolUpdate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"chainId\",\"type\":\"uint64\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"proposeRemoveChain\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract RegistryModuleOwnerCustom\",\"name\":\"registry\",\"type\":\"address\"},{\"internalType\":\"contract ITokenPool\",\"name\":\"_tokenPool\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint64\",\"name\":\"remoteChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes[]\",\"name\":\"remotePoolAddresses\",\"type\":\"bytes[]\"},{\"internalType\":\"bytes\",\"name\":\"remoteTokenAddress\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"outboundRateLimiterConfig\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"isEnabled\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"capacity\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"rate\",\"type\":\"uint128\"}],\"internalType\":\"struct RateLimiter.Config\",\"name\":\"inboundRateLimiterConfig\",\"type\":\"tuple\"}],\"internalType\":\"struct ITokenPool.ChainUpdate[]\",\"name\":\"chainsToAdd\",\"type\":\"tuple[]\"}],\"name\":\"registerToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tokenPool\",\"outputs\":[{\"internalType\":\"contract ITokenPool\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"acceptAdmin(address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])\":{\"details\":\"Can only be called if this contract is the pending owner for the token.\",\"params\":{\"_tokenPool\":\"The token pool to administer\",\"chainsToAdd\":\"The chains to add to the token pool\"}},\"applyAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)))\":{\"details\":\"Requires the token pool to be set\",\"params\":{\"config\":\"RemoteChainUpdate information\"}},\"applyAdminTransfer(address)\":{\"details\":\"Transfers admin on the TokenPool and ownership on the ZCHF token on the TokenAdminRegistry\",\"params\":{\"newAdmin\":\"The address of the new admin\"}},\"applyRateLimit(uint64,(bool,uint128,uint128),(bool,uint128,uint128),address[])\":{\"details\":\"Requires the token pool to be set\",\"params\":{\"chain\":\"The chain to set the rate limits for\",\"helpers\":\"Array of helper addresses for qualification check\",\"inbound\":\"The inbound rate limits\",\"outbound\":\"The outbound rate limits\"}},\"applyRemotePoolUpdate((bool,uint64,bytes))\":{\"details\":\"Requires the token pool to be set\",\"params\":{\"update\":\"RemotePoolUpdate information\"}},\"applyRemoveChain(uint64)\":{\"details\":\"Requires the token pool to be set\",\"params\":{\"chainId\":\"The chain to remove\"}},\"deny(bytes32,address[])\":{\"details\":\"Only qualified voters can deny proposals\",\"params\":{\"hash\":\"The hash of the proposal to deny\",\"helpers\":\"Array of helper addresses for qualification check\"}},\"proposeAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)),address[])\":{\"details\":\"The contract only stores the hash. So the data has to be passed in during apply again\",\"params\":{\"config\":\"The chain configuration\",\"helpers\":\"Array of helper addresses for qualification check\"}},\"proposeAdminTransfer(address,address[])\":{\"params\":{\"helpers\":\"Array of helper addresses for qualification check\",\"newAdmin\":\"The address of the new admin\"}},\"proposeRemotePoolUpdate((bool,uint64,bytes),address[])\":{\"details\":\"The contract only stores the hash. So the data has to be passed in during apply again\",\"params\":{\"helpers\":\"The helpers to get enough votes\",\"update\":\"The update proposal\"}},\"proposeRemoveChain(uint64,address[])\":{\"details\":\"The contract only stores the hash. So the data has to be passed in during apply again\",\"params\":{\"chainId\":\"The chain to remove\",\"helpers\":\"Array of helper addresses for qualification check\"}},\"registerToken(address,address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])\":{\"details\":\"Can only be called while the token admin is not set\",\"params\":{\"_tokenPool\":\"The token pool to administer\",\"chainsToAdd\":\"The chains to add to the token pool\",\"registry\":\"The registry to register the token with\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"acceptAdmin(address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])\":{\"notice\":\"Accepts the admin role transfer on the TokenAdminRegistry and sets the token pool\"},\"applyAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)))\":{\"notice\":\"Applies the remote chain update\"},\"applyAdminTransfer(address)\":{\"notice\":\"Applies the admin transfer\"},\"applyRateLimit(uint64,(bool,uint128,uint128),(bool,uint128,uint128),address[])\":{\"notice\":\"Sets the rate limits for the given chain. Any qualified voter can apply rate limits with immediate effect.         Rate limits can only do limited harm, so it is acceptable to be very permissive. At the same time, rate limits are typically         applied during emergencies, e.g. when a chain has been hacked. Therefore, it is desirable to ensure that         they can be applied quickly.\"},\"applyRemotePoolUpdate((bool,uint64,bytes))\":{\"notice\":\"Applies the update on the TokenPool\"},\"applyRemoveChain(uint64)\":{\"notice\":\"Applies the remove chain proposal\"},\"deny(bytes32,address[])\":{\"notice\":\"Denies and removes a pending proposal\"},\"proposeAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)),address[])\":{\"notice\":\"Propose to add a remote chains\"},\"proposeAdminTransfer(address,address[])\":{\"notice\":\"Proposed a new admin for the TokenPool and Admin on the Token registry\"},\"proposeRemotePoolUpdate((bool,uint64,bytes),address[])\":{\"notice\":\"Proposed a remote pool update\"},\"proposeRemoveChain(uint64,address[])\":{\"notice\":\"Propose to add or remove remote chains\"},\"registerToken(address,address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])\":{\"notice\":\"Registers the token in the CCIP system\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/bridge/CCIPAdmin.sol\":\"CCIPAdmin\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IGetCCIPAdmin.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IGetCCIPAdmin {\\n  /// @notice Returns the admin of the token.\\n  /// @dev This method is named to never conflict with existing methods.\\n  function getCCIPAdmin() external view returns (address);\\n}\\n\",\"keccak256\":\"0x915794040125fbb75110b20e60c3e6b584d92f57d40b77266bc37d31dae3bd29\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IOwner.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IOwner {\\n  /// @notice Returns the owner of the contract.\\n  /// @dev This method is named to match with the OpenZeppelin Ownable contract.\\n  function owner() external view returns (address);\\n}\\n\",\"keccak256\":\"0x53acc313bc9fd39590c1a0a770bd311c85d803741d361319393c6bcfff5ed2a6\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {Pool} from \\\"../libraries/Pool.sol\\\";\\n\\nimport {IERC165} from \\\"../../vendor/openzeppelin-solidity/v5.0.2/contracts/utils/introspection/IERC165.sol\\\";\\n\\n/// @notice Shared public interface for multiple V1 pool types.\\n/// Each pool type handles a different child token model (lock/unlock, mint/burn.)\\ninterface IPoolV1 is IERC165 {\\n  /// @notice Lock tokens into the pool or burn the tokens.\\n  /// @param lockOrBurnIn Encoded data fields for the processing of tokens on the source chain.\\n  /// @return lockOrBurnOut Encoded data fields for the processing of tokens on the destination chain.\\n  function lockOrBurn(\\n    Pool.LockOrBurnInV1 calldata lockOrBurnIn\\n  ) external returns (Pool.LockOrBurnOutV1 memory lockOrBurnOut);\\n\\n  /// @notice Releases or mints tokens to the receiver address.\\n  /// @param releaseOrMintIn All data required to release or mint tokens.\\n  /// @return releaseOrMintOut The amount of tokens released or minted on the local chain, denominated\\n  /// in the local token's decimals.\\n  /// @dev The offramp asserts that the balanceOf of the receiver has been incremented by exactly the number\\n  /// of tokens that is returned in ReleaseOrMintOutV1.destinationAmount. If the amounts do not match, the tx reverts.\\n  function releaseOrMint(\\n    Pool.ReleaseOrMintInV1 calldata releaseOrMintIn\\n  ) external returns (Pool.ReleaseOrMintOutV1 memory);\\n\\n  /// @notice Checks whether a remote chain is supported in the token pool.\\n  /// @param remoteChainSelector The selector of the remote chain.\\n  /// @return true if the given chain is a permissioned remote chain.\\n  function isSupportedChain(\\n    uint64 remoteChainSelector\\n  ) external view returns (bool);\\n\\n  /// @notice Returns if the token pool supports the given token.\\n  /// @param token The address of the token.\\n  /// @return true if the token is supported by the pool.\\n  function isSupportedToken(\\n    address token\\n  ) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x9c7a2905deceb86bd729af5adb650306523db604f83f9cb4e7dbff7652d4e5b5\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/ITokenAdminRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\ninterface ITokenAdminRegistry {\\n  /// @notice Returns the pool for the given token.\\n  function getPool(\\n    address token\\n  ) external view returns (address);\\n\\n  /// @notice Proposes an administrator for the given token as pending administrator.\\n  /// @param localToken The token to register the administrator for.\\n  /// @param administrator The administrator to register.\\n  function proposeAdministrator(address localToken, address administrator) external;\\n\\n  /// @notice Accepts the administrator role for a token.\\n  /// @param localToken The token to accept the administrator role for.\\n  /// @dev This function can only be called by the pending administrator.\\n  function acceptAdminRole(\\n    address localToken\\n  ) external;\\n\\n  /// @notice Sets the pool for a token. Setting the pool to address(0) effectively delists the token\\n  /// from CCIP. Setting the pool to any other address enables the token on CCIP.\\n  /// @param localToken The token to set the pool for.\\n  /// @param pool The pool to set for the token.\\n  function setPool(address localToken, address pool) external;\\n\\n  /// @notice Transfers the administrator role for a token to a new address with a 2-step process.\\n  /// @param localToken The token to transfer the administrator role for.\\n  /// @param newAdmin The address to transfer the administrator role to. Can be address(0) to cancel\\n  /// a pending transfer.\\n  /// @dev The new admin must call `acceptAdminRole` to accept the role.\\n  function transferAdminRole(address localToken, address newAdmin) external;\\n}\\n\",\"keccak256\":\"0xbaf636acea653acae0832636a675f2a830088b4ff7d0a5193daa6f583ba966ae\",\"license\":\"BUSL-1.1\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Pool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/// @notice This library contains various token pool functions to aid constructing the return data.\\nlibrary Pool {\\n  // The tag used to signal support for the pool v1 standard\\n  // bytes4(keccak256(\\\"CCIP_POOL_V1\\\"))\\n  bytes4 public constant CCIP_POOL_V1 = 0xaff2afbf;\\n\\n  // The number of bytes in the return data for a pool v1 releaseOrMint call.\\n  // This should match the size of the ReleaseOrMintOutV1 struct.\\n  uint16 public constant CCIP_POOL_V1_RET_BYTES = 32;\\n\\n  // The default max number of bytes in the return data for a pool v1 lockOrBurn call.\\n  // This data can be used to send information to the destination chain token pool. Can be overwritten\\n  // in the TokenTransferFeeConfig.destBytesOverhead if more data is required.\\n  uint32 public constant CCIP_LOCK_OR_BURN_V1_RET_BYTES = 32;\\n\\n  struct LockOrBurnInV1 {\\n    bytes receiver; //  The recipient of the tokens on the destination chain, abi encoded\\n    uint64 remoteChainSelector; // \\u2500\\u256e The chain ID of the destination chain\\n    address originalSender; // \\u2500\\u2500\\u2500\\u2500\\u2500\\u256f The original sender of the tx on the source chain\\n    uint256 amount; //  The amount of tokens to lock or burn, denominated in the source token's decimals\\n    address localToken; //  The address on this chain of the token to lock or burn\\n  }\\n\\n  struct LockOrBurnOutV1 {\\n    // The address of the destination token, abi encoded in the case of EVM chains\\n    // This value is UNTRUSTED as any pool owner can return whatever value they want.\\n    bytes destTokenAddress;\\n    // Optional pool data to be transferred to the destination chain. Be default this is capped at\\n    // CCIP_LOCK_OR_BURN_V1_RET_BYTES bytes. If more data is required, the TokenTransferFeeConfig.destBytesOverhead\\n    // has to be set for the specific token.\\n    bytes destPoolData;\\n  }\\n\\n  struct ReleaseOrMintInV1 {\\n    bytes originalSender; //          The original sender of the tx on the source chain\\n    uint64 remoteChainSelector; // \\u2500\\u256e The chain ID of the source chain\\n    address receiver; // \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u256f The recipient of the tokens on the destination chain.\\n    uint256 amount; //                The amount of tokens to release or mint, denominated in the source token's decimals\\n    address localToken; //            The address on this chain of the token to release or mint\\n    /// @dev WARNING: sourcePoolAddress should be checked prior to any processing of funds. Make sure it matches the\\n    /// expected pool address for the given remoteChainSelector.\\n    bytes sourcePoolAddress; //       The address of the source pool, abi encoded in the case of EVM chains\\n    bytes sourcePoolData; //          The data received from the source pool to process the release or mint\\n    /// @dev WARNING: offchainTokenData is untrusted data.\\n    bytes offchainTokenData; //       The offchain data to process the release or mint\\n  }\\n\\n  struct ReleaseOrMintOutV1 {\\n    // The number of tokens released or minted on the destination chain, denominated in the local token's decimals.\\n    // This value is expected to be equal to the ReleaseOrMintInV1.amount in the case where the source and destination\\n    // chain have the same number of decimals.\\n    uint256 destinationAmount;\\n  }\\n}\\n\",\"keccak256\":\"0x0bab34da83a9a9f207471db3aeb0866a376aada7e287b0d8a7ac74a8d77fc2a5\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.4;\\n\\n/// @notice Implements Token Bucket rate limiting.\\n/// @dev uint128 is safe for rate limiter state.\\n/// For USD value rate limiting, it can adequately store USD value in 18 decimals.\\n/// For ERC20 token amount rate limiting, all tokens that will be listed will have at most\\n/// a supply of uint128.max tokens, and it will therefore not overflow the bucket.\\n/// In exceptional scenarios where tokens consumed may be larger than uint128,\\n/// e.g. compromised issuer, an enabled RateLimiter will check and revert.\\nlibrary RateLimiter {\\n  error BucketOverfilled();\\n  error OnlyCallableByAdminOrOwner();\\n  error TokenMaxCapacityExceeded(uint256 capacity, uint256 requested, address tokenAddress);\\n  error TokenRateLimitReached(uint256 minWaitInSeconds, uint256 available, address tokenAddress);\\n  error AggregateValueMaxCapacityExceeded(uint256 capacity, uint256 requested);\\n  error AggregateValueRateLimitReached(uint256 minWaitInSeconds, uint256 available);\\n  error InvalidRateLimitRate(Config rateLimiterConfig);\\n  error DisabledNonZeroRateLimit(Config config);\\n  error RateLimitMustBeDisabled();\\n\\n  event TokensConsumed(uint256 tokens);\\n  event ConfigChanged(Config config);\\n\\n  struct TokenBucket {\\n    uint128 tokens; // \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u256e Current number of tokens that are in the bucket.\\n    uint32 lastUpdated; //   \\u2502 Timestamp in seconds of the last token refill, good for 100+ years.\\n    bool isEnabled; // \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u256f Indication whether the rate limiting is enabled or not\\n    uint128 capacity; // \\u2500\\u2500\\u2500\\u2500\\u256e Maximum number of tokens that can be in the bucket.\\n    uint128 rate; // \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u256f Number of tokens per second that the bucket is refilled.\\n  }\\n\\n  struct Config {\\n    bool isEnabled; // Indication whether the rate limiting should be enabled\\n    uint128 capacity; // \\u2500\\u2500\\u2500\\u2500\\u256e Specifies the capacity of the rate limiter\\n    uint128 rate; //  \\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u256f Specifies the rate of the rate limiter\\n  }\\n\\n  /// @notice _consume removes the given tokens from the pool, lowering the\\n  /// rate tokens allowed to be consumed for subsequent calls.\\n  /// @param requestTokens The total tokens to be consumed from the bucket.\\n  /// @param tokenAddress The token to consume capacity for, use 0x0 to indicate aggregate value capacity.\\n  /// @dev Reverts when requestTokens exceeds bucket capacity or available tokens in the bucket\\n  /// @dev emits removal of requestTokens if requestTokens is > 0\\n  function _consume(TokenBucket storage s_bucket, uint256 requestTokens, address tokenAddress) internal {\\n    // If there is no value to remove or rate limiting is turned off, skip this step to reduce gas usage\\n    if (!s_bucket.isEnabled || requestTokens == 0) {\\n      return;\\n    }\\n\\n    uint256 tokens = s_bucket.tokens;\\n    uint256 capacity = s_bucket.capacity;\\n    uint256 timeDiff = block.timestamp - s_bucket.lastUpdated;\\n\\n    if (timeDiff != 0) {\\n      if (tokens > capacity) revert BucketOverfilled();\\n\\n      // Refill tokens when arriving at a new block time\\n      tokens = _calculateRefill(capacity, tokens, timeDiff, s_bucket.rate);\\n\\n      s_bucket.lastUpdated = uint32(block.timestamp);\\n    }\\n\\n    if (capacity < requestTokens) {\\n      // Token address 0 indicates consuming aggregate value rate limit capacity.\\n      if (tokenAddress == address(0)) revert AggregateValueMaxCapacityExceeded(capacity, requestTokens);\\n      revert TokenMaxCapacityExceeded(capacity, requestTokens, tokenAddress);\\n    }\\n    if (tokens < requestTokens) {\\n      uint256 rate = s_bucket.rate;\\n      // Wait required until the bucket is refilled enough to accept this value, round up to next higher second\\n      // Consume is not guaranteed to succeed after wait time passes if there is competing traffic.\\n      // This acts as a lower bound of wait time.\\n      uint256 minWaitInSeconds = ((requestTokens - tokens) + (rate - 1)) / rate;\\n\\n      if (tokenAddress == address(0)) revert AggregateValueRateLimitReached(minWaitInSeconds, tokens);\\n      revert TokenRateLimitReached(minWaitInSeconds, tokens, tokenAddress);\\n    }\\n    tokens -= requestTokens;\\n\\n    // Downcast is safe here, as tokens is not larger than capacity\\n    s_bucket.tokens = uint128(tokens);\\n    emit TokensConsumed(requestTokens);\\n  }\\n\\n  /// @notice Gets the token bucket with its values for the block it was requested at.\\n  /// @return The token bucket.\\n  function _currentTokenBucketState(\\n    TokenBucket memory bucket\\n  ) internal view returns (TokenBucket memory) {\\n    // We update the bucket to reflect the status at the exact time of the\\n    // call. This means we might need to refill a part of the bucket based\\n    // on the time that has passed since the last update.\\n    bucket.tokens =\\n      uint128(_calculateRefill(bucket.capacity, bucket.tokens, block.timestamp - bucket.lastUpdated, bucket.rate));\\n    bucket.lastUpdated = uint32(block.timestamp);\\n    return bucket;\\n  }\\n\\n  /// @notice Sets the rate limited config.\\n  /// @param s_bucket The token bucket\\n  /// @param config The new config\\n  function _setTokenBucketConfig(TokenBucket storage s_bucket, Config memory config) internal {\\n    // First update the bucket to make sure the proper rate is used for all the time\\n    // up until the config change.\\n    uint256 timeDiff = block.timestamp - s_bucket.lastUpdated;\\n    if (timeDiff != 0) {\\n      s_bucket.tokens = uint128(_calculateRefill(s_bucket.capacity, s_bucket.tokens, timeDiff, s_bucket.rate));\\n\\n      s_bucket.lastUpdated = uint32(block.timestamp);\\n    }\\n\\n    s_bucket.tokens = uint128(_min(config.capacity, s_bucket.tokens));\\n    s_bucket.isEnabled = config.isEnabled;\\n    s_bucket.capacity = config.capacity;\\n    s_bucket.rate = config.rate;\\n\\n    emit ConfigChanged(config);\\n  }\\n\\n  /// @notice Validates the token bucket config\\n  function _validateTokenBucketConfig(Config memory config, bool mustBeDisabled) internal pure {\\n    if (config.isEnabled) {\\n      if (config.rate >= config.capacity || config.rate == 0) {\\n        revert InvalidRateLimitRate(config);\\n      }\\n      if (mustBeDisabled) {\\n        revert RateLimitMustBeDisabled();\\n      }\\n    } else {\\n      if (config.rate != 0 || config.capacity != 0) {\\n        revert DisabledNonZeroRateLimit(config);\\n      }\\n    }\\n  }\\n\\n  /// @notice Calculate refilled tokens\\n  /// @param capacity bucket capacity\\n  /// @param tokens current bucket tokens\\n  /// @param timeDiff block time difference since last refill\\n  /// @param rate bucket refill rate\\n  /// @return the value of tokens after refill\\n  function _calculateRefill(\\n    uint256 capacity,\\n    uint256 tokens,\\n    uint256 timeDiff,\\n    uint256 rate\\n  ) private pure returns (uint256) {\\n    return _min(capacity, tokens + timeDiff * rate);\\n  }\\n\\n  /// @notice Return the smallest of two integers\\n  /// @param a first int\\n  /// @param b second int\\n  /// @return smallest\\n  function _min(uint256 a, uint256 b) internal pure returns (uint256) {\\n    return a < b ? a : b;\\n  }\\n}\\n\",\"keccak256\":\"0xd279954d3429598e5b8513c90e42805195bc29780abb8350007285626333809d\",\"license\":\"BUSL-1.1\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nimport {ITypeAndVersion} from \\\"../../shared/interfaces/ITypeAndVersion.sol\\\";\\nimport {IGetCCIPAdmin} from \\\"../interfaces/IGetCCIPAdmin.sol\\\";\\nimport {IOwner} from \\\"../interfaces/IOwner.sol\\\";\\nimport {ITokenAdminRegistry} from \\\"../interfaces/ITokenAdminRegistry.sol\\\";\\n\\nimport {AccessControl} from \\\"../../vendor/openzeppelin-solidity/v5.0.2/contracts/access/AccessControl.sol\\\";\\n\\ncontract RegistryModuleOwnerCustom is ITypeAndVersion {\\n  error CanOnlySelfRegister(address admin, address token);\\n  error RequiredRoleNotFound(address msgSender, bytes32 role, address token);\\n  error AddressZero();\\n\\n  event AdministratorRegistered(address indexed token, address indexed administrator);\\n\\n  string public constant override typeAndVersion = \\\"RegistryModuleOwnerCustom 1.6.0\\\";\\n\\n  // The TokenAdminRegistry contract\\n  ITokenAdminRegistry internal immutable i_tokenAdminRegistry;\\n\\n  constructor(\\n    address tokenAdminRegistry\\n  ) {\\n    if (tokenAdminRegistry == address(0)) {\\n      revert AddressZero();\\n    }\\n    i_tokenAdminRegistry = ITokenAdminRegistry(tokenAdminRegistry);\\n  }\\n\\n  /// @notice Registers the admin of the token using the `getCCIPAdmin` method.\\n  /// @param token The token to register the admin for.\\n  /// @dev The caller must be the admin returned by the `getCCIPAdmin` method.\\n  function registerAdminViaGetCCIPAdmin(\\n    address token\\n  ) external {\\n    _registerAdmin(token, IGetCCIPAdmin(token).getCCIPAdmin());\\n  }\\n\\n  /// @notice Registers the admin of the token using the `owner` method.\\n  /// @param token The token to register the admin for.\\n  /// @dev The caller must be the admin returned by the `owner` method.\\n  function registerAdminViaOwner(\\n    address token\\n  ) external {\\n    _registerAdmin(token, IOwner(token).owner());\\n  }\\n\\n  /// @notice Registers the admin of the token using OZ's AccessControl DEFAULT_ADMIN_ROLE.\\n  /// @param token The token to register the admin for.\\n  /// @dev The caller must have the DEFAULT_ADMIN_ROLE as defined by the contract itself.\\n  function registerAccessControlDefaultAdmin(\\n    address token\\n  ) external {\\n    bytes32 defaultAdminRole = AccessControl(token).DEFAULT_ADMIN_ROLE();\\n    if (!AccessControl(token).hasRole(defaultAdminRole, msg.sender)) {\\n      revert RequiredRoleNotFound(msg.sender, defaultAdminRole, token);\\n    }\\n\\n    _registerAdmin(token, msg.sender);\\n  }\\n\\n  /// @notice Registers the admin of the token to msg.sender given that the\\n  /// admin is equal to msg.sender.\\n  /// @param token The token to register the admin for.\\n  /// @param admin The caller must be the admin.\\n  function _registerAdmin(address token, address admin) internal {\\n    if (admin != msg.sender) {\\n      revert CanOnlySelfRegister(admin, token);\\n    }\\n\\n    i_tokenAdminRegistry.proposeAdministrator(token, admin);\\n\\n    emit AdministratorRegistered(token, admin);\\n  }\\n}\\n\",\"keccak256\":\"0x8d6c257b30168f951bbdf3dcc218142886aa4e33b09e2bd384c46e7cf9d5d9c8\",\"license\":\"BUSL-1.1\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nimport {ITypeAndVersion} from \\\"../../shared/interfaces/ITypeAndVersion.sol\\\";\\nimport {IPoolV1} from \\\"../interfaces/IPool.sol\\\";\\nimport {ITokenAdminRegistry} from \\\"../interfaces/ITokenAdminRegistry.sol\\\";\\n\\nimport {OwnerIsCreator} from \\\"../../shared/access/OwnerIsCreator.sol\\\";\\n\\nimport {EnumerableSet} from \\\"../../vendor/openzeppelin-solidity/v5.0.2/contracts/utils/structs/EnumerableSet.sol\\\";\\n\\n/// @notice This contract stores the token pool configuration for all CCIP enabled tokens. It works\\n/// on a self-serve basis, where tokens can be registered without intervention from the CCIP owner.\\n/// @dev This contract is not considered upgradable, as it is a customer facing contract that will store\\n/// significant amounts of data.\\ncontract TokenAdminRegistry is ITokenAdminRegistry, ITypeAndVersion, OwnerIsCreator {\\n  using EnumerableSet for EnumerableSet.AddressSet;\\n\\n  error OnlyRegistryModuleOrOwner(address sender);\\n  error OnlyAdministrator(address sender, address token);\\n  error OnlyPendingAdministrator(address sender, address token);\\n  error AlreadyRegistered(address token);\\n  error ZeroAddress();\\n  error InvalidTokenPoolToken(address token);\\n\\n  event PoolSet(address indexed token, address indexed previousPool, address indexed newPool);\\n  event AdministratorTransferRequested(address indexed token, address indexed currentAdmin, address indexed newAdmin);\\n  event AdministratorTransferred(address indexed token, address indexed newAdmin);\\n  event RegistryModuleAdded(address module);\\n  event RegistryModuleRemoved(address indexed module);\\n\\n  // The struct is packed in a way that optimizes the attributes that are accessed together.\\n  // solhint-disable-next-line gas-struct-packing\\n  struct TokenConfig {\\n    address administrator; // the current administrator of the token\\n    address pendingAdministrator; // the address that is pending to become the new administrator\\n    address tokenPool; // the token pool for this token. Can be address(0) if not deployed or not configured.\\n  }\\n\\n  string public constant override typeAndVersion = \\\"TokenAdminRegistry 1.5.0\\\";\\n\\n  // Mapping of token address to token configuration\\n  mapping(address token => TokenConfig) internal s_tokenConfig;\\n\\n  // All tokens that have been configured\\n  EnumerableSet.AddressSet internal s_tokens;\\n\\n  // Registry modules are allowed to register administrators for tokens\\n  EnumerableSet.AddressSet internal s_registryModules;\\n\\n  /// @notice Returns all pools for the given tokens.\\n  /// @dev Will return address(0) for tokens that do not have a pool.\\n  function getPools(\\n    address[] calldata tokens\\n  ) external view returns (address[] memory) {\\n    address[] memory pools = new address[](tokens.length);\\n    for (uint256 i = 0; i < tokens.length; ++i) {\\n      pools[i] = s_tokenConfig[tokens[i]].tokenPool;\\n    }\\n    return pools;\\n  }\\n\\n  /// @inheritdoc ITokenAdminRegistry\\n  function getPool(\\n    address token\\n  ) external view returns (address) {\\n    return s_tokenConfig[token].tokenPool;\\n  }\\n\\n  /// @notice Returns the configuration for a token.\\n  /// @param token The token to get the configuration for.\\n  /// @return config The configuration for the token.\\n  function getTokenConfig(\\n    address token\\n  ) external view returns (TokenConfig memory) {\\n    return s_tokenConfig[token];\\n  }\\n\\n  /// @notice Returns a list of tokens that are configured in the token admin registry.\\n  /// @param startIndex Starting index in list, can be 0 if you want to start from the beginning.\\n  /// @param maxCount Maximum number of tokens to retrieve. Since the list can be large,\\n  /// it is recommended to use a paging mechanism to retrieve all tokens. If querying for very\\n  /// large lists, RPCs can time out. If you want all tokens, use type(uint64).max.\\n  /// @return tokens List of configured tokens.\\n  /// @dev The function is paginated to avoid RPC timeouts.\\n  /// @dev The ordering is guaranteed to remain the same as it is not possible to remove tokens\\n  /// from s_tokens.\\n  function getAllConfiguredTokens(uint64 startIndex, uint64 maxCount) external view returns (address[] memory tokens) {\\n    uint256 numberOfTokens = s_tokens.length();\\n    if (startIndex >= numberOfTokens) {\\n      return tokens;\\n    }\\n    uint256 count = maxCount;\\n    if (count + startIndex > numberOfTokens) {\\n      count = numberOfTokens - startIndex;\\n    }\\n    tokens = new address[](count);\\n    for (uint256 i = 0; i < count; ++i) {\\n      tokens[i] = s_tokens.at(startIndex + i);\\n    }\\n\\n    return tokens;\\n  }\\n\\n  // ================================================================\\n  // \\u2502                  Administrator functions                     \\u2502\\n  // ================================================================\\n\\n  /// @notice Sets the pool for a token. Setting the pool to address(0) effectively delists the token\\n  /// from CCIP. Setting the pool to any other address enables the token on CCIP.\\n  /// @param localToken The token to set the pool for.\\n  /// @param pool The pool to set for the token.\\n  function setPool(address localToken, address pool) external onlyTokenAdmin(localToken) {\\n    // The pool has to support the token, but we want to allow removing the pool, so we only check\\n    // if the pool supports the token if it is not address(0).\\n    if (pool != address(0) && !IPoolV1(pool).isSupportedToken(localToken)) {\\n      revert InvalidTokenPoolToken(localToken);\\n    }\\n\\n    TokenConfig storage config = s_tokenConfig[localToken];\\n\\n    address previousPool = config.tokenPool;\\n    config.tokenPool = pool;\\n\\n    if (previousPool != pool) {\\n      emit PoolSet(localToken, previousPool, pool);\\n    }\\n  }\\n\\n  /// @notice Transfers the administrator role for a token to a new address with a 2-step process.\\n  /// @param localToken The token to transfer the administrator role for.\\n  /// @param newAdmin The address to transfer the administrator role to. Can be address(0) to cancel\\n  /// a pending transfer.\\n  /// @dev The new admin must call `acceptAdminRole` to accept the role.\\n  function transferAdminRole(address localToken, address newAdmin) external onlyTokenAdmin(localToken) {\\n    TokenConfig storage config = s_tokenConfig[localToken];\\n    config.pendingAdministrator = newAdmin;\\n\\n    emit AdministratorTransferRequested(localToken, msg.sender, newAdmin);\\n  }\\n\\n  /// @notice Accepts the administrator role for a token.\\n  /// @param localToken The token to accept the administrator role for.\\n  /// @dev This function can only be called by the pending administrator.\\n  function acceptAdminRole(\\n    address localToken\\n  ) external {\\n    TokenConfig storage config = s_tokenConfig[localToken];\\n    if (config.pendingAdministrator != msg.sender) {\\n      revert OnlyPendingAdministrator(msg.sender, localToken);\\n    }\\n\\n    config.administrator = msg.sender;\\n    config.pendingAdministrator = address(0);\\n\\n    emit AdministratorTransferred(localToken, msg.sender);\\n  }\\n\\n  // ================================================================\\n  // \\u2502                    Administrator config                      \\u2502\\n  // ================================================================\\n\\n  /// @notice Public getter to check for permissions of an administrator\\n  function isAdministrator(address localToken, address administrator) external view returns (bool) {\\n    return s_tokenConfig[localToken].administrator == administrator;\\n  }\\n\\n  /// @inheritdoc ITokenAdminRegistry\\n  /// @dev Can only be called by a registry module.\\n  function proposeAdministrator(address localToken, address administrator) external {\\n    if (!isRegistryModule(msg.sender) && msg.sender != owner()) {\\n      revert OnlyRegistryModuleOrOwner(msg.sender);\\n    }\\n    if (administrator == address(0)) {\\n      revert ZeroAddress();\\n    }\\n    TokenConfig storage config = s_tokenConfig[localToken];\\n\\n    if (config.administrator != address(0)) {\\n      revert AlreadyRegistered(localToken);\\n    }\\n\\n    config.pendingAdministrator = administrator;\\n\\n    // We don't care if it's already in the set, as it's a no-op.\\n    s_tokens.add(localToken);\\n\\n    emit AdministratorTransferRequested(localToken, address(0), administrator);\\n  }\\n\\n  // ================================================================\\n  // \\u2502                      Registry Modules                        \\u2502\\n  // ================================================================\\n\\n  /// @notice Checks if an address is a registry module.\\n  /// @param module The address to check.\\n  /// @return True if the address is a registry module, false otherwise.\\n  function isRegistryModule(\\n    address module\\n  ) public view returns (bool) {\\n    return s_registryModules.contains(module);\\n  }\\n\\n  /// @notice Adds a new registry module to the list of allowed modules.\\n  /// @param module The module to add.\\n  function addRegistryModule(\\n    address module\\n  ) external onlyOwner {\\n    if (s_registryModules.add(module)) {\\n      emit RegistryModuleAdded(module);\\n    }\\n  }\\n\\n  /// @notice Removes a registry module from the list of allowed modules.\\n  /// @param module The module to remove.\\n  function removeRegistryModule(\\n    address module\\n  ) external onlyOwner {\\n    if (s_registryModules.remove(module)) {\\n      emit RegistryModuleRemoved(module);\\n    }\\n  }\\n\\n  // ================================================================\\n  // \\u2502                           Access                             \\u2502\\n  // ================================================================\\n\\n  /// @notice Checks if an address is the administrator of the given token.\\n  modifier onlyTokenAdmin(\\n    address token\\n  ) {\\n    if (s_tokenConfig[token].administrator != msg.sender) {\\n      revert OnlyAdministrator(msg.sender, token);\\n    }\\n    _;\\n  }\\n}\\n\",\"keccak256\":\"0xe6fba137fe2bf74d803c5e904fa1ec9e522ca501b9cb2a50fbf80f249aa9dd53\",\"license\":\"BUSL-1.1\"},\"@chainlink/contracts-ccip/src/v0.8/shared/access/ConfirmedOwner.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {ConfirmedOwnerWithProposal} from \\\"./ConfirmedOwnerWithProposal.sol\\\";\\n\\n/// @title The ConfirmedOwner contract\\n/// @notice A contract with helpers for basic contract ownership.\\ncontract ConfirmedOwner is ConfirmedOwnerWithProposal {\\n  constructor(address newOwner) ConfirmedOwnerWithProposal(newOwner, address(0)) {}\\n}\\n\",\"keccak256\":\"0xdcb0e9135ddbe71ee27ba99fa06656960c66c964cf2ecb29696da1c1427d9861\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/shared/access/ConfirmedOwnerWithProposal.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {IOwnable} from \\\"../interfaces/IOwnable.sol\\\";\\n\\n/// @title The ConfirmedOwner contract\\n/// @notice A contract with helpers for basic contract ownership.\\ncontract ConfirmedOwnerWithProposal is IOwnable {\\n  address private s_owner;\\n  address private s_pendingOwner;\\n\\n  event OwnershipTransferRequested(address indexed from, address indexed to);\\n  event OwnershipTransferred(address indexed from, address indexed to);\\n\\n  constructor(address newOwner, address pendingOwner) {\\n    // solhint-disable-next-line gas-custom-errors\\n    require(newOwner != address(0), \\\"Cannot set owner to zero\\\");\\n\\n    s_owner = newOwner;\\n    if (pendingOwner != address(0)) {\\n      _transferOwnership(pendingOwner);\\n    }\\n  }\\n\\n  /// @notice Allows an owner to begin transferring ownership to a new address.\\n  function transferOwnership(address to) public override onlyOwner {\\n    _transferOwnership(to);\\n  }\\n\\n  /// @notice Allows an ownership transfer to be completed by the recipient.\\n  function acceptOwnership() external override {\\n    // solhint-disable-next-line gas-custom-errors\\n    require(msg.sender == s_pendingOwner, \\\"Must be proposed owner\\\");\\n\\n    address oldOwner = s_owner;\\n    s_owner = msg.sender;\\n    s_pendingOwner = address(0);\\n\\n    emit OwnershipTransferred(oldOwner, msg.sender);\\n  }\\n\\n  /// @notice Get the current owner\\n  function owner() public view override returns (address) {\\n    return s_owner;\\n  }\\n\\n  /// @notice validate, transfer ownership, and emit relevant events\\n  function _transferOwnership(address to) private {\\n    // solhint-disable-next-line gas-custom-errors\\n    require(to != msg.sender, \\\"Cannot transfer to self\\\");\\n\\n    s_pendingOwner = to;\\n\\n    emit OwnershipTransferRequested(s_owner, to);\\n  }\\n\\n  /// @notice validate access\\n  function _validateOwnership() internal view {\\n    // solhint-disable-next-line gas-custom-errors\\n    require(msg.sender == s_owner, \\\"Only callable by owner\\\");\\n  }\\n\\n  /// @notice Reverts if called by anyone other than the contract owner.\\n  modifier onlyOwner() {\\n    _validateOwnership();\\n    _;\\n  }\\n}\\n\",\"keccak256\":\"0x2422a055657a87e98be61f8f31abb1824ec50fd0f73949f4e3c6ac877efb6da8\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {ConfirmedOwner} from \\\"./ConfirmedOwner.sol\\\";\\n\\n/// @title The OwnerIsCreator contract\\n/// @notice A contract with helpers for basic contract ownership.\\ncontract OwnerIsCreator is ConfirmedOwner {\\n  constructor() ConfirmedOwner(msg.sender) {}\\n}\\n\",\"keccak256\":\"0x895af02d6a3df2930bbb6ec1f2d68118b492ca6e710ba0c34fcb6b574a0906aa\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/shared/interfaces/IOwnable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IOwnable {\\n  function owner() external returns (address);\\n\\n  function transferOwnership(address recipient) external;\\n\\n  function acceptOwnership() external;\\n}\\n\",\"keccak256\":\"0x885de72b7b4e4f1bf8ba817a3f2bcc37fd9022d342c4ce76782151c30122d767\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/shared/interfaces/ITypeAndVersion.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface ITypeAndVersion {\\n  function typeAndVersion() external pure returns (string memory);\\n}\\n\",\"keccak256\":\"0xf5827cb463c01d055021684d04f9186391c2d9ac850e0d0819f76140e4fc84ed\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/AccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"./IAccessControl.sol\\\";\\nimport {Context} from \\\"../utils/Context.sol\\\";\\nimport {ERC165} from \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```solidity\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```solidity\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\\n * to enforce additional security measures for this role.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping(address account => bool) hasRole;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 role => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role);\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\\n        return _roles[role].hasRole[account];\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\\n     */\\n    function _checkRole(bytes32 role) internal view virtual {\\n        _checkRole(role, _msgSender());\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\\n     * is missing `role`.\\n     */\\n    function _checkRole(bytes32 role, address account) internal view virtual {\\n        if (!hasRole(role, account)) {\\n            revert AccessControlUnauthorizedAccount(account, role);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\\n        if (callerConfirmation != _msgSender()) {\\n            revert AccessControlBadConfirmation();\\n        }\\n\\n        _revokeRole(role, callerConfirmation);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (!hasRole(role, account)) {\\n            _roles[role].hasRole[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Attempts to revoke `role` to `account` and returns a boolean indicating if `role` was revoked.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (hasRole(role, account)) {\\n            _roles[role].hasRole[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xa0e92d42942f4f57c5be50568dac11e9d00c93efcb458026e18d2d9b9b2e7308\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/access/IAccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControl {\\n    /**\\n     * @dev The `account` is missing a role.\\n     */\\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\\n\\n    /**\\n     * @dev The caller of a function is not the expected one.\\n     *\\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\\n     */\\n    error AccessControlBadConfirmation();\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {AccessControl-_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) external;\\n}\\n\",\"keccak256\":\"0xb6b36edd6a2999fd243ff226d6cbf84bd71af2432bbd0dfe19392996a1d9cb41\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0x9e8778b14317ba9e256c30a76fd6c32b960af621987f56069e1e819c77c6a133\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/utils/structs/EnumerableSet.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/structs/EnumerableSet.sol)\\n// This file was procedurally generated from scripts/generate/templates/EnumerableSet.js.\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Library for managing\\n * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive\\n * types.\\n *\\n * Sets have the following properties:\\n *\\n * - Elements are added, removed, and checked for existence in constant time\\n * (O(1)).\\n * - Elements are enumerated in O(n). No guarantees are made on the ordering.\\n *\\n * ```solidity\\n * contract Example {\\n *     // Add the library methods\\n *     using EnumerableSet for EnumerableSet.AddressSet;\\n *\\n *     // Declare a set state variable\\n *     EnumerableSet.AddressSet private mySet;\\n * }\\n * ```\\n *\\n * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)\\n * and `uint256` (`UintSet`) are supported.\\n *\\n * [WARNING]\\n * ====\\n * Trying to delete such a structure from storage will likely result in data corruption, rendering the structure\\n * unusable.\\n * See https://github.com/ethereum/solidity/pull/11843[ethereum/solidity#11843] for more info.\\n *\\n * In order to clean an EnumerableSet, you can either remove all elements one by one or create a fresh instance using an\\n * array of EnumerableSet.\\n * ====\\n */\\nlibrary EnumerableSet {\\n    // To implement this library for multiple types with as little code\\n    // repetition as possible, we write it in terms of a generic Set type with\\n    // bytes32 values.\\n    // The Set implementation uses private functions, and user-facing\\n    // implementations (such as AddressSet) are just wrappers around the\\n    // underlying Set.\\n    // This means that we can only create new EnumerableSets for types that fit\\n    // in bytes32.\\n\\n    struct Set {\\n        // Storage of set values\\n        bytes32[] _values;\\n        // Position is the index of the value in the `values` array plus 1.\\n        // Position 0 is used to mean a value is not in the set.\\n        mapping(bytes32 value => uint256) _positions;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function _add(Set storage set, bytes32 value) private returns (bool) {\\n        if (!_contains(set, value)) {\\n            set._values.push(value);\\n            // The value is stored at length-1, but we add 1 to all indexes\\n            // and use 0 as a sentinel value\\n            set._positions[value] = set._values.length;\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function _remove(Set storage set, bytes32 value) private returns (bool) {\\n        // We cache the value's position to prevent multiple reads from the same storage slot\\n        uint256 position = set._positions[value];\\n\\n        if (position != 0) {\\n            // Equivalent to contains(set, value)\\n            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in\\n            // the array, and then remove the last element (sometimes called as 'swap and pop').\\n            // This modifies the order of the array, as noted in {at}.\\n\\n            uint256 valueIndex = position - 1;\\n            uint256 lastIndex = set._values.length - 1;\\n\\n            if (valueIndex != lastIndex) {\\n                bytes32 lastValue = set._values[lastIndex];\\n\\n                // Move the lastValue to the index where the value to delete is\\n                set._values[valueIndex] = lastValue;\\n                // Update the tracked position of the lastValue (that was just moved)\\n                set._positions[lastValue] = position;\\n            }\\n\\n            // Delete the slot where the moved value was stored\\n            set._values.pop();\\n\\n            // Delete the tracked position for the deleted slot\\n            delete set._positions[value];\\n\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function _contains(Set storage set, bytes32 value) private view returns (bool) {\\n        return set._positions[value] != 0;\\n    }\\n\\n    /**\\n     * @dev Returns the number of values on the set. O(1).\\n     */\\n    function _length(Set storage set) private view returns (uint256) {\\n        return set._values.length;\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function _at(Set storage set, uint256 index) private view returns (bytes32) {\\n        return set._values[index];\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function _values(Set storage set) private view returns (bytes32[] memory) {\\n        return set._values;\\n    }\\n\\n    // Bytes32Set\\n\\n    struct Bytes32Set {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _add(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _remove(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {\\n        return _contains(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(Bytes32Set storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {\\n        return _at(set._inner, index);\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(Bytes32Set storage set) internal view returns (bytes32[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        bytes32[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // AddressSet\\n\\n    struct AddressSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(AddressSet storage set, address value) internal returns (bool) {\\n        return _add(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(AddressSet storage set, address value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(AddressSet storage set, address value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(AddressSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(AddressSet storage set, uint256 index) internal view returns (address) {\\n        return address(uint160(uint256(_at(set._inner, index))));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(AddressSet storage set) internal view returns (address[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        address[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // UintSet\\n\\n    struct UintSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _add(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(UintSet storage set, uint256 value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(UintSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(UintSet storage set, uint256 index) internal view returns (uint256) {\\n        return uint256(_at(set._inner, index));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(UintSet storage set) internal view returns (uint256[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        uint256[] memory result;\\n\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n}\\n\",\"keccak256\":\"0x86c1470cbfd878491e5de030072b647352d36bd27122cffb928970b1945282aa\",\"license\":\"MIT\"},\"contracts/bridge/CCIPAdmin.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport {IGovernance} from \\\"../equity/IGovernance.sol\\\";\\nimport {ITokenPool} from \\\"./ITokenPool.sol\\\";\\nimport {TokenAdminRegistry} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol\\\";\\nimport {RateLimiter} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol\\\";\\nimport {IBasicFrankencoin} from \\\"../stablecoin/IBasicFrankencoin.sol\\\";\\nimport {RegistryModuleOwnerCustom} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol\\\";\\n\\n// The admin for briding Frankencoins using CCIP.\\n// Each chain needs an instance of this administrator.\\ncontract CCIPAdmin {\\n    struct RemotePoolUpdate {\\n        bool add; // true if adding, false if removing\\n        uint64 chain;\\n        bytes poolAddress;\\n    }\\n\\n    uint64 public constant DAY = 24 * 60 * 60;\\n\\n    IGovernance public immutable GOVERNANCE;\\n    TokenAdminRegistry public immutable TOKEN_ADMIN_REGISTRY;\\n    address public immutable ZCHF;\\n\\n    ITokenPool public tokenPool;\\n    mapping(bytes32 hash => uint64 deadline) public proposals;\\n\\n    error TooEarly(uint64 deadline);\\n    error UnknownProposal(bytes32 hash);\\n    error ProposalAlreadyMade(bytes32 hash);\\n    error AlreadyRegistered();\\n    error TokenPoolNotSet();\\n\\n    event TokenPoolSet(address indexed tokenPool);\\n\\n    event ProposalMade(bytes32 hash, uint64 deadline);\\n    event ProposalDenied(bytes32 hash);\\n    event ProposalEnacted(bytes32 hash);\\n\\n    event RemotePoolUpdateProposed(bytes32 hash, address indexed proposer, RemotePoolUpdate update);\\n    event RemoveChainProposed(bytes32 hash, address indexed proposer, uint64 chain);\\n    event AddChainProposed(bytes32 hash, address indexed proposer, ITokenPool.ChainUpdate update);\\n    event AdminTransferProposed(bytes32 hash, address indexed proposer, address newAdmin);\\n\\n    event RemotePoolAdded(uint64 indexed chain, bytes indexed poolAddress);\\n    event RemotePoolRemoved(uint64 indexed chain, bytes indexed poolAddress);\\n    event ChainRemoved(uint64 id);\\n    event ChainAdded(ITokenPool.ChainUpdate config);\\n    event AdminTransfered(address newAdmin);\\n    event RateLimit(uint64 remoteChain, RateLimiter.Config inboundConfigs, RateLimiter.Config outboundConfig);\\n\\n    modifier onlyQualified(address[] calldata helpers) {\\n        GOVERNANCE.checkQualified(msg.sender, helpers);\\n        _;\\n    }\\n\\n    modifier tokenPoolSet() {\\n        if (address(tokenPool) == address(0)) revert TokenPoolNotSet();\\n        _;\\n    }\\n\\n    constructor(TokenAdminRegistry tokenAdminRegistry, IBasicFrankencoin zchf) {\\n        GOVERNANCE = zchf.reserve();\\n        TOKEN_ADMIN_REGISTRY = tokenAdminRegistry;\\n        ZCHF = address(zchf);\\n    }\\n    \\n    /// @notice Registers the token in the CCIP system\\n    /// @dev Can only be called while the token admin is not set\\n    /// @param registry The registry to register the token with\\n    /// @param _tokenPool The token pool to administer\\n    /// @param chainsToAdd The chains to add to the token pool\\n    function registerToken(RegistryModuleOwnerCustom registry, ITokenPool _tokenPool, ITokenPool.ChainUpdate[] calldata chainsToAdd) external {\\n        // This prevents from reregistering the inital ccipAdmin contract after it got superseeded by a new version\\n        if (TOKEN_ADMIN_REGISTRY.getTokenConfig(ZCHF).administrator != address(0)) {\\n            revert AlreadyRegistered();\\n        }\\n        // registerAdminViaGetCCIPAdmin() calls proposeAdministrator() in the background which prevents the existing admin from being set as pending\\n        registry.registerAdminViaGetCCIPAdmin(ZCHF);\\n        acceptAdmin(_tokenPool, chainsToAdd);\\n    }\\n    \\n    /// @notice Accepts the admin role transfer on the TokenAdminRegistry and sets the token pool\\n    /// @dev Can only be called if this contract is the pending owner for the token.\\n    /// @param _tokenPool The token pool to administer\\n    /// @param chainsToAdd The chains to add to the token pool\\n    function acceptAdmin(ITokenPool _tokenPool, ITokenPool.ChainUpdate[] calldata chainsToAdd) public {\\n        // The token pool can only be reset if this contract is a pending admin again. In this case it could be beneficial to reset the token pool\\n        TOKEN_ADMIN_REGISTRY.acceptAdminRole(ZCHF);\\n        setTokenPool(_tokenPool, chainsToAdd);\\n    }\\n    \\n    /// @notice Proposed a remote pool update\\n    /// @dev The contract only stores the hash. So the data has to be passed in during apply again\\n    /// @param update  The update proposal\\n    /// @param helpers The helpers to get enough votes\\n    function proposeRemotePoolUpdate(RemotePoolUpdate memory update, address[] calldata helpers) external {\\n        bytes32 hash = keccak256(abi.encode(\\\"remotePoolUpdate\\\", update));\\n        propose(hash, 7, helpers);\\n        emit RemotePoolUpdateProposed(hash, msg.sender, update);\\n    }\\n    \\n    /// @notice Applies the update on the TokenPool\\n    /// @dev Requires the token pool to be set\\n    /// @param update RemotePoolUpdate information\\n    function applyRemotePoolUpdate(RemotePoolUpdate memory update) external tokenPoolSet {\\n        enact(keccak256(abi.encode(\\\"remotePoolUpdate\\\", update)));\\n        if (update.add) {\\n            tokenPool.addRemotePool(update.chain, update.poolAddress);\\n            emit RemotePoolAdded(update.chain, update.poolAddress);\\n        } else {\\n            tokenPool.removeRemotePool(update.chain, update.poolAddress);\\n            emit RemotePoolRemoved(update.chain, update.poolAddress);\\n        }\\n    }\\n    \\n    /// @notice Sets the rate limits for the given chain. Any qualified voter can apply rate limits with immediate effect.\\n    ///         Rate limits can only do limited harm, so it is acceptable to be very permissive. At the same time, rate limits are typically\\n    ///         applied during emergencies, e.g. when a chain has been hacked. Therefore, it is desirable to ensure that\\n    ///         they can be applied quickly.\\n    /// @dev Requires the token pool to be set\\n    /// @param chain The chain to set the rate limits for\\n    /// @param inbound The inbound rate limits\\n    /// @param outbound The outbound rate limits\\n    /// @param helpers Array of helper addresses for qualification check\\n    function applyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external onlyQualified(helpers) tokenPoolSet {\\n        tokenPool.setChainRateLimiterConfig(chain, inbound, outbound);\\n        emit RateLimit(chain, inbound, outbound);\\n    }\\n    \\n    /// @notice Propose to add or remove remote chains\\n    /// @dev The contract only stores the hash. So the data has to be passed in during apply again\\n    /// @param chainId The chain to remove\\n    /// @param helpers Array of helper addresses for qualification check\\n    function proposeRemoveChain(uint64 chainId, address[] calldata helpers) external {\\n        bytes32 hash = keccak256(abi.encode(\\\"removeChain\\\", chainId));\\n        propose(hash, 7, helpers);\\n        emit RemoveChainProposed(hash, msg.sender, chainId);\\n    }\\n    \\n    /// @notice Applies the remove chain proposal\\n    /// @dev Requires the token pool to be set\\n    /// @param chainId The chain to remove\\n    function applyRemoveChain(uint64 chainId) external tokenPoolSet {\\n        enact(keccak256(abi.encode(\\\"removeChain\\\", chainId)));\\n        uint64[] memory chainsToRemove = new uint64[](1);\\n        chainsToRemove[0] = chainId;\\n        ITokenPool.ChainUpdate[] memory chainsToAdd = new ITokenPool.ChainUpdate[](0);\\n        tokenPool.applyChainUpdates(chainsToRemove, chainsToAdd);\\n        emit ChainRemoved(chainId);\\n    }\\n    \\n    /// @notice Propose to add a remote chains\\n    /// @dev The contract only stores the hash. So the data has to be passed in during apply again\\n    /// @param config The chain configuration\\n    /// @param helpers Array of helper addresses for qualification check\\n    function proposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external {\\n        bytes32 hash = keccak256(abi.encode(\\\"addChain\\\", config));\\n        propose(hash, 7, helpers);\\n        emit AddChainProposed(hash, msg.sender, config);\\n    }\\n    \\n    /// @notice Applies the remote chain update\\n    /// @dev Requires the token pool to be set\\n    /// @param config RemoteChainUpdate information\\n    function applyAddChain(ITokenPool.ChainUpdate memory config) external tokenPoolSet {\\n        enact(keccak256(abi.encode(\\\"addChain\\\", config)));\\n        uint64[] memory chainsToRemove = new uint64[](0);\\n        ITokenPool.ChainUpdate[] memory chainsToAdd = new ITokenPool.ChainUpdate[](1);\\n        chainsToAdd[0] = config;\\n        tokenPool.applyChainUpdates(chainsToRemove, chainsToAdd);\\n        emit ChainAdded(config);\\n    }\\n    \\n    /// @notice Proposed a new admin for the TokenPool and Admin on the Token registry\\n    /// @param newAdmin  The address of the new admin\\n    /// @param helpers Array of helper addresses for qualification check\\n    function proposeAdminTransfer(address newAdmin, address[] calldata helpers) external {\\n        bytes32 hash = keccak256(abi.encode(\\\"adminTransfer\\\", newAdmin));\\n        propose(hash, 21, helpers);\\n        emit AdminTransferProposed(hash, msg.sender, newAdmin);\\n    }\\n    \\n    /// @notice Applies the admin transfer\\n    /// @dev Transfers admin on the TokenPool and ownership on the ZCHF token on the TokenAdminRegistry\\n    /// @param newAdmin The address of the new admin\\n    function applyAdminTransfer(address newAdmin) external {\\n        enact(keccak256(abi.encode(\\\"adminTransfer\\\", newAdmin)));\\n        TOKEN_ADMIN_REGISTRY.transferAdminRole(ZCHF, newAdmin);\\n        if (address(tokenPool) != address(0)) tokenPool.transferOwnership(newAdmin);\\n        emit AdminTransfered(newAdmin);\\n    }\\n    \\n    /// @notice Denies and removes a pending proposal\\n    /// @dev Only qualified voters can deny proposals\\n    /// @param hash The hash of the proposal to deny\\n    /// @param helpers Array of helper addresses for qualification check\\n    function deny(bytes32 hash, address[] calldata helpers) external onlyQualified(helpers) {\\n        if (proposals[hash] == 0) revert UnknownProposal(hash);\\n        delete proposals[hash];\\n        emit ProposalDenied(hash);\\n    }\\n    \\n    /// @notice Enacts a pending proposal\\n    /// @param hash The hash of the proposal to enact\\n    function enact(bytes32 hash) internal {\\n        uint64 deadline = proposals[hash];\\n        if (deadline == 0) revert UnknownProposal(hash);\\n        if (deadline > block.timestamp) revert TooEarly(deadline);\\n        delete proposals[hash];\\n        emit ProposalEnacted(hash);\\n    }\\n    \\n    /// @notice Creates a new proposal with a delay period\\n    /// @dev Only qualified voters can create proposals\\n    /// @param hash The hash of the proposal data\\n    /// @param delayInDays Number of days to delay the proposal execution\\n    /// @param helpers Array of helper addresses for qualification check\\n    function propose(bytes32 hash, uint64 delayInDays, address[] calldata helpers) internal onlyQualified(helpers) {\\n        if (proposals[hash] > 0) revert ProposalAlreadyMade(hash);\\n        proposals[hash] = uint64(block.timestamp) + delayInDays * DAY;\\n        emit ProposalMade(hash, proposals[hash]);\\n    }\\n    \\n    /// @notice Sets the token pool to administer, sets it in the TokenAdminRegistry, accept ownership, and applies the chain updates\\n    /// @dev The token pool needs to have this contract as pending owner\\n    /// @param _tokenPool The token pool to set\\n    /// @param chainsToAdd The chains to add to the token pool\\n    function setTokenPool(ITokenPool _tokenPool, ITokenPool.ChainUpdate[] calldata chainsToAdd) internal {\\n        TOKEN_ADMIN_REGISTRY.setPool(ZCHF, address(_tokenPool));\\n        _tokenPool.acceptOwnership();\\n\\n        if (chainsToAdd.length > 0) {\\n            _tokenPool.applyChainUpdates(new uint64[](0), chainsToAdd);\\n        }\\n\\n        tokenPool = _tokenPool;\\n        emit TokenPoolSet(address(_tokenPool));\\n    }\\n}\\n\",\"keccak256\":\"0x0154b4b35426fd0d9b45e18c9b0817694da9560583bc760fa823d4a47a1fa8d3\",\"license\":\"MIT\"},\"contracts/bridge/ITokenPool.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport {RateLimiter} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol\\\";\\n\\ninterface ITokenPool {\\n    \\n    struct ChainUpdate {\\n        uint64 remoteChainSelector; // Remote chain selector\\n        bytes[] remotePoolAddresses; // Address of the remote pool, ABI encoded in the case of a remote EVM chain.\\n        bytes remoteTokenAddress; // Address of the remote token, ABI encoded in the case of a remote EVM chain.\\n        RateLimiter.Config outboundRateLimiterConfig; // Outbound rate limited config, meaning the rate limits for all of the onRamps for the given chain\\n        RateLimiter.Config inboundRateLimiterConfig; // Inbound rate limited config, meaning the rate limits for all of the offRamps for the given chain\\n    }\\n\\n    function addRemotePool(uint64 remoteChainSelector, bytes calldata remotePoolAddress) external;\\n    function removeRemotePool(uint64 remoteChainSelector, bytes calldata remotePoolAddress) external;\\n\\n    function setChainRateLimiterConfig(\\n        uint64 remoteChainSelectors,\\n        RateLimiter.Config calldata outboundConfigs,\\n        RateLimiter.Config calldata inboundConfigs\\n    ) external;\\n    \\n    function applyChainUpdates(\\n        uint64[] calldata remoteChainSelectorsToRemove,\\n        ChainUpdate[] calldata chainsToAdd\\n    ) external;\\n\\n    function acceptOwnership() external;\\n    function transferOwnership(address to) external;\\n}\\n\",\"keccak256\":\"0xaf29bf95153673054a35587472988d5d6044a2cb0b2a8961b30714bb9b38722b\",\"license\":\"MIT\"},\"contracts/equity/IGovernance.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IGovernance {\\n   function checkQualified(address sender, address[] calldata helpers) external view;\\n}\\n\\nstruct SyncVote {\\n    address voter;\\n    uint256 votes;\\n    address delegatee;\\n}\\n\\nstruct SyncMessage {\\n    SyncVote[] votes;\\n    uint256 totalVotes;\\n}\\n\",\"keccak256\":\"0xd6329ac67953e19cee718b79f14ff527f49984d8a01141b496ee68c91b0a4274\",\"license\":\"MIT\"},\"contracts/erc20/IERC20.sol\":{\"content\":\"/**\\n * SPDX-License-Identifier: MIT\\n *\\n * Copyright (c) 2016-2019 zOS Global Limited\\n *\\n */\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP. Does not include\\n * the optional functions; to access them see `ERC20Detailed`.\\n */\\n\\ninterface IERC20 {\\n    function name() external view returns (string memory);\\n\\n    function symbol() external view returns (string memory);\\n\\n    function decimals() external view returns (uint8);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `recipient`.\\n     *\\n     * Returns always true. Throws error on failure.\\n     *\\n     * Emits a `Transfer` event.\\n     */\\n    function transfer(address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through `transferFrom`. This is\\n     * zero by default.\\n     *\\n     * This value can change when `approve` or `transferFrom` are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * > Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an `Approval` event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `sender` to `recipient` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns always true. Throws error on failure.\\n     *\\n     * Emits a `Transfer` event.\\n     */\\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to `approve`. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n}\\n\",\"keccak256\":\"0x6c4823424e1d0c53e2d3e978b81929fcec2583b96ed286abc955b71a5aad5544\",\"license\":\"MIT\"},\"contracts/stablecoin/IBasicFrankencoin.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport \\\"../erc20/IERC20.sol\\\";\\nimport \\\"../equity/IGovernance.sol\\\";\\n\\ninterface IBasicFrankencoin is IERC20 {\\n\\n    function suggestMinter(address _minter, uint256 _applicationPeriod, uint256 _applicationFee, string calldata _message) external;\\n\\n    function registerPosition(address position) external;\\n\\n    function denyMinter(address minter, address[] calldata helpers, string calldata message) external;\\n\\n    function reserve() external view returns (IGovernance);\\n\\n    function isMinter(address minter) external view returns (bool);\\n\\n    function getPositionParent(address position) external view returns (address);\\n\\n    function mint(address target, uint256 amount) external;\\n\\n    function burnFrom(address target, uint256 amount) external;\\n\\n    function burn(uint256 amount) external;\\n\\n    function coverLoss(address source, uint256 amount) external;\\n\\n    function collectProfits(address source, uint256 _amount) external;\\n}\\n\",\"keccak256\":\"0xb82261531f8ce37117044c94b6d0488b708e4b83cc8fb700bcafcb97297772d1\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60e06040523480156200001157600080fd5b506040516200235d3803806200235d8339810160408190526200003491620000d0565b806001600160a01b031663cd3293de6040518163ffffffff1660e01b8152600401602060405180830381865afa15801562000073573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906200009991906200010f565b6001600160a01b0390811660805291821660a0521660c05262000136565b6001600160a01b0381168114620000cd57600080fd5b50565b60008060408385031215620000e457600080fd5b8251620000f181620000b7565b60208401519092506200010481620000b7565b809150509250929050565b6000602082840312156200012257600080fd5b81516200012f81620000b7565b9392505050565b60805160a05160c0516121a3620001ba600039600081816101b30152818161033701528181610c5201528181610d7501528181610e4f01526111610152600081816101200152818161036701528181610c7a01528181610da0015261119101526000818161018c0152818161065e01528181610a75015261100c01526121a36000f3fe608060405234801561001057600080fd5b50600436106101165760003560e01c806356813c46116100a2578063a278ce7311610071578063a278ce7314610292578063e185f1a2146102a5578063e7865c9a146102b8578063f2249822146102cb578063fdc49132146102de57600080fd5b806356813c461461024657806366b5063214610259578063867931341461026c5780638bb4e7611461027f57600080fd5b80631836e0da116100e95780631836e0da146101ae57806327cfe856146101d55780632865ae72146101f757806332ed5b121461020a5780634aef7d8b1461023357600080fd5b80630618da0e1461011b57806306b16f921461015f578063104e9929146101745780631462783414610187575b600080fd5b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020015b60405180910390f35b61017261016d366004611384565b6102f1565b005b600054610142906001600160a01b031681565b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6101df6201518081565b6040516001600160401b039091168152602001610156565b6101726102053660046113c4565b610475565b6101df6102183660046113df565b6001602052600090815260409020546001600160401b031681565b6101726102413660046115bb565b6105d9565b610172610254366004611623565b61065a565b610172610267366004611661565b61077a565b61017261027a366004611703565b610945565b61017261028d366004611863565b610a71565b6101726102a03660046118db565b610bc8565b6101726102b3366004611932565b610c3b565b6101726102c6366004611932565b610ce6565b6101726102d936600461196d565b610d5e565b6101726102ec3660046119d1565b610ec4565b6103208160405160200161030591906119ef565b60405160208183030381529060405280519060200120610f3c565b604051636ed6fd4760e11b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015282811660248301527f0000000000000000000000000000000000000000000000000000000000000000169063ddadfa8e90604401600060405180830381600087803b1580156103ab57600080fd5b505af11580156103bf573d6000803e3d6000fd5b50506000546001600160a01b031615915061043690505760005460405163f2fde38b60e01b81526001600160a01b0383811660048301529091169063f2fde38b90602401600060405180830381600087803b15801561041d57600080fd5b505af1158015610431573d6000803e3d6000fd5b505050505b6040516001600160a01b03821681527f87eedd0e13e9fb80060a41db0a20ab3848c96b515a386eace4d1c22c19f64ba09060200160405180910390a150565b6000546001600160a01b031661049e5760405163b346648b60e01b815260040160405180910390fd5b6104b2816040516020016103059190611a27565b6040805160018082528183019092526000916020808301908036833701905050905081816000815181106104e8576104e8611a5d565b6001600160401b039290921660209283029190910182015260408051600080825292810190915281610530565b61051d611300565b8152602001906001900390816105155790505b5060005460405163e8a1da1760e01b81529192506001600160a01b03169063e8a1da17906105649085908590600401611c05565b600060405180830381600087803b15801561057e57600080fd5b505af1158015610592573d6000803e3d6000fd5b50506040516001600160401b03861681527f5204aec90a3c794d8e90fded8b46ae9c7c552803e7e832e0c1d358396d859916925060200190505b60405180910390a1505050565b6000836040516020016105ec9190611cab565b6040516020818303038152906040528051906020012090506106118160078585611008565b336001600160a01b03167fc69c8ca301ca62431960a091e21b4ccba9198869711cb21e33c959537aa6e444828660405161064c929190611ce5565b60405180910390a250505050565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b81526004016106ac93929190611cfe565b60006040518083038186803b1580156106c457600080fd5b505afa1580156106d8573d6000803e3d6000fd5b5050506000868152600160205260408120546001600160401b03169003905061071c576040516304bbf15f60e11b8152600481018690526024015b60405180910390fd5b60008581526001602052604090819020805467ffffffffffffffff19169055517f1f31008e39db52785cc2c4af1b52bfde142d3ad9ff6b5221888a4700481f2f639061076b9087815260200190565b60405180910390a15050505050565b6000546001600160a01b03166107a35760405163b346648b60e01b815260040160405180910390fd5b6107b7816040516020016103059190611cab565b80511561088157600054602082015160408084015190516318b774f160e21b81526001600160a01b03909316926362ddd3c4926107f8929091600401611d5a565b600060405180830381600087803b15801561081257600080fd5b505af1158015610826573d6000803e3d6000fd5b50505050806040015160405161083c9190611d7c565b604051809103902081602001516001600160401b03167f7d628c9a1796743d365ab521a8b2a4686e419b3269919dc9145ea2ce853b54ea60405160405180910390a350565b6000546020820151604080840151905163acfecf9160e01b81526001600160a01b039093169263acfecf91926108bb929091600401611d5a565b600060405180830381600087803b1580156108d557600080fd5b505af11580156108e9573d6000803e3d6000fd5b5050505080604001516040516108ff9190611d7c565b604051809103902081602001516001600160401b03167f52d00ee4d9bd51b40168f2afc5848837288ce258784ad914278791464b3f4d7660405160405180910390a35b50565b6000546001600160a01b031661096e5760405163b346648b60e01b815260040160405180910390fd5b610982816040516020016103059190611d98565b604080516000808252600160208301818152606084018552929391929184015b6109aa611300565b8152602001906001900390816109a257905050905082816000815181106109d3576109d3611a5d565b602090810291909101015260005460405163e8a1da1760e01b81526001600160a01b039091169063e8a1da1790610a109085908590600401611c05565b600060405180830381600087803b158015610a2a57600080fd5b505af1158015610a3e573d6000803e3d6000fd5b505050507f997ece7f5dbb418762275ab79bd907b726b4b93ce7ce4a3bf20485ed9abe7faa836040516105cc9190611dd2565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b8152600401610ac393929190611cfe565b60006040518083038186803b158015610adb57600080fd5b505afa158015610aef573d6000803e3d6000fd5b50506000546001600160a01b03169150610b1e90505760405163b346648b60e01b815260040160405180910390fd5b60005460405163cf7401f360e01b81526001600160a01b039091169063cf7401f390610b52908a908a908a90600401611e27565b600060405180830381600087803b158015610b6c57600080fd5b505af1158015610b80573d6000803e3d6000fd5b505050507f3deebf0b3430431835efe0c537812d7973219fdd0bdd3aeaddb8db166ab7bf27878787604051610bb793929190611e27565b60405180910390a150505050505050565b600083604051602001610bdb9190611fd4565b604051602081830303815290604052805190602001209050610c008160078585611008565b336001600160a01b03167f68457984b8b28a38a49b3e46cb383b047dbca87b3b2e45d9181439f84169d028828660405161064c92919061200e565b604051630ab0ca6d60e11b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000811660048301527f0000000000000000000000000000000000000000000000000000000000000000169063156194da90602401600060405180830381600087803b158015610cbe57600080fd5b505af1158015610cd2573d6000803e3d6000fd5b50505050610ce183838361114a565b505050565b600083604051602001610cf991906119ef565b604051602081830303815290604052805190602001209050610d1e8160158585611008565b604080518281526001600160a01b038616602082015233917f7e3383d715b50982af3e6f86cd3a22cc104cf300b02375e0c8738244d95857c7910161064c565b60405163cb67e3b160e01b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000811660048301526000917f00000000000000000000000000000000000000000000000000000000000000009091169063cb67e3b190602401606060405180830381865afa158015610de9573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e0d9190612027565b516001600160a01b031614610e3557604051630ea075bf60e21b815260040160405180910390fd5b6040516001623b4f2b60e21b031981526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015285169063ff12c35490602401600060405180830381600087803b158015610e9b57600080fd5b505af1158015610eaf573d6000803e3d6000fd5b50505050610ebe838383610c3b565b50505050565b600083604051602001610ed79190611a27565b604051602081830303815290604052805190602001209050610efc8160078585611008565b604080518281526001600160401b038616602082015233917f5a570504a3f0608bbc8a5bf898d58fba6c092e1424e5f9e5a3e8635cae1976ce910161064c565b6000818152600160205260408120546001600160401b031690819003610f78576040516304bbf15f60e11b815260048101839052602401610713565b42816001600160401b03161115610fad5760405163d606d83f60e01b81526001600160401b0382166004820152602401610713565b60008281526001602052604090819020805467ffffffffffffffff19169055517fa3b6368b6d3f37515d1e7c5f2419ec24fb57f5f867fd9456a70d950bdac1f4c690610ffc9084815260200190565b60405180910390a15050565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b815260040161105a93929190611cfe565b60006040518083038186803b15801561107257600080fd5b505afa158015611086573d6000803e3d6000fd5b5050506000878152600160205260409020546001600160401b03161590506110c457604051634c44e3d360e11b815260048101879052602401610713565b6110d16201518086612091565b6110db90426120bc565b600087815260016020908152604091829020805467ffffffffffffffff19166001600160401b039490941693841790558151898152908101929092527f497e45dce2bd7277051c7194a9252a4560c476938b268b26082614bd9d655e55910160405180910390a1505050505050565b604051634e847fc760e01b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015284811660248301527f00000000000000000000000000000000000000000000000000000000000000001690634e847fc790604401600060405180830381600087803b1580156111d557600080fd5b505af11580156111e9573d6000803e3d6000fd5b50505050826001600160a01b03166379ba50976040518163ffffffff1660e01b8152600401600060405180830381600087803b15801561122857600080fd5b505af115801561123c573d6000803e3d6000fd5b5050821591506112b69050576040805160008152602081019182905263e8a1da1760e01b9091526001600160a01b0384169063e8a1da1790611283908585602483016120e3565b600060405180830381600087803b15801561129d57600080fd5b505af11580156112b1573d6000803e3d6000fd5b505050505b600080546001600160a01b0319166001600160a01b038516908117825560405190917f05dbcb65b33e42bc9e68704a2b109e0f4eee368a6945cad1e857b0197c9fef4291a2505050565b6040518060a0016040528060006001600160401b03168152602001606081526020016060815260200161134c604080516060810182526000808252602082018190529181019190915290565b815260408051606081018252600080825260208281018290529282015291015290565b6001600160a01b038116811461094257600080fd5b60006020828403121561139657600080fd5b81356113a18161136f565b9392505050565b80356001600160401b03811681146113bf57600080fd5b919050565b6000602082840312156113d657600080fd5b6113a1826113a8565b6000602082840312156113f157600080fd5b5035919050565b634e487b7160e01b600052604160045260246000fd5b604051606081016001600160401b0381118282101715611430576114306113f8565b60405290565b60405160a081016001600160401b0381118282101715611430576114306113f8565b604051601f8201601f191681016001600160401b0381118282101715611480576114806113f8565b604052919050565b803580151581146113bf57600080fd5b600082601f8301126114a957600080fd5b81356001600160401b038111156114c2576114c26113f8565b6114d5601f8201601f1916602001611458565b8181528460208386010111156114ea57600080fd5b816020850160208301376000918101602001919091529392505050565b60006060828403121561151957600080fd5b61152161140e565b905061152c82611488565b815261153a602083016113a8565b602082015260408201356001600160401b0381111561155857600080fd5b61156484828501611498565b60408301525092915050565b60008083601f84011261158257600080fd5b5081356001600160401b0381111561159957600080fd5b6020830191508360208260051b85010111156115b457600080fd5b9250929050565b6000806000604084860312156115d057600080fd5b83356001600160401b03808211156115e757600080fd5b6115f387838801611507565b9450602086013591508082111561160957600080fd5b5061161686828701611570565b9497909650939450505050565b60008060006040848603121561163857600080fd5b8335925060208401356001600160401b0381111561165557600080fd5b61161686828701611570565b60006020828403121561167357600080fd5b81356001600160401b0381111561168957600080fd5b61169584828501611507565b949350505050565b80356001600160801b03811681146113bf57600080fd5b6000606082840312156116c657600080fd5b6116ce61140e565b90506116d982611488565b81526116e76020830161169d565b60208201526116f86040830161169d565b604082015292915050565b6000602080838503121561171657600080fd5b82356001600160401b038082111561172d57600080fd5b90840190610120828703121561174257600080fd5b61174a611436565b611753836113a8565b8152838301358281111561176657600080fd5b8301601f8101881361177757600080fd5b803583811115611789576117896113f8565b8060051b611798878201611458565b918252828101870191878101908b8411156117b257600080fd5b88850192505b838310156117ee578235878111156117d05760008081fd5b6117de8d8b83890101611498565b83525091880191908801906117b8565b80898701525050505050604083013593508184111561180c57600080fd5b61181887858501611498565b604082015261182a87606085016116b4565b606082015261183c8760c085016116b4565b60808201529695505050505050565b60006060828403121561185d57600080fd5b50919050565b6000806000806000610100868803121561187c57600080fd5b611885866113a8565b9450611894876020880161184b565b93506118a3876080880161184b565b925060e08601356001600160401b038111156118be57600080fd5b6118ca88828901611570565b969995985093965092949392505050565b6000806000604084860312156118f057600080fd5b83356001600160401b038082111561190757600080fd5b90850190610120828803121561191c57600080fd5b9093506020850135908082111561160957600080fd5b60008060006040848603121561194757600080fd5b83356119528161136f565b925060208401356001600160401b0381111561165557600080fd5b6000806000806060858703121561198357600080fd5b843561198e8161136f565b9350602085013561199e8161136f565b925060408501356001600160401b038111156119b957600080fd5b6119c587828801611570565b95989497509550505050565b6000806000604084860312156119e657600080fd5b611952846113a8565b6040808252600d908201526c30b236b4b72a3930b739b332b960991b60608201526001600160a01b0391909116602082015260800190565b6040808252600b908201526a3932b6b7bb32a1b430b4b760a91b60608201526001600160401b0391909116602082015260800190565b634e487b7160e01b600052603260045260246000fd5b60008151808452602080850194506020840160005b83811015611aad5781516001600160401b031687529582019590820190600101611a88565b509495945050505050565b60005b83811015611ad3578181015183820152602001611abb565b50506000910152565b60008151808452611af4816020860160208601611ab8565b601f01601f19169290920160200192915050565b80516001600160401b03168252602080820151610120828501819052815190850181905260009261014080870193600584901b88019091019290820190855b81811015611b765761013f19898603018652611b64858451611adc565b95840195945091830191600101611b47565b50505050604084015191508481036040860152611b938183611adc565b9150506060830151611bcd60608601828051151582526020808201516001600160801b039081169184019190915260409182015116910152565b5060808301518051151560c086015260208101516001600160801b0390811660e0870152604082015116610100860152509392505050565b604081526000611c186040830185611a73565b6020838203818501528185518084528284019150828160051b85010183880160005b83811015611c6857601f19878403018552611c56838351611b08565b94860194925090850190600101611c3a565b50909998505050505050505050565b8051151582526001600160401b03602082015116602083015260006040820151606060408501526116956060850182611adc565b60408152601060408201526f72656d6f7465506f6f6c55706461746560801b60608201526080602082015260006113a16080830184611c77565b8281526040602082015260006116956040830184611c77565b6001600160a01b03848116825260406020808401829052908301849052600091859160608501845b87811015611d4d578435611d398161136f565b841682529382019390820190600101611d26565b5098975050505050505050565b6001600160401b03831681526040602082015260006116956040830184611adc565b60008251611d8e818460208701611ab8565b9190910192915050565b604081526000611dc060408301600881526730b23221b430b4b760c11b602082015260400190565b82810360208401526116958185611b08565b6020815260006113a16020830184611b08565b611dee81611488565b15158252611dfe6020820161169d565b6001600160801b03808216602085015280611e1b6040850161169d565b16604085015250505050565b6001600160401b038416815260e08101611e446020830185611de5565b6116956080830184611de5565b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b6000808335601e19843603018112611e9157600080fd5b83016020810192503590506001600160401b03811115611eb057600080fd5b8036038213156115b457600080fd5b6000838385526020808601955060208560051b8301018460005b87811015611f1357848303601f19018952611ef48288611e7a565b611eff858284611e51565b9a86019a9450505090830190600101611ed9565b5090979650505050505050565b60006101206001600160401b0380611f37856113a8565b1685526020840135601e19853603018112611f5157600080fd5b840160208101903582811115611f6657600080fd5b8060051b3603821315611f7857600080fd5b836020880152611f8b8488018284611ebf565b9350505050611f9d6040840184611e7a565b8583036040870152611fb0838284611e51565b92505050611fc46060850160608501611de5565b6113a160c0850160c08501611de5565b604081526000611ffc60408301600881526730b23221b430b4b760c11b602082015260400190565b82810360208401526116958185611f20565b8281526040602082015260006116956040830184611f20565b60006060828403121561203957600080fd5b61204161140e565b825161204c8161136f565b8152602083015161205c8161136f565b6020820152604083015161206f8161136f565b60408201529392505050565b634e487b7160e01b600052601160045260246000fd5b6001600160401b038181168382160280821691908281146120b4576120b461207b565b505092915050565b6001600160401b038181168382160190808211156120dc576120dc61207b565b5092915050565b6040815260006120f66040830186611a73565b602083820360208501528185835260208301905060208660051b840101876000805b8981101561215d57868403601f190185528235368c900361011e1901811261213e578283fd5b61214a858d8301611f20565b9587019594505091850191600101612118565b50919a995050505050505050505056fea264697066735822122009756230fb3cd9122737e0cda93a26ce8625476d0f2a05f5fae05c4b45fa388564736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101165760003560e01c806356813c46116100a2578063a278ce7311610071578063a278ce7314610292578063e185f1a2146102a5578063e7865c9a146102b8578063f2249822146102cb578063fdc49132146102de57600080fd5b806356813c461461024657806366b5063214610259578063867931341461026c5780638bb4e7611461027f57600080fd5b80631836e0da116100e95780631836e0da146101ae57806327cfe856146101d55780632865ae72146101f757806332ed5b121461020a5780634aef7d8b1461023357600080fd5b80630618da0e1461011b57806306b16f921461015f578063104e9929146101745780631462783414610187575b600080fd5b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020015b60405180910390f35b61017261016d366004611384565b6102f1565b005b600054610142906001600160a01b031681565b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6101427f000000000000000000000000000000000000000000000000000000000000000081565b6101df6201518081565b6040516001600160401b039091168152602001610156565b6101726102053660046113c4565b610475565b6101df6102183660046113df565b6001602052600090815260409020546001600160401b031681565b6101726102413660046115bb565b6105d9565b610172610254366004611623565b61065a565b610172610267366004611661565b61077a565b61017261027a366004611703565b610945565b61017261028d366004611863565b610a71565b6101726102a03660046118db565b610bc8565b6101726102b3366004611932565b610c3b565b6101726102c6366004611932565b610ce6565b6101726102d936600461196d565b610d5e565b6101726102ec3660046119d1565b610ec4565b6103208160405160200161030591906119ef565b60405160208183030381529060405280519060200120610f3c565b604051636ed6fd4760e11b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015282811660248301527f0000000000000000000000000000000000000000000000000000000000000000169063ddadfa8e90604401600060405180830381600087803b1580156103ab57600080fd5b505af11580156103bf573d6000803e3d6000fd5b50506000546001600160a01b031615915061043690505760005460405163f2fde38b60e01b81526001600160a01b0383811660048301529091169063f2fde38b90602401600060405180830381600087803b15801561041d57600080fd5b505af1158015610431573d6000803e3d6000fd5b505050505b6040516001600160a01b03821681527f87eedd0e13e9fb80060a41db0a20ab3848c96b515a386eace4d1c22c19f64ba09060200160405180910390a150565b6000546001600160a01b031661049e5760405163b346648b60e01b815260040160405180910390fd5b6104b2816040516020016103059190611a27565b6040805160018082528183019092526000916020808301908036833701905050905081816000815181106104e8576104e8611a5d565b6001600160401b039290921660209283029190910182015260408051600080825292810190915281610530565b61051d611300565b8152602001906001900390816105155790505b5060005460405163e8a1da1760e01b81529192506001600160a01b03169063e8a1da17906105649085908590600401611c05565b600060405180830381600087803b15801561057e57600080fd5b505af1158015610592573d6000803e3d6000fd5b50506040516001600160401b03861681527f5204aec90a3c794d8e90fded8b46ae9c7c552803e7e832e0c1d358396d859916925060200190505b60405180910390a1505050565b6000836040516020016105ec9190611cab565b6040516020818303038152906040528051906020012090506106118160078585611008565b336001600160a01b03167fc69c8ca301ca62431960a091e21b4ccba9198869711cb21e33c959537aa6e444828660405161064c929190611ce5565b60405180910390a250505050565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b81526004016106ac93929190611cfe565b60006040518083038186803b1580156106c457600080fd5b505afa1580156106d8573d6000803e3d6000fd5b5050506000868152600160205260408120546001600160401b03169003905061071c576040516304bbf15f60e11b8152600481018690526024015b60405180910390fd5b60008581526001602052604090819020805467ffffffffffffffff19169055517f1f31008e39db52785cc2c4af1b52bfde142d3ad9ff6b5221888a4700481f2f639061076b9087815260200190565b60405180910390a15050505050565b6000546001600160a01b03166107a35760405163b346648b60e01b815260040160405180910390fd5b6107b7816040516020016103059190611cab565b80511561088157600054602082015160408084015190516318b774f160e21b81526001600160a01b03909316926362ddd3c4926107f8929091600401611d5a565b600060405180830381600087803b15801561081257600080fd5b505af1158015610826573d6000803e3d6000fd5b50505050806040015160405161083c9190611d7c565b604051809103902081602001516001600160401b03167f7d628c9a1796743d365ab521a8b2a4686e419b3269919dc9145ea2ce853b54ea60405160405180910390a350565b6000546020820151604080840151905163acfecf9160e01b81526001600160a01b039093169263acfecf91926108bb929091600401611d5a565b600060405180830381600087803b1580156108d557600080fd5b505af11580156108e9573d6000803e3d6000fd5b5050505080604001516040516108ff9190611d7c565b604051809103902081602001516001600160401b03167f52d00ee4d9bd51b40168f2afc5848837288ce258784ad914278791464b3f4d7660405160405180910390a35b50565b6000546001600160a01b031661096e5760405163b346648b60e01b815260040160405180910390fd5b610982816040516020016103059190611d98565b604080516000808252600160208301818152606084018552929391929184015b6109aa611300565b8152602001906001900390816109a257905050905082816000815181106109d3576109d3611a5d565b602090810291909101015260005460405163e8a1da1760e01b81526001600160a01b039091169063e8a1da1790610a109085908590600401611c05565b600060405180830381600087803b158015610a2a57600080fd5b505af1158015610a3e573d6000803e3d6000fd5b505050507f997ece7f5dbb418762275ab79bd907b726b4b93ce7ce4a3bf20485ed9abe7faa836040516105cc9190611dd2565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b8152600401610ac393929190611cfe565b60006040518083038186803b158015610adb57600080fd5b505afa158015610aef573d6000803e3d6000fd5b50506000546001600160a01b03169150610b1e90505760405163b346648b60e01b815260040160405180910390fd5b60005460405163cf7401f360e01b81526001600160a01b039091169063cf7401f390610b52908a908a908a90600401611e27565b600060405180830381600087803b158015610b6c57600080fd5b505af1158015610b80573d6000803e3d6000fd5b505050507f3deebf0b3430431835efe0c537812d7973219fdd0bdd3aeaddb8db166ab7bf27878787604051610bb793929190611e27565b60405180910390a150505050505050565b600083604051602001610bdb9190611fd4565b604051602081830303815290604052805190602001209050610c008160078585611008565b336001600160a01b03167f68457984b8b28a38a49b3e46cb383b047dbca87b3b2e45d9181439f84169d028828660405161064c92919061200e565b604051630ab0ca6d60e11b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000811660048301527f0000000000000000000000000000000000000000000000000000000000000000169063156194da90602401600060405180830381600087803b158015610cbe57600080fd5b505af1158015610cd2573d6000803e3d6000fd5b50505050610ce183838361114a565b505050565b600083604051602001610cf991906119ef565b604051602081830303815290604052805190602001209050610d1e8160158585611008565b604080518281526001600160a01b038616602082015233917f7e3383d715b50982af3e6f86cd3a22cc104cf300b02375e0c8738244d95857c7910161064c565b60405163cb67e3b160e01b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000811660048301526000917f00000000000000000000000000000000000000000000000000000000000000009091169063cb67e3b190602401606060405180830381865afa158015610de9573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e0d9190612027565b516001600160a01b031614610e3557604051630ea075bf60e21b815260040160405180910390fd5b6040516001623b4f2b60e21b031981526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015285169063ff12c35490602401600060405180830381600087803b158015610e9b57600080fd5b505af1158015610eaf573d6000803e3d6000fd5b50505050610ebe838383610c3b565b50505050565b600083604051602001610ed79190611a27565b604051602081830303815290604052805190602001209050610efc8160078585611008565b604080518281526001600160401b038616602082015233917f5a570504a3f0608bbc8a5bf898d58fba6c092e1424e5f9e5a3e8635cae1976ce910161064c565b6000818152600160205260408120546001600160401b031690819003610f78576040516304bbf15f60e11b815260048101839052602401610713565b42816001600160401b03161115610fad5760405163d606d83f60e01b81526001600160401b0382166004820152602401610713565b60008281526001602052604090819020805467ffffffffffffffff19169055517fa3b6368b6d3f37515d1e7c5f2419ec24fb57f5f867fd9456a70d950bdac1f4c690610ffc9084815260200190565b60405180910390a15050565b81817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663352e3a833384846040518463ffffffff1660e01b815260040161105a93929190611cfe565b60006040518083038186803b15801561107257600080fd5b505afa158015611086573d6000803e3d6000fd5b5050506000878152600160205260409020546001600160401b03161590506110c457604051634c44e3d360e11b815260048101879052602401610713565b6110d16201518086612091565b6110db90426120bc565b600087815260016020908152604091829020805467ffffffffffffffff19166001600160401b039490941693841790558151898152908101929092527f497e45dce2bd7277051c7194a9252a4560c476938b268b26082614bd9d655e55910160405180910390a1505050505050565b604051634e847fc760e01b81526001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116600483015284811660248301527f00000000000000000000000000000000000000000000000000000000000000001690634e847fc790604401600060405180830381600087803b1580156111d557600080fd5b505af11580156111e9573d6000803e3d6000fd5b50505050826001600160a01b03166379ba50976040518163ffffffff1660e01b8152600401600060405180830381600087803b15801561122857600080fd5b505af115801561123c573d6000803e3d6000fd5b5050821591506112b69050576040805160008152602081019182905263e8a1da1760e01b9091526001600160a01b0384169063e8a1da1790611283908585602483016120e3565b600060405180830381600087803b15801561129d57600080fd5b505af11580156112b1573d6000803e3d6000fd5b505050505b600080546001600160a01b0319166001600160a01b038516908117825560405190917f05dbcb65b33e42bc9e68704a2b109e0f4eee368a6945cad1e857b0197c9fef4291a2505050565b6040518060a0016040528060006001600160401b03168152602001606081526020016060815260200161134c604080516060810182526000808252602082018190529181019190915290565b815260408051606081018252600080825260208281018290529282015291015290565b6001600160a01b038116811461094257600080fd5b60006020828403121561139657600080fd5b81356113a18161136f565b9392505050565b80356001600160401b03811681146113bf57600080fd5b919050565b6000602082840312156113d657600080fd5b6113a1826113a8565b6000602082840312156113f157600080fd5b5035919050565b634e487b7160e01b600052604160045260246000fd5b604051606081016001600160401b0381118282101715611430576114306113f8565b60405290565b60405160a081016001600160401b0381118282101715611430576114306113f8565b604051601f8201601f191681016001600160401b0381118282101715611480576114806113f8565b604052919050565b803580151581146113bf57600080fd5b600082601f8301126114a957600080fd5b81356001600160401b038111156114c2576114c26113f8565b6114d5601f8201601f1916602001611458565b8181528460208386010111156114ea57600080fd5b816020850160208301376000918101602001919091529392505050565b60006060828403121561151957600080fd5b61152161140e565b905061152c82611488565b815261153a602083016113a8565b602082015260408201356001600160401b0381111561155857600080fd5b61156484828501611498565b60408301525092915050565b60008083601f84011261158257600080fd5b5081356001600160401b0381111561159957600080fd5b6020830191508360208260051b85010111156115b457600080fd5b9250929050565b6000806000604084860312156115d057600080fd5b83356001600160401b03808211156115e757600080fd5b6115f387838801611507565b9450602086013591508082111561160957600080fd5b5061161686828701611570565b9497909650939450505050565b60008060006040848603121561163857600080fd5b8335925060208401356001600160401b0381111561165557600080fd5b61161686828701611570565b60006020828403121561167357600080fd5b81356001600160401b0381111561168957600080fd5b61169584828501611507565b949350505050565b80356001600160801b03811681146113bf57600080fd5b6000606082840312156116c657600080fd5b6116ce61140e565b90506116d982611488565b81526116e76020830161169d565b60208201526116f86040830161169d565b604082015292915050565b6000602080838503121561171657600080fd5b82356001600160401b038082111561172d57600080fd5b90840190610120828703121561174257600080fd5b61174a611436565b611753836113a8565b8152838301358281111561176657600080fd5b8301601f8101881361177757600080fd5b803583811115611789576117896113f8565b8060051b611798878201611458565b918252828101870191878101908b8411156117b257600080fd5b88850192505b838310156117ee578235878111156117d05760008081fd5b6117de8d8b83890101611498565b83525091880191908801906117b8565b80898701525050505050604083013593508184111561180c57600080fd5b61181887858501611498565b604082015261182a87606085016116b4565b606082015261183c8760c085016116b4565b60808201529695505050505050565b60006060828403121561185d57600080fd5b50919050565b6000806000806000610100868803121561187c57600080fd5b611885866113a8565b9450611894876020880161184b565b93506118a3876080880161184b565b925060e08601356001600160401b038111156118be57600080fd5b6118ca88828901611570565b969995985093965092949392505050565b6000806000604084860312156118f057600080fd5b83356001600160401b038082111561190757600080fd5b90850190610120828803121561191c57600080fd5b9093506020850135908082111561160957600080fd5b60008060006040848603121561194757600080fd5b83356119528161136f565b925060208401356001600160401b0381111561165557600080fd5b6000806000806060858703121561198357600080fd5b843561198e8161136f565b9350602085013561199e8161136f565b925060408501356001600160401b038111156119b957600080fd5b6119c587828801611570565b95989497509550505050565b6000806000604084860312156119e657600080fd5b611952846113a8565b6040808252600d908201526c30b236b4b72a3930b739b332b960991b60608201526001600160a01b0391909116602082015260800190565b6040808252600b908201526a3932b6b7bb32a1b430b4b760a91b60608201526001600160401b0391909116602082015260800190565b634e487b7160e01b600052603260045260246000fd5b60008151808452602080850194506020840160005b83811015611aad5781516001600160401b031687529582019590820190600101611a88565b509495945050505050565b60005b83811015611ad3578181015183820152602001611abb565b50506000910152565b60008151808452611af4816020860160208601611ab8565b601f01601f19169290920160200192915050565b80516001600160401b03168252602080820151610120828501819052815190850181905260009261014080870193600584901b88019091019290820190855b81811015611b765761013f19898603018652611b64858451611adc565b95840195945091830191600101611b47565b50505050604084015191508481036040860152611b938183611adc565b9150506060830151611bcd60608601828051151582526020808201516001600160801b039081169184019190915260409182015116910152565b5060808301518051151560c086015260208101516001600160801b0390811660e0870152604082015116610100860152509392505050565b604081526000611c186040830185611a73565b6020838203818501528185518084528284019150828160051b85010183880160005b83811015611c6857601f19878403018552611c56838351611b08565b94860194925090850190600101611c3a565b50909998505050505050505050565b8051151582526001600160401b03602082015116602083015260006040820151606060408501526116956060850182611adc565b60408152601060408201526f72656d6f7465506f6f6c55706461746560801b60608201526080602082015260006113a16080830184611c77565b8281526040602082015260006116956040830184611c77565b6001600160a01b03848116825260406020808401829052908301849052600091859160608501845b87811015611d4d578435611d398161136f565b841682529382019390820190600101611d26565b5098975050505050505050565b6001600160401b03831681526040602082015260006116956040830184611adc565b60008251611d8e818460208701611ab8565b9190910192915050565b604081526000611dc060408301600881526730b23221b430b4b760c11b602082015260400190565b82810360208401526116958185611b08565b6020815260006113a16020830184611b08565b611dee81611488565b15158252611dfe6020820161169d565b6001600160801b03808216602085015280611e1b6040850161169d565b16604085015250505050565b6001600160401b038416815260e08101611e446020830185611de5565b6116956080830184611de5565b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b6000808335601e19843603018112611e9157600080fd5b83016020810192503590506001600160401b03811115611eb057600080fd5b8036038213156115b457600080fd5b6000838385526020808601955060208560051b8301018460005b87811015611f1357848303601f19018952611ef48288611e7a565b611eff858284611e51565b9a86019a9450505090830190600101611ed9565b5090979650505050505050565b60006101206001600160401b0380611f37856113a8565b1685526020840135601e19853603018112611f5157600080fd5b840160208101903582811115611f6657600080fd5b8060051b3603821315611f7857600080fd5b836020880152611f8b8488018284611ebf565b9350505050611f9d6040840184611e7a565b8583036040870152611fb0838284611e51565b92505050611fc46060850160608501611de5565b6113a160c0850160c08501611de5565b604081526000611ffc60408301600881526730b23221b430b4b760c11b602082015260400190565b82810360208401526116958185611f20565b8281526040602082015260006116956040830184611f20565b60006060828403121561203957600080fd5b61204161140e565b825161204c8161136f565b8152602083015161205c8161136f565b6020820152604083015161206f8161136f565b60408201529392505050565b634e487b7160e01b600052601160045260246000fd5b6001600160401b038181168382160280821691908281146120b4576120b461207b565b505092915050565b6001600160401b038181168382160190808211156120dc576120dc61207b565b5092915050565b6040815260006120f66040830186611a73565b602083820360208501528185835260208301905060208660051b840101876000805b8981101561215d57868403601f190185528235368c900361011e1901811261213e578283fd5b61214a858d8301611f20565b9587019594505091850191600101612118565b50919a995050505050505050505056fea264697066735822122009756230fb3cd9122737e0cda93a26ce8625476d0f2a05f5fae05c4b45fa388564736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "acceptAdmin(address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])": {
+        "details": "Can only be called if this contract is the pending owner for the token.",
+        "params": {
+          "_tokenPool": "The token pool to administer",
+          "chainsToAdd": "The chains to add to the token pool"
+        }
+      },
+      "applyAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)))": {
+        "details": "Requires the token pool to be set",
+        "params": {
+          "config": "RemoteChainUpdate information"
+        }
+      },
+      "applyAdminTransfer(address)": {
+        "details": "Transfers admin on the TokenPool and ownership on the ZCHF token on the TokenAdminRegistry",
+        "params": {
+          "newAdmin": "The address of the new admin"
+        }
+      },
+      "applyRateLimit(uint64,(bool,uint128,uint128),(bool,uint128,uint128),address[])": {
+        "details": "Requires the token pool to be set",
+        "params": {
+          "chain": "The chain to set the rate limits for",
+          "helpers": "Array of helper addresses for qualification check",
+          "inbound": "The inbound rate limits",
+          "outbound": "The outbound rate limits"
+        }
+      },
+      "applyRemotePoolUpdate((bool,uint64,bytes))": {
+        "details": "Requires the token pool to be set",
+        "params": {
+          "update": "RemotePoolUpdate information"
+        }
+      },
+      "applyRemoveChain(uint64)": {
+        "details": "Requires the token pool to be set",
+        "params": {
+          "chainId": "The chain to remove"
+        }
+      },
+      "deny(bytes32,address[])": {
+        "details": "Only qualified voters can deny proposals",
+        "params": {
+          "hash": "The hash of the proposal to deny",
+          "helpers": "Array of helper addresses for qualification check"
+        }
+      },
+      "proposeAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)),address[])": {
+        "details": "The contract only stores the hash. So the data has to be passed in during apply again",
+        "params": {
+          "config": "The chain configuration",
+          "helpers": "Array of helper addresses for qualification check"
+        }
+      },
+      "proposeAdminTransfer(address,address[])": {
+        "params": {
+          "helpers": "Array of helper addresses for qualification check",
+          "newAdmin": "The address of the new admin"
+        }
+      },
+      "proposeRemotePoolUpdate((bool,uint64,bytes),address[])": {
+        "details": "The contract only stores the hash. So the data has to be passed in during apply again",
+        "params": {
+          "helpers": "The helpers to get enough votes",
+          "update": "The update proposal"
+        }
+      },
+      "proposeRemoveChain(uint64,address[])": {
+        "details": "The contract only stores the hash. So the data has to be passed in during apply again",
+        "params": {
+          "chainId": "The chain to remove",
+          "helpers": "Array of helper addresses for qualification check"
+        }
+      },
+      "registerToken(address,address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])": {
+        "details": "Can only be called while the token admin is not set",
+        "params": {
+          "_tokenPool": "The token pool to administer",
+          "chainsToAdd": "The chains to add to the token pool",
+          "registry": "The registry to register the token with"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "acceptAdmin(address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])": {
+        "notice": "Accepts the admin role transfer on the TokenAdminRegistry and sets the token pool"
+      },
+      "applyAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)))": {
+        "notice": "Applies the remote chain update"
+      },
+      "applyAdminTransfer(address)": {
+        "notice": "Applies the admin transfer"
+      },
+      "applyRateLimit(uint64,(bool,uint128,uint128),(bool,uint128,uint128),address[])": {
+        "notice": "Sets the rate limits for the given chain. Any qualified voter can apply rate limits with immediate effect.         Rate limits can only do limited harm, so it is acceptable to be very permissive. At the same time, rate limits are typically         applied during emergencies, e.g. when a chain has been hacked. Therefore, it is desirable to ensure that         they can be applied quickly."
+      },
+      "applyRemotePoolUpdate((bool,uint64,bytes))": {
+        "notice": "Applies the update on the TokenPool"
+      },
+      "applyRemoveChain(uint64)": {
+        "notice": "Applies the remove chain proposal"
+      },
+      "deny(bytes32,address[])": {
+        "notice": "Denies and removes a pending proposal"
+      },
+      "proposeAddChain((uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128)),address[])": {
+        "notice": "Propose to add a remote chains"
+      },
+      "proposeAdminTransfer(address,address[])": {
+        "notice": "Proposed a new admin for the TokenPool and Admin on the Token registry"
+      },
+      "proposeRemotePoolUpdate((bool,uint64,bytes),address[])": {
+        "notice": "Proposed a remote pool update"
+      },
+      "proposeRemoveChain(uint64,address[])": {
+        "notice": "Propose to add or remove remote chains"
+      },
+      "registerToken(address,address,(uint64,bytes[],bytes,(bool,uint128,uint128),(bool,uint128,uint128))[])": {
+        "notice": "Registers the token in the CCIP system"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 5052,
+        "contract": "contracts/bridge/CCIPAdmin.sol:CCIPAdmin",
+        "label": "tokenPool",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(ITokenPool)6244"
+      },
+      {
+        "astId": 5056,
+        "contract": "contracts/bridge/CCIPAdmin.sol:CCIPAdmin",
+        "label": "proposals",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_uint64)"
+      }
+    ],
+    "types": {
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(ITokenPool)6244": {
+        "encoding": "inplace",
+        "label": "contract ITokenPool",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_bytes32,t_uint64)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint64)",
+        "numberOfBytes": "32",
+        "value": "t_uint64"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

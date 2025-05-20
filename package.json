@@ -65,6 +65,8 @@
     "viem": "^2.21.16"
   },
   "dependencies": {
+    "@chainlink/contracts-ccip": "1.5.1-beta.2",
+    "@chainlink/local": "0.2.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }

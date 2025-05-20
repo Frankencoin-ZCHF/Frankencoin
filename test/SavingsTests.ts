@@ -134,7 +134,7 @@ describe("Savings Tests", () => {
 
         Error: VM Exception while processing transaction: reverted with custom error 'ERC20InsufficientAllowance("0x1301d297043f564235EA41560f61681253BbD48B", 0, 192328779807204464738)'
         at Frankencoin.permit (contracts/utils/ERC20PermitLight.sol:21)
-        at Frankencoin.transferFrom (contracts/utils/ERC20.sol:123)
+        at Frankencoin.transferFrom (contracts/erc20/ERC20.sol:123)
         at Savings.refresh (contracts/Savings.sol:68)
         at Savings.withdraw (contracts/Savings.sol:109)
 

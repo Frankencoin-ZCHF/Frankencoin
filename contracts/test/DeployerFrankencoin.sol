@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../Frankencoin.sol";
-import "../PositionFactory.sol";
-import "../MintingHub.sol";
-import "../Leadrate.sol";
-import "../interface/IReserve.sol";
+import "../stablecoin/Frankencoin.sol";
+import "../minting/PositionFactory.sol";
+import "../minting/MintingHub.sol";
+import "../rate/Leadrate.sol";
+import "../equity/Equity.sol";
 
 contract DeployerFrankencoin {
     string public constant NAME = "DeployerV0";
@@ -33,7 +33,7 @@ contract DeployerFrankencoin {
     function initA_Frankencoin() public {
         uint256 toMint = 1_000_000 ether;
         zchf.mint(address(this), 2 * toMint);
-        IReserve(zchf.reserve()).invest(toMint, 1000 ether);
+        Equity(address(zchf.reserve())).invest(toMint, 1000 ether);
 
         // for sender
         zchf.mint(msg.sender, toMint);

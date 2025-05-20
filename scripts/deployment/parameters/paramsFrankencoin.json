@@ -13,6 +13,12 @@
     },
     {
         "name": "Frankencoin",
+        "chainId": 80002,
+        "chainName" : "Amoy",
+        "minApplicationPeriod" : 900
+    },
+    {
+        "name": "Frankencoin",
         "chainId": 1,
         "chainName" : "Ethereum",
         "minApplicationPeriod" : 1209600

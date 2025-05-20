@@ -232,16 +232,14 @@ describe("FrankenCoin", () => {
       ).to.be.revertedWithCustomError(zchf, "NotMinter");
     });
     it("should revert covering loss from non minters", async () => {
-      await expect(zchf.coverLoss(owner.address, 0)).to.be.revertedWithCustomError(
-        zchf,
-        "NotMinter"
-      );
+      await expect(
+        zchf.coverLoss(owner.address, 0)
+      ).to.be.revertedWithCustomError(zchf, "NotMinter");
     });
     it("should revert collecting profits from non minters", async () => {
-      await expect(zchf.collectProfits(owner.address, 7)).to.be.revertedWithCustomError(
-        zchf,
-        "NotMinter"
-      );
+      await expect(
+        zchf.collectProfits(owner.address, 7)
+      ).to.be.revertedWithCustomError(zchf, "NotMinter");
     });
   });
 
@@ -261,5 +259,14 @@ describe("FrankenCoin", () => {
       );
     });
     it("calculateAssignedReserve", async () => {});
+  });
+
+  describe("Equity", () => {
+    it("should create one", async () => {
+      const frankenCoinFactory = await ethers.getContractFactory("Frankencoin");
+      zchf = await frankenCoinFactory.deploy(10 * 86400);
+
+      expect(await zchf.reserve()).to.be.not.eq(ethers.ZeroAddress);
+    });
   });
 });

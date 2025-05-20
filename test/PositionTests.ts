@@ -1117,8 +1117,9 @@ describe("Position Tests", () => {
       ).to.be.revertedWithCustomError(positionContract, "Challenged");
     });
     it("should increase cooldown for 3 days when submitted price is greater than the current price", async () => {
-      await evm_increaseTime(86400 * 6);
+      await evm_increaseTime(86400 * 7);
       const prevCooldown = await positionContract.cooldown();
+      console.log(prevCooldown)
       await expect(positionContract.adjustPrice(floatToDec18(5500))).to.be.emit(
         positionContract,
         "MintingUpdate"
@@ -1143,7 +1144,7 @@ describe("Position Tests", () => {
       const underPrice = initialLimit;
       await expect(
         positionContract.adjustPrice(underPrice * 2n)
-      ).to.be.revertedWithoutReason();
+      ).to.be.revertedWithCustomError(positionContract, "Hot");
     });
   });
 
