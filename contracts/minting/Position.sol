@@ -333,7 +333,7 @@ contract Position is Ownable, IPosition, MathUtil {
     }
 
     function _setPrice(uint256 newPrice, uint256 bounds) internal {
-        require(newPrice * minimumCollateral <= bounds * ONE_DEC18); // sanity check
+        require(newPrice * minimumCollateral <= bounds * ONE_DEC18); // very important sanity check, see github.com/Frankencoin-ZCHF/FrankenCoin/issues/52
         price = newPrice;
     }
 
