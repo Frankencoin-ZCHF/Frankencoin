@@ -47,12 +47,13 @@ abstract contract CrossChainReference is CrossChainERC20 {
         return true;
     }
 
+    // cross transfer from
     function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
-        transferFrom(targetChain, owner, _toReceiver(recipient), amount, "", ref);
+        return transferFrom(targetChain, owner, _toReceiver(recipient), amount, "", ref);
     }
 
     function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
-        transferFrom(targetChain, owner, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
+        return transferFrom(targetChain, owner, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
     }
 
     function transferFrom(uint64 targetChain, address owner, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public returns (bool) {

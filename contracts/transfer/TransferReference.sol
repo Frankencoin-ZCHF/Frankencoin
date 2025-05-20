@@ -22,6 +22,7 @@ contract TransferReference is CCIPSender {
         zchf = IERC20(token);
     }
 
+    // erc20 transfer
     function transfer(address recipient, uint256 amount, string calldata ref) public returns (bool) {
         zchf.transferFrom(msg.sender, recipient, amount);
         emit Transfer(msg.sender, recipient, amount, ref);
@@ -35,14 +36,38 @@ contract TransferReference is CCIPSender {
         return true;
     }
 
+    // cross transfer
     function crossTransfer(uint64 targetChain, address recipient, uint256 amount, string calldata ref) public returns (bool) {
         _crossTransfer(targetChain, msg.sender, _toReceiver(recipient), amount, "", ref);
         return true;
     }
 
+    function crossTransfer(uint64 targetChain, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+        _crossTransfer(targetChain, msg.sender, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
+        return true;
+    }
+
+    function crossTransfer(uint64 targetChain, bytes memory recipient, uint256 amount, bytes calldata extraArgs, string calldata ref) public returns (bool) {
+        _crossTransfer(targetChain, msg.sender, recipient, amount, extraArgs, ref);
+        return true;
+    }
+
+    // cross transfer from
     function crossTransferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
         if (zchf.allowance(owner, msg.sender) < INFINITY) revert InfiniteAllowanceRequired(owner, msg.sender);
         _crossTransfer(targetChain, owner, _toReceiver(recipient), amount, "", ref);
+        return true;
+    }
+
+    function crossTransferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+        if (zchf.allowance(owner, msg.sender) < INFINITY) revert InfiniteAllowanceRequired(owner, msg.sender);
+        _crossTransfer(targetChain, owner, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
+        return true;
+    }
+
+    function crossTransferFrom(uint64 targetChain, address owner, bytes memory recipient, uint256 amount, bytes calldata extraArgs, string calldata ref) public returns (bool) {
+        if (zchf.allowance(owner, msg.sender) < INFINITY) revert InfiniteAllowanceRequired(owner, msg.sender);
+        _crossTransfer(targetChain, owner, recipient, amount, extraArgs, ref);
         return true;
     }
 
