@@ -7,13 +7,12 @@ import "../equity/Equity.sol";
 import "../utils/Ownable.sol";
 import "../minting/Position.sol";
 import "../minting/MintingHub.sol";
-import "../stablecoin/StablecoinBridge.sol";
+import "../swap/StablecoinBridge.sol";
 import "../minting/IPosition.sol";
 import "../stablecoin/IFrankencoin.sol";
 import "../erc20/IERC20.sol";
 
 contract PositionExpirationTest {
-
     MintingHub hub;
     TestToken col;
     IFrankencoin zchf;
@@ -27,7 +26,7 @@ contract PositionExpirationTest {
     function openPositionFor(address owner) public returns (address) {
         col.mint(address(this), 100);
         col.approve(address(hub), 100);
-        address pos = hub.openPosition(address(col), 10, 100 /* collateral */, 1000000 * 10**18, 7 days, 30 days, 10 hours, 50000, 1000 * 10**36 /* price */, 200000);
+        address pos = hub.openPosition(address(col), 10, 100 /* collateral */, 1000000 * 10 ** 18, 7 days, 30 days, 10 hours, 50000, 1000 * 10 ** 36 /* price */, 200000);
         Position(pos).transferOwnership(owner);
         return pos;
     }
@@ -40,7 +39,6 @@ contract PositionExpirationTest {
         uint256 balanceAfter = zchf.balanceOf(address(this));
         uint256 colBalAfter = col.balanceOf(address(this));
         require(colBalAfter - colBalBefore == amount, "collateral amount");
-        require((balanceBefore - balanceAfter) == amount * price / 10**18, "price paid");
+        require((balanceBefore - balanceAfter) == (amount * price) / 10 ** 18, "price paid");
     }
-
 }

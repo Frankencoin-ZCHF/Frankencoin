@@ -9,9 +9,6 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
  * @dev A module for Frankencoin crosschain transfers with a reference number
  */
 abstract contract CrossChainReference is CrossChainERC20 {
-    // CrossChainERC20 immutable token;
-    uint256 internal constant INFINITY = (1 << 255); // @dev: copied from "./ERC20.sol"
-
     event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
     event CrossTransfer(address indexed from, uint64 toChain, address indexed to, uint256 amount, string ref);
 
