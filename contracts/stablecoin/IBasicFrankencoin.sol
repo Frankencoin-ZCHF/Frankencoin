@@ -5,8 +5,16 @@ import "../erc20/IERC20.sol";
 import "../equity/IGovernance.sol";
 
 interface IBasicFrankencoin is IERC20 {
+    function MIN_FEE() external view returns (uint256);
 
-    function suggestMinter(address _minter, uint256 _applicationPeriod, uint256 _applicationFee, string calldata _message) external;
+    function MIN_APPLICATION_PERIOD() external view returns (uint256);
+
+    function suggestMinter(
+        address _minter,
+        uint256 _applicationPeriod,
+        uint256 _applicationFee,
+        string calldata _message
+    ) external;
 
     function registerPosition(address position) external;
 
