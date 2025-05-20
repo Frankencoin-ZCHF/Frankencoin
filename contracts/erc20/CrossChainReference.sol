@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {CrossChainERC20} from "./CrossChainERC20.sol";
 import {ERC20} from "./ERC20.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 
 /**
  * @dev A module for Frankencoin crosschain transfers with a reference number
@@ -34,13 +35,29 @@ abstract contract CrossChainReference is CrossChainERC20 {
 
     // transfer within the cross chain context
     function transfer(uint64 targetChain, address recipient, uint256 amount, string calldata ref) public returns (bool) {
-        _crossTransfer(targetChain, msg.sender, _toReceiver(recipient), amount, "", ref);
+        return transfer(targetChain, _toReceiver(recipient), amount, "", ref);
+    }
+
+    function transfer(uint64 targetChain, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+        return transfer(targetChain, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
+    }
+
+    function transfer(uint64 targetChain, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public returns (bool) {
+        _crossTransfer(targetChain, msg.sender, recipient, amount, extraArgs, ref);
         return true;
     }
 
     function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+        transferFrom(targetChain, owner, _toReceiver(recipient), amount, "", ref);
+    }
+
+    function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+        transferFrom(targetChain, owner, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
+    }
+
+    function transferFrom(uint64 targetChain, address owner, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public returns (bool) {
         _useAllowance(owner, msg.sender, amount);
-        _crossTransfer(targetChain, owner, _toReceiver(recipient), amount, "", ref);
+        _crossTransfer(targetChain, owner, recipient, amount, extraArgs, ref);
         return true;
     }
 
