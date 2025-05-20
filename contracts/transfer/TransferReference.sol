@@ -9,7 +9,7 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
 /**
  * @dev A module for Frankencoin transfers with a reference number, incl. cross chain transfers
  */
-contract ReferenceTransfer is CCIPSender {
+contract TransferReference is CCIPSender {
     IERC20 public immutable zchf;
     uint256 internal constant INFINITY = (1 << 255); // @dev: copied from "./ERC20.sol"
 
