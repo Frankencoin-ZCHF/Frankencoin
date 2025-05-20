@@ -10,7 +10,7 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
  */
 abstract contract CrossChainReference is CrossChainERC20 {
     event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
-    event CrossTransfer(address indexed from, uint64 toChain, address indexed to, uint256 amount, string ref);
+    event CrossTransfer(address indexed from, uint64 indexed toChain, address indexed to, uint256 amount, string ref); // FIXME: uint64 **indexed** toChain ?
 
     error InfiniteAllowanceRequired(address owner, address spender);
 
@@ -63,6 +63,17 @@ abstract contract CrossChainReference is CrossChainERC20 {
         _transfer(from, address(this), amount);
         _approve(address(this), address(ROUTER), amount);
         _send(targetChain, constructTransferMessage(target, amount, extraArgs));
+        /*  FIXME: what needs to be indexable... from, to, value, ...
+            address **to** is missing and needs convertion. 
+            (msg.sender, targetChain, **to**, amount, ref); 
+            
+            @mathewmeconry
+            sender might not be the owner, should we index "from" instead of msg.sender?
+            sender might be a minting module with INFINITY allowance
+            
+            e.g. i guess we need this, what do you think?
+            CrossTransfer(msg.sender, from, targetChain, to, amount, ref); 
+        */
         emit CrossTransfer(msg.sender, targetChain, from, amount, ref);
     }
 }
