@@ -1,5 +1,6 @@
 // chain addresses and helpers
-export * from "./address.config";
+export * as deployment from "./address.mainnet.config";
+export * as testing from "./address.testnet.config";
 
 // abi exports
 export * from "./abis/core/Frankencoin";
@@ -24,3 +25,7 @@ export * from "./abis/utils/UniswapV3Pool";
 export * from "./abis/utils/StablecoinBridge";
 export * from "./abis/utils/FPSWrapper";
 export * from "./abis/utils/FPSUnlock";
+export * from "./abis/utils/ReferenceTransfer";
+
+// ignition params
+export * as ReferenceTransferParams from "../ignition/params/5. ReferenceTransfer";

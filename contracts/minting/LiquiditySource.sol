@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../erc20/IERC20.sol";
-import "../stablecoin/IFrankencoin.sol";
+import "../interface/IERC20.sol";
+import "../interface/IFrankencoin.sol";
 import "../utils/Ownable.sol";
 
 /**
- * Untested proof of concept to help a market maker or similar ecosystem contributor getting liquidity 
+ * Untested proof of concept to help a market maker or similar ecosystem contributor getting liquidity
  * under a set of binding commitments made in the initialize function. After initialization, the contract
  * is subject to the minter approval process.
  */
 contract LiquiditySource is Ownable {
-
     IFrankencoin public constant ZCHF = IFrankencoin(0xB58E61C3098d85632Df34EecfB899A1Ed80921cB);
     uint256 public constant MIN_EXTERNAL_REPAYMENT = 100_000 * 1e18; // 100k ZCHF
 
     uint256 public immutable LIMIT;
     uint256 public immutable MATURITY;
-    
+
     uint256 public minted;
     string public termsUrl;
 
@@ -32,7 +31,7 @@ contract LiquiditySource is Ownable {
     event Repaid(uint256 amount, uint256 newTotal);
     event CompensationOwed(address owner, string ref, uint256 amount);
 
-    constructor(uint256 limit, uint256 maturityDate){
+    constructor(uint256 limit, uint256 maturityDate) {
         _setOwner(msg.sender);
         LIMIT = limit;
         MATURITY = maturityDate;
@@ -42,12 +41,12 @@ contract LiquiditySource is Ownable {
     /**
      * Initialize the contract with the hash of and the link to the legal obligations of the owner.
      * Typically, the owner would legally commit to repay the outstanding amount fully before the
-     * maturity date is reached. The owner would further commit that if they fail to repay the 
+     * maturity date is reached. The owner would further commit that if they fail to repay the
      * outstanding amount in time, that they would owe the repaid amount plus a penalty to anyone
      * who repaid some or all of the outstanding amount using the 'repay' function.
-     * 
+     *
      * Initialization requires this contract to be funded with 1000 ZCHF to cover the application fee.
-     * 
+     *
      * It is the responsibility of the governance token holders verify the legal commitment made
      * by the applicants and to deny minting privileges if the commitments are deemed insufficient.
      */
@@ -90,10 +89,10 @@ contract LiquiditySource is Ownable {
     }
 
     /**
-     * Anyone who repays after maturity will be able to make a claim against the owner under the 
+     * Anyone who repays after maturity will be able to make a claim against the owner under the
      * published terms. This claim would typically include the repaid amount plus a penalty.
      * There is a minimum repayment amount that must be respected.
-     * 
+     *
      * The sender can speficy a reference number to help with the processing of the payment.
      */
     function repay(uint256 amount, string calldata ref) external {
@@ -102,5 +101,4 @@ contract LiquiditySource is Ownable {
         burn(amount);
         emit CompensationOwed(msg.sender, ref, amount);
     }
-
 }

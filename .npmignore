@@ -1,7 +1,8 @@
 artifacts
 artifacts*/
-audits
+audits/
 abi/
+ignition/
 
 cache
 contracts
