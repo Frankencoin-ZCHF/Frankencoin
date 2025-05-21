@@ -14,7 +14,9 @@ contract TransferReference is CCIPSender {
     uint256 internal constant INFINITY = (1 << 255); // @dev: copied from "./ERC20.sol"
 
     event Transfer(address indexed from, address indexed to, uint256 amount, string ref);
-    event CrossTransfer(address indexed from, uint64 toChain, address indexed to, uint256 amount, string ref);
+
+    // @dev: **to** is type bytes to support arbitrary destination chains without risk of unsafe conversion
+    event CrossTransfer(address indexed sender, address indexed from, uint64 toChain, bytes indexed to, uint256 amount, string ref);
 
     error InfiniteAllowanceRequired(address owner, address spender);
 
@@ -75,7 +77,7 @@ contract TransferReference is CCIPSender {
         zchf.transferFrom(from, address(this), amount);
         zchf.approve(address(ROUTER), amount);
         _send(targetChain, constructTransferMessage(target, amount, extraArgs));
-        emit CrossTransfer(msg.sender, targetChain, from, amount, ref);
+        emit CrossTransfer(msg.sender, from, targetChain, target, amount, ref); // @dev: target is type bytes
     }
 
     /// @notice Gets the CCIP fee for a transfer.

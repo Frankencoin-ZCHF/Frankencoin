@@ -1,7 +1,16 @@
-import { arbitrum, mainnet, optimism, polygon } from "viem/chains";
+import {
+  arbitrum,
+  avalanche,
+  base,
+  gnosis,
+  mainnet,
+  optimism,
+  polygon,
+} from "viem/chains";
 import { Address, zeroAddress } from "viem";
 
 export interface ChainAddress {
+  // ###### NATIVE CHAIN ######
   [mainnet.id]: {
     // core
     frankencoin: Address; // ZCHF token
@@ -9,8 +18,6 @@ export interface ChainAddress {
 
     // utils
     wFPS: Address; // wrapped FPS
-    referenceTransfer: Address;
-    savingsDetached: Address;
 
     // minting hub v1
     mintingHubV1: Address;
@@ -27,7 +34,17 @@ export interface ChainAddress {
     xchf: Address;
     stablecoinBridgeVCHF: Address;
     vchf: Address;
+
+    // multi chain support
+    transferReference: Address; // separate SC for mainnet transfers
+    savingsDetached: Address; // detached from any minting hub
+    ccipAdmin: Address;
+    ccipTokenPool: Address;
+    ccipBridgeAccounting: Address;
+    ccipGovernanceSender: Address;
+    ccipLeadrateSender: Address;
   };
+  // ###### MULTI CHAIN ######
   [polygon.id]: {
     bridgePolygonFrankencoin: Address;
     bridgePolygonWfps: Address;
@@ -38,6 +55,9 @@ export interface ChainAddress {
   [optimism.id]: {
     bridgeOptimismFrankencoin: Address;
   };
+  [base.id]: {};
+  [avalanche.id]: {};
+  [gnosis.id]: {};
 }
 
 export const ADDRESS: ChainAddress = {
@@ -48,8 +68,6 @@ export const ADDRESS: ChainAddress = {
 
     // utils
     wFPS: "0x5052D3Cc819f53116641e89b96Ff4cD1EE80B182",
-    referenceTransfer: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
-    savingsDetached: zeroAddress,
 
     // minting hub v1
     mintingHubV1: "0x7546762fdb1a6d9146b33960545C3f6394265219",
@@ -66,6 +84,15 @@ export const ADDRESS: ChainAddress = {
     xchf: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
     stablecoinBridgeVCHF: "0x3b71ba73299f925a837836160c3e1fec74340403",
     vchf: "0x79d4f0232A66c4c91b89c76362016A1707CFBF4f",
+
+    // multi chain support
+    transferReference: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
+    savingsDetached: zeroAddress,
+    ccipAdmin: zeroAddress,
+    ccipTokenPool: zeroAddress,
+    ccipBridgeAccounting: zeroAddress,
+    ccipGovernanceSender: zeroAddress,
+    ccipLeadrateSender: zeroAddress,
   },
   [polygon.id]: {
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",
@@ -77,4 +104,7 @@ export const ADDRESS: ChainAddress = {
   [optimism.id]: {
     bridgeOptimismFrankencoin: "0x4F8a84C442F9675610c680990EdDb2CCDDB8aB6f",
   },
+  [base.id]: {},
+  [avalanche.id]: {},
+  [gnosis.id]: {},
 };
