@@ -749,6 +749,321 @@ describe("BridgedFrankencoin", () => {
     });
   });
 
+  describe("ref transfer", () => {
+    it("should transfer and emit", async () => {
+      const { bridgedFrankencoin, owner, newMinter } = await loadFixture(
+        deployFixture
+      );
+      await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+      await bridgedFrankencoin.mint(
+        await owner.getAddress(),
+        ethers.parseEther("10000")
+      );
+
+      const tx = bridgedFrankencoin["transfer(address,uint256,string)"](
+        await newMinter.getAddress(),
+        ethers.parseEther("100"),
+        "test"
+      );
+      await expect(tx).changeTokenBalance(
+        bridgedFrankencoin,
+        await owner.getAddress(),
+        ethers.parseEther("-100")
+      );
+      await expect(tx).changeTokenBalance(
+        bridgedFrankencoin,
+        await newMinter.getAddress(),
+        ethers.parseEther("100")
+      );
+      await expect(tx)
+        .emit(bridgedFrankencoin, "Transfer(address,address,uint256,string)")
+        .withArgs(
+          await owner.getAddress(),
+          await newMinter.getAddress(),
+          ethers.parseEther("100"),
+          "test"
+        );
+    });
+
+    it("should transferFrom and use allowance", async () => {
+      const { bridgedFrankencoin, owner, newMinter } = await loadFixture(
+        deployFixture
+      );
+      await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+      await bridgedFrankencoin.mint(
+        await owner.getAddress(),
+        ethers.parseEther("10000")
+      );
+      const recipient = ethers.Wallet.createRandom().address;
+      await bridgedFrankencoin.approve(
+        await newMinter.getAddress(),
+        ethers.parseEther("200")
+      );
+      const tx = bridgedFrankencoin
+        .connect(newMinter)
+        ["transferFrom(address,address,uint256,string)"](
+          await owner.getAddress(),
+          recipient,
+          ethers.parseEther("100"),
+          "test"
+        );
+
+      await expect(tx).changeTokenBalance(
+        bridgedFrankencoin,
+        await owner.getAddress(),
+        ethers.parseEther("-100")
+      );
+      await expect(tx).changeTokenBalance(
+        bridgedFrankencoin,
+        recipient,
+        ethers.parseEther("100")
+      );
+      await expect(tx)
+        .to.emit(bridgedFrankencoin, "Transfer(address,address,uint256,string)")
+        .withArgs(
+          await owner.getAddress(),
+          recipient,
+          ethers.parseEther("100"),
+          "test"
+        );
+      expect(
+        await bridgedFrankencoin
+          .connect(newMinter)
+          .allowance(await owner.getAddress(), await newMinter.getAddress())
+      ).to.equal(ethers.parseEther("100"));
+    });
+
+    it("should revert if no allowance is set", async () => {
+      const { bridgedFrankencoin, owner, newMinter } = await loadFixture(
+        deployFixture
+      );
+      await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+      await bridgedFrankencoin.mint(
+        await owner.getAddress(),
+        ethers.parseEther("10000")
+      );
+      const recipient = ethers.Wallet.createRandom().address;
+      await expect(
+        bridgedFrankencoin
+          .connect(newMinter)
+          ["transferFrom(address,address,uint256,string)"](
+            await owner.getAddress(),
+            recipient,
+            ethers.parseEther("100"),
+            "test"
+          )
+      ).to.revertedWithCustomError(
+        bridgedFrankencoin,
+        "ERC20InsufficientAllowance"
+      );
+    });
+
+    it("should revert if allowance is too small", async () => {
+      const { bridgedFrankencoin, owner, newMinter } = await loadFixture(
+        deployFixture
+      );
+      await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+      await bridgedFrankencoin.mint(
+        await owner.getAddress(),
+        ethers.parseEther("10000")
+      );
+      await bridgedFrankencoin.approve(
+        await newMinter.getAddress(),
+        ethers.parseEther("50")
+      );
+      const recipient = ethers.Wallet.createRandom().address;
+      await expect(
+        bridgedFrankencoin
+          .connect(newMinter)
+          ["transferFrom(address,address,uint256,string)"](
+            await owner.getAddress(),
+            recipient,
+            ethers.parseEther("100"),
+            "test"
+          )
+      ).to.revertedWithCustomError(
+        bridgedFrankencoin,
+        "ERC20InsufficientAllowance"
+      );
+    });
+
+    describe("ccip transfers", () => {
+      it("should transfer and emit", async () => {
+        const {
+          bridgedFrankencoin,
+          owner,
+          newMinter,
+          ccipLocalSimulatorConfig,
+        } = await loadFixture(deployFixture);
+        await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+        await bridgedFrankencoin.mint(
+          await owner.getAddress(),
+          ethers.parseEther("10000")
+        );
+
+        const tx = bridgedFrankencoin[
+          "transfer(uint64,address,uint256,string)"
+        ](
+          ccipLocalSimulatorConfig.chainSelector_,
+          await newMinter.getAddress(),
+          ethers.parseEther("100"),
+          "test"
+        );
+
+        await expect(tx).changeTokenBalance(
+          bridgedFrankencoin,
+          await owner.getAddress(),
+          ethers.parseEther("-100")
+        );
+        await expect(tx).changeTokenBalance(
+          bridgedFrankencoin,
+          await newMinter.getAddress(),
+          ethers.parseEther("100")
+        );
+        await expect(tx)
+          .to.emit(
+            bridgedFrankencoin,
+            "CrossTransfer(address,address,uint64,bytes,uint256,string)"
+          )
+          .withArgs(
+            await owner.getAddress(),
+            await owner.getAddress(),
+            ccipLocalSimulatorConfig.chainSelector_,
+            ethers.AbiCoder.defaultAbiCoder().encode(
+              ["address"],
+              [await newMinter.getAddress()]
+            ),
+            ethers.parseEther("100"),
+            "test"
+          );
+      });
+
+      it("should transferFrom, use allowance, and emit", async () => {
+        const {
+          bridgedFrankencoin,
+          owner,
+          newMinter,
+          ccipLocalSimulatorConfig,
+        } = await loadFixture(deployFixture);
+        await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+        await bridgedFrankencoin.mint(
+          await owner.getAddress(),
+          ethers.parseEther("10000")
+        );
+        await bridgedFrankencoin.approve(
+          await newMinter.getAddress(),
+          ethers.parseEther("200")
+        );
+        const recipient = ethers.Wallet.createRandom().address;
+
+        const tx = bridgedFrankencoin
+          .connect(newMinter)
+          ["transferFrom(uint64,address,address,uint256,string)"](
+            ccipLocalSimulatorConfig.chainSelector_,
+            await owner.getAddress(),
+            recipient,
+            ethers.parseEther("100"),
+            "test"
+          );
+
+        await expect(tx).changeTokenBalance(
+          bridgedFrankencoin,
+          await owner.getAddress(),
+          ethers.parseEther("-100")
+        );
+        await expect(tx).changeTokenBalance(
+          bridgedFrankencoin,
+          recipient,
+          ethers.parseEther("100")
+        );
+        await expect(tx)
+          .to.emit(
+            bridgedFrankencoin,
+            "CrossTransfer(address,address,uint64,bytes,uint256,string)"
+          )
+          .withArgs(
+            await newMinter.getAddress(),
+            await owner.getAddress(),
+            ccipLocalSimulatorConfig.chainSelector_,
+            ethers.AbiCoder.defaultAbiCoder().encode(["address"], [recipient]),
+            ethers.parseEther("100"),
+            "test"
+          );
+
+        expect(
+          await bridgedFrankencoin.allowance(
+            await owner.getAddress(),
+            await newMinter.getAddress()
+          )
+        ).to.equal(ethers.parseEther("100"));
+      });
+
+      it("should revert if now allowance is set", async () => {
+        const {
+          bridgedFrankencoin,
+          owner,
+          newMinter,
+          ccipLocalSimulatorConfig,
+        } = await loadFixture(deployFixture);
+        await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+        await bridgedFrankencoin.mint(
+          await owner.getAddress(),
+          ethers.parseEther("10000")
+        );
+        const recipient = ethers.Wallet.createRandom().address;
+
+        await expect(
+          bridgedFrankencoin
+            .connect(newMinter)
+            ["transferFrom(uint64,address,address,uint256,string)"](
+              ccipLocalSimulatorConfig.chainSelector_,
+              await owner.getAddress(),
+              recipient,
+              ethers.parseEther("100"),
+              "test"
+            )
+        ).to.revertedWithCustomError(
+          bridgedFrankencoin,
+          "ERC20InsufficientAllowance"
+        );
+      });
+
+      it("should revert if allowance is too small", async () => {
+        const {
+          bridgedFrankencoin,
+          owner,
+          newMinter,
+          ccipLocalSimulatorConfig,
+        } = await loadFixture(deployFixture);
+        await bridgedFrankencoin.initialize([await owner.getAddress()], [""]);
+        await bridgedFrankencoin.mint(
+          await owner.getAddress(),
+          ethers.parseEther("10000")
+        );
+        await bridgedFrankencoin.approve(
+          await newMinter.getAddress(),
+          ethers.parseEther("10")
+        );
+        const recipient = ethers.Wallet.createRandom().address;
+
+        await expect(
+          bridgedFrankencoin
+            .connect(newMinter)
+            ["transferFrom(uint64,address,address,uint256,string)"](
+              ccipLocalSimulatorConfig.chainSelector_,
+              await owner.getAddress(),
+              recipient,
+              ethers.parseEther("100"),
+              "test"
+            )
+        ).to.revertedWithCustomError(
+          bridgedFrankencoin,
+          "ERC20InsufficientAllowance"
+        );
+      });
+    });
+  });
+
   describe("getCCIPAdmin", () => {
     it("should return the CCIP admin", async () => {
       const { bridgedFrankencoin, owner, ccipAdmin } = await loadFixture(
