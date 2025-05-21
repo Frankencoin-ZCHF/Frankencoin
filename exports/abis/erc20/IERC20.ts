@@ -1,48 +1,27 @@
-export const ReferenceTransferABI = [
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "token",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    name: "InfiniteAllowanceRequired",
-    type: "error",
-  },
+export const IERC20ABI = [
   {
     anonymous: false,
     inputs: [
       {
         indexed: true,
         internalType: "address",
-        name: "to",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "spender",
         type: "address",
       },
       {
         indexed: false,
-        internalType: "address",
-        name: "target",
-        type: "address",
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
       },
     ],
-    name: "AutoSave",
+    name: "Approval",
     type: "event",
   },
   {
@@ -63,53 +42,32 @@ export const ReferenceTransferABI = [
       {
         indexed: false,
         internalType: "uint256",
-        name: "amount",
+        name: "value",
         type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "ref",
-        type: "string",
       },
     ],
     name: "Transfer",
     type: "event",
   },
   {
-    inputs: [],
-    name: "ZCHF",
-    outputs: [
-      {
-        internalType: "contract IERC20",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "clearAutoSave",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "spender",
         type: "address",
       },
     ],
-    name: "hasAutoSave",
+    name: "allowance",
     outputs: [
       {
-        internalType: "address",
+        internalType: "uint256",
         name: "",
-        type: "address",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -119,13 +77,95 @@ export const ReferenceTransferABI = [
     inputs: [
       {
         internalType: "address",
-        name: "target",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
         type: "address",
       },
     ],
-    name: "setAutoSave",
-    outputs: [],
-    stateMutability: "nonpayable",
+    name: "balanceOf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -139,11 +179,6 @@ export const ReferenceTransferABI = [
         internalType: "uint256",
         name: "amount",
         type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "ref",
-        type: "string",
       },
     ],
     name: "transfer",
@@ -161,7 +196,7 @@ export const ReferenceTransferABI = [
     inputs: [
       {
         internalType: "address",
-        name: "owner",
+        name: "sender",
         type: "address",
       },
       {
@@ -173,11 +208,6 @@ export const ReferenceTransferABI = [
         internalType: "uint256",
         name: "amount",
         type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "ref",
-        type: "string",
       },
     ],
     name: "transferFrom",
