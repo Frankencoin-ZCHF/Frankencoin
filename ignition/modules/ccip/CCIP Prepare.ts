@@ -1,7 +1,7 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { getChildFromSeed } from "../../helper/wallet";
-import { storeConstructorArgs } from "../../helper/store.args";
-import { ADDRESS } from "../../exports/address.config";
+import { getChildFromSeed } from "../../../helper/wallet";
+import { storeConstructorArgs } from "../../../helper/store.args";
+import { ADDRESS } from "../../../exports/address.mainnet.config";
 import { Chain } from "viem";
 
 const seed = process.env.DEPLOYER_ACCOUNT_SEED;
@@ -22,10 +22,7 @@ console.log("Config Info");
 console.log(config);
 
 // ccip admin constructor args
-export const ccipAdminArgs = [
-  ADDR.tokenAdminRegistry,
-  ADDR.frankenCoin,
-];
+export const ccipAdminArgs = [ADDR.tokenAdminRegistry, ADDR.frankenCoin];
 storeConstructorArgs("CCIPAdmin", ccipAdminArgs, true);
 
 console.log("CCIPAdmin Constructor Args");
@@ -46,11 +43,7 @@ console.log(tokenPoolArgs);
 
 // governance sender
 export const governanceSenderArgs = [ADDR.equity, ADDR.router, ADDR.linkToken];
-storeConstructorArgs(
-  "GovernanceSender",
-  governanceSenderArgs,
-  true
-);
+storeConstructorArgs("GovernanceSender", governanceSenderArgs, true);
 console.log("GovernanceSender Constructor Args");
 console.log(governanceSenderArgs);
 
@@ -75,10 +68,7 @@ const CCIPPrepareModule = buildModule("CCIPPrepare", (m) => {
   const tokenPool = m.contract("BurnMintTokenPool", tokenPoolArgs);
   m.call(tokenPool, "transferOwnership", [ccipAdmin]);
 
-  const governanceSender = m.contract(
-    "GovernanceSender",
-    governanceSenderArgs
-  );
+  const governanceSender = m.contract("GovernanceSender", governanceSenderArgs);
   const leadrateSender = m.contract("LeadrateSender", leadrateSenderArgs);
   const bridgeAccounting = m.contract("BridgeAccounting", bridgeAccountArgs);
   const frankencoin = m.contractAt("Frankencoin", ADDR.frankenCoin);
@@ -87,25 +77,22 @@ const CCIPPrepareModule = buildModule("CCIPPrepare", (m) => {
     "MIN_APPLICATION_PERIOD"
   );
   const minFee = m.staticCall(frankencoin, "MIN_FEE");
-  m.call(frankencoin, "suggestMinter", [
-    bridgeAccounting,
-    minApplicationPeriod,
-    minFee,
-    "Bridge Accounting",
-  ], {id: "suggestBridgeAccounting"});
-  m.call(frankencoin, "suggestMinter", [
-    tokenPool,
-    minApplicationPeriod,
-    minFee,
-    "CCIP TokenPool",
-  ], {id: "suggestTokenPool"});
-
-  console.log('')
-  console.log("NEXT STEPS:")
-  console.log(
-    `Ping the Chainlink team to propose CCIPAdmin as admin for ZCHF`
+  m.call(
+    frankencoin,
+    "suggestMinter",
+    [bridgeAccounting, minApplicationPeriod, minFee, "Bridge Accounting"],
+    { id: "suggestBridgeAccounting" }
+  );
+  m.call(
+    frankencoin,
+    "suggestMinter",
+    [tokenPool, minApplicationPeriod, minFee, "CCIP TokenPool"],
+    { id: "suggestTokenPool" }
   );
 
+  console.log("");
+  console.log("NEXT STEPS:");
+  console.log(`Ping the Chainlink team to propose CCIPAdmin as admin for ZCHF`);
 
   return {
     ccipAdmin,

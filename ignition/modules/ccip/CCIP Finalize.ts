@@ -1,6 +1,6 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { getChildFromSeed } from "../../helper/wallet";
-import { ADDRESS } from "../../exports/address.config";
+import { getChildFromSeed } from "../../../helper/wallet";
+import { ADDRESS } from "../../../exports/address.mainnet.config";
 import { Chain } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 import { ethers } from "ethers";
