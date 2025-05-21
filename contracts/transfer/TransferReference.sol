@@ -107,7 +107,7 @@ contract TransferReference is CCIPSender {
     /// @param extraArgs Extra arguments for CCIP
     function getCCIPFee(uint64 targetChain, bytes memory target, uint256 amount, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
-        tokenAmounts[0] = Client.EVMTokenAmount(address(this), amount);
+        tokenAmounts[0] = Client.EVMTokenAmount(address(zchf), amount);
         return _calculateFee(targetChain, _constructMessage(target, "", tokenAmounts, nativeToken, extraArgs));
     }
 
@@ -118,7 +118,7 @@ contract TransferReference is CCIPSender {
     /// @return Client.EVM2AnyMessage Returns an EVM2AnyMessage struct which contains information for sending a CCIP message.
     function constructTransferMessage(bytes memory receiver, uint256 amount, bytes memory extraArgs) private view returns (Client.EVM2AnyMessage memory) {
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
-        tokenAmounts[0] = Client.EVMTokenAmount(address(this), amount);
+        tokenAmounts[0] = Client.EVMTokenAmount(address(zchf), amount);
         return _constructMessage(receiver, "", tokenAmounts, extraArgs);
     }
 }
