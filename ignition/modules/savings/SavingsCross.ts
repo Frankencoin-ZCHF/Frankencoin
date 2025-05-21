@@ -6,7 +6,7 @@ import { Address } from "viem";
 
 // config and select
 export const NAME: string = "Savings"; // <-- select smart contract
-export const FILE: string = "SavingsDetached"; // <-- name exported file
+export const FILE: string = "SavingsCross"; // <-- name exported file
 export const MOD: string = NAME + "Module";
 console.log(NAME);
 
