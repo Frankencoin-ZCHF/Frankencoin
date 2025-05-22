@@ -37,7 +37,7 @@ export interface ChainAddress {
 
     // multi chain support
     transferReference: Address; // separate SC for mainnet transfers
-    savingsCross: Address; // detached from multichain sync
+    savingsReferral: Address; // detached, implements referral
     ccipAdmin: Address;
     ccipTokenPool: Address;
     ccipBridgeAccounting: Address;
@@ -87,7 +87,7 @@ export const ADDRESS: ChainAddress = {
 
     // multi chain support
     transferReference: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
-    savingsCross: zeroAddress,
+    savingsReferral: "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
     ccipAdmin: zeroAddress,
     ccipTokenPool: zeroAddress,
     ccipBridgeAccounting: zeroAddress,
