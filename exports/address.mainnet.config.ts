@@ -43,6 +43,10 @@ export interface ChainAddress {
     ccipBridgeAccounting: Address;
     ccipGovernanceSender: Address;
     ccipLeadrateSender: Address;
+    ccipTokenAdminRegistry: Address;
+    ccipRmnProxy: Address;
+    ccipRouter: Address;
+    linkToken: Address;
   };
   // ###### MULTI CHAIN ######
   [polygon.id]: {
@@ -88,11 +92,15 @@ export const ADDRESS: ChainAddress = {
     // multi chain support
     transferReference: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
     savingsReferral: "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
-    ccipAdmin: zeroAddress,
-    ccipTokenPool: zeroAddress,
+    ccipAdmin: "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    ccipTokenPool: "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
     ccipBridgeAccounting: zeroAddress,
     ccipGovernanceSender: zeroAddress,
     ccipLeadrateSender: zeroAddress,
+    ccipTokenAdminRegistry: "0xb22764f98dD05c789929716D677382Df22C05Cb6",
+    ccipRmnProxy: "0x411dE17f12D1A34ecC7F45f49844626267c75e81",
+    ccipRouter: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
+    linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA"
   },
   [polygon.id]: {
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",

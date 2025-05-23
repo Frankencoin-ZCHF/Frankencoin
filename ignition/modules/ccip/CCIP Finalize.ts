@@ -5,7 +5,7 @@ import { Chain } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 import { ethers } from "ethers";
 
-const seed = process.env.DEPLOYER_ACCOUNT_SEED;
+const seed = process.env.DEPLOYER_SEED;
 if (!seed) throw new Error("Failed to import the seed string from .env");
 
 const w0 = getChildFromSeed(seed, 0); // deployer
@@ -24,7 +24,7 @@ console.log(config);
 
 let chainUpdates: any[] = [];
 if (id === 1) {
-  chainUpdates = [getChainUpdate(polygon.id)];
+  chainUpdates = [];
 } else {
   chainUpdates = [getChainUpdate(polygonAmoy.id)];
 }
@@ -35,18 +35,18 @@ console.log(chainUpdates);
 
 const CCIPFinalizeModule = buildModule("CCIPFinalize", (m) => {
   const ccipAdmin = m.contractAt("CCIPAdmin", ADDR.ccipAdmin);
-  m.call(ccipAdmin, "acceptAdmin", [ADDR.tokenPool, chainUpdates]);
+  m.call(ccipAdmin, "acceptAdmin", [ADDR.ccipTokenPool, chainUpdates]);
 
   return {};
 });
 
 function getChainUpdate(chainId: Chain["id"]) {
   const ADDR = ADDRESS[chainId];
-  if (ADDR && ADDR.frankenCoin && ADDR.chainSelector && ADDR.tokenPool) {
+  if (ADDR && ADDR.frankenCoin && ADDR.chainSelector && ADDR.ccipTokenPool) {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
     return {
       remoteChainSelector: ADDR.chainSelector,
-      remotePoolAddresses: [abiCoder.encode(["address"], [ADDR.tokenPool])],
+      remotePoolAddresses: [abiCoder.encode(["address"], [ADDR.ccipTokenPool])],
       remoteTokenAddress: abiCoder.encode(["address"], [ADDR.frankenCoin]),
       outboundRateLimiterConfig: {
         isEnabled: false,
