@@ -14,8 +14,6 @@ abstract contract CrossChainReference is CrossChainERC20 {
     // @dev: **to** is type bytes to support arbitrary destination chains without risk of unsafe conversion
     event CrossTransfer(address indexed sender, address indexed from, uint64 toChain, bytes indexed to, uint256 amount, string ref);
 
-    error InfiniteAllowanceRequired(address owner, address spender);
-
     constructor(address router, address linkToken) CrossChainERC20(router, linkToken) {}
 
     // transfer within the erc20 context
