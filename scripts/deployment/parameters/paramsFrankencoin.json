@@ -22,5 +22,41 @@
         "chainId": 1,
         "chainName" : "Ethereum",
         "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 137,
+        "chainName" : "Polygon",
+        "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 42161,
+        "chainName" : "Arbitrum",
+        "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 10,
+        "chainName" : "Optimism",
+        "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 8453,
+        "chainName" : "Base",
+        "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 43114,
+        "chainName" : "Avalanche",
+        "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 100,
+        "chainName" : "Gnosis",
+        "minApplicationPeriod" : 1209600
     }
 ]
