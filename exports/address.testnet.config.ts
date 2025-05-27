@@ -1,8 +1,8 @@
-import { polygon } from "viem/chains";
+import { polygonAmoy } from "viem/chains";
 import { Address } from "viem";
 
 export interface ChainAddress {
-  [polygon.id]: {
+  [polygonAmoy.id]: {
     // core
     frankencoin: Address; // ZCHF token
     equity: Address; // FPS token
@@ -25,7 +25,7 @@ export interface ChainAddress {
 }
 
 export const ADDRESS: ChainAddress = {
-  [polygon.id]: {
+  [polygonAmoy.id]: {
     // core
     frankencoin: "0x89C31867c878E4268C65de3CDf8Ea201310c5851",
     equity: "0x5e97Bb61440f3BbaB94Bbb61C41159B675175D49",

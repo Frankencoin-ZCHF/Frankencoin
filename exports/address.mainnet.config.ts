@@ -100,7 +100,7 @@ export const ADDRESS: ChainAddress = {
     ccipTokenAdminRegistry: "0xb22764f98dD05c789929716D677382Df22C05Cb6",
     ccipRmnProxy: "0x411dE17f12D1A34ecC7F45f49844626267c75e81",
     ccipRouter: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
-    linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA"
+    linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
   },
   [polygon.id]: {
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",

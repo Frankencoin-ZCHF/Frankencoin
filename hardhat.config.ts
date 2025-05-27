@@ -12,6 +12,25 @@ import { getChildFromSeed } from "./helper/wallet";
 import dotenv from "dotenv";
 dotenv.config();
 
+// Extend Hardhat typings
+declare module "hardhat/types/config" {
+  export interface HardhatNetworkUserConfig {
+    testnet?: boolean;
+  }
+
+  export interface HttpNetworkUserConfig {
+    testnet?: boolean;
+  }
+
+  export interface HardhatNetworkConfig {
+    testnet?: boolean;
+  }
+
+  export interface HttpNetworkConfig {
+    testnet?: boolean;
+  }
+}
+
 // ---------------------------------------------------------------------------------------
 
 const index = process.env.DEPLOYER_SEED_INDEX;
@@ -52,6 +71,7 @@ const config: HardhatUserConfig = {
       gasMultiplier: 0.7,
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: false,
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${alchemy}`,
@@ -60,14 +80,16 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: true,
     },
     polygon: {
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemy}`,
+      url: `https://virtual.polygon.rpc.tenderly.co/0893227f-a381-4c77-bac8-06309378425e`,
       chainId: 137,
       gas: "auto",
       gasPrice: "auto",
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: false,
     },
     citrea: {
       url: `https://rpc.testnet.citrea.xyz`,
@@ -107,6 +129,8 @@ const config: HardhatUserConfig = {
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
+    deploy: "./scripts/deployment/deploy",
+    deployments: "./scripts/deployment/deployments",
   },
   contractSizer: {
     alphaSort: false,
