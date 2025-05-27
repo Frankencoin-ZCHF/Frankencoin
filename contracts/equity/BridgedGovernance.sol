@@ -7,7 +7,23 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {SyncVote, SyncMessage} from "./IGovernance.sol";
 import {Governance} from "./Governance.sol";
 
+/**
+ * This contract receives messages from the mainnet governance contract about the voting power of individual addresses
+ * as well as the total number of votes at the time of synchronization, and to whom they are delegating (if anyone).
+ * 
+ * Accounts that alone or with the help of delegations reach 2% of the votes gain veto power and are considered 'qualified'.
+ * See also the 'checkQualified' method in the parent class and the IGovernance interface. The governance process is not
+ * done through majority votes, but by exercising veto power. Generally, anyone can make governance proposals that pass
+ * automatically after a grace period unless a qualified user vetoes the proposal, leading to a very light-weight and
+ * decentralized governance process.
+ * 
+ * As the total number of votes increases with time (votes is the holding duration times the number of governance tokens
+ * held), the voting power of previously synchronized accounts tends to decrease with subsequent new synchronizations,
+ * leading to a natural and desired decay. Delegations can either be synchronized from mainnet or done locally on
+ * the current chain (with the risk of being overwritten when someone triggers a sync for the delegating account).
+ */
 contract BridgedGovernance is CCIPReceiver, Governance {
+
     uint64 public immutable MAINNET_CHAIN_SELECTOR;
     address public immutable MAINNET_GOVERNANCE_ADDRESS;
 

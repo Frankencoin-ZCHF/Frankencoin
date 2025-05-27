@@ -8,15 +8,22 @@ import "../rate/AbstractLeadrate.sol";
  * @title Savings
  *
  * Module to enable savings based on a Leadrate ("Leitzins") module.
+ * 
+ * Users can deposit Frankencoins into the module and earn an interest on the 
+ * deposited amount. The deposited Frankencoins stay in the module (no lending
+ * or use by others) and are kept on separate accounts within the module.
+ * That means legal segregation is preserved thanks to the internal accounting.
  *
- * As the interest rate changes, the speed at which 'ticks' are accumulated is
+ * As the interest rate changes, the speed at which yield is accumulated is
  * adjusted. The ticks counter serves as the basis for calculating the interest
- * due for the individual accoutns.
+ * due for the individual accounts.
  *
- * The saved ZCHF are subject to a lockup of up to 3 days and only start to yield
- * an interest after the lockup ended. The purpose of this lockup is to discourage
- * short-term holdings and to avoid paying interest to transactional accounts.
- * Transactional accounts typically do not need an incentive to hold Frankencoins.
+ * Interest only starts to accumulate after a delay of three days in order to
+ * disincentivize going in and out of the savings module for very short time spans.
+ * 
+ * Frontends or wallets can optionally specify a referrer that gets up to
+ * 25% of the earned interest. The user can get rid of the referrer at any time by
+ * calling dropReferred.
  */
 abstract contract AbstractSavings is AbstractLeadrate {
     

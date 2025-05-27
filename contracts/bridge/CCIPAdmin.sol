@@ -9,8 +9,16 @@ import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Rat
 import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
 import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
 
-// The admin for bridging Frankencoins using CCIP.
-// Each chain needs an instance of this administrator.
+/**
+ * Since there is no centralized administrator, a smart contract relying on the decentralized governance process takes over
+ * the admin role. This contract contains all functions to configure the CCIP bridge based on the typical Frankencoin
+ * governance process.
+ * 
+ * For the token pool to function properly, it must be equipped with minting power and registered as a minting module.
+ * 
+ * For example, any qualified users can at any time adjust the rate limit of the bridge. But the other, less time-critical
+ * functions are exercised in two steps, a proposal and a delayed actual execution if no veto has been cast in the meantime.
+ */
 contract CCIPAdmin {
     struct RemotePoolUpdate {
         bool add; // true if adding, false if removing

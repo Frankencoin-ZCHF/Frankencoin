@@ -13,9 +13,19 @@ import "./IBasicFrankencoin.sol";
  *
  * Like its mainnet counterpart, it has the capability to add minting modules. This allows to
  * potentially add similar collateralized minting methods as in the mainnet Frankencoin.
+ * 
+ * Minting modules are extremely powerful. They can mint, move, and burn Frankencoins on arbitrary addresses.
+ * A typical minting module is the CCIP Token Manager that mints tokens as they arrive from other chains or
+ * burns them when sent away again.
  *
- * However, there is only one FPS, the one on mainnet and voting power has to be projected onto the
- * side chains.
+ * The bridged Frankencoin relies on the bridged governance module to veto bad proposals for new minters.
+ * 
+ * System income (e.g. from proposal fees) is accumualted on the governance address (this could be any address,
+ * but on mainnet, it is also the governance module that contains the equity capital). Furthermore, the contract
+ * keeps track of accumulated costs (losses), for example when the Savings module pays out interests.
+ * 
+ * The accumulated profit or loss should be synchronized back to mainnet from time to time using a CCIP
+ * message.
  */
 contract BridgedFrankencoin is CrossChainReference, ERC20PermitLight, IBasicFrankencoin {
     /**
@@ -40,6 +50,9 @@ contract BridgedFrankencoin is CrossChainReference, ERC20PermitLight, IBasicFran
 
     /**
      * @notice List of positions that are allowed to mint and the minter that registered them.
+     * 
+     * This is not used in the bridged Frankencoins for now, but can be useful once we want to introduce collateralized
+     * minting like on mainnet.
      */
     mapping(address position => address registeringMinter) public positions;
 

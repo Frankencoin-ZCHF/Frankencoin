@@ -8,7 +8,7 @@ import "../erc20/IERC20.sol";
 /**
  * @title BridgedSavings
  *
- * Module to enable savings based on a Leadrate ("Leitzins") module on a layer-two chain.
+ * Module to enable savings on module bridged chains.
  */
 contract BridgedSavings is AbstractSavings, BridgedLeadrate {
     constructor(

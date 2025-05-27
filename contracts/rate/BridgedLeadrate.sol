@@ -11,7 +11,9 @@ import "./AbstractLeadrate.sol";
 /**
  * @title Leadrate (attempt at translating the nicely concise German term 'Leitzins')
  *
- * A module that can provide other modules with the lead interest rate for the system.
+ * A contract that receives updates from mainnet about interest rate changes. It keeps a "tick" counter that 
+ * increases with the accumulated interest (i.e. the ticks accrue twice as fast over time if the interest rate
+ * is twice as high).
  *
  **/
 contract BridgedLeadrate is AbstractLeadrate, CCIPReceiver {
