@@ -9,6 +9,7 @@ import {BurnMintTokenPool} from "@chainlink/contracts-ccip/src/v0.8/ccip/pools/B
 import {IBurnMintERC20} from "@chainlink/contracts-ccip/src/v0.8/shared/token/ERC20/IBurnMintERC20.sol";
 import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
 import {ITokenPool} from "../bridge/ITokenPool.sol";
+import {L2TestMinter} from "./L2TestMinter.sol";
 
 contract L2Deployer {
     struct CCIPConfig {
@@ -30,6 +31,7 @@ contract L2Deployer {
     BridgedFrankencoin public bridgedFrankencoin;
     CCIPAdmin public ccipAdmin;
     BurnMintTokenPool public tokenPool;
+    L2TestMinter public testMinter;
 
     error CCIPAdminMismatch(address expected, address actual);
 
@@ -51,12 +53,18 @@ contract L2Deployer {
         tokenPool = new BurnMintTokenPool(IBurnMintERC20(address(bridgedFrankencoin)), bridgedFrankencoin.decimals(), allowlist, _ccipConfig.rmnProxy, _ccipConfig.router);
         tokenPool.transferOwnership(address(ccipAdmin));
 
-        address[] memory minters = new address[](1);
-        minters[0] = address(tokenPool);
+        testMinter = new L2TestMinter();
 
-        string[] memory minterComments = new string[](1);
+        address[] memory minters = new address[](2);
+        minters[0] = address(tokenPool);
+        minters[1] = address(testMinter);
+
+        string[] memory minterComments = new string[](2);
         minterComments[0] = "BurnMintTokenPool";
+        minterComments[1] = "TestMinter";
         bridgedFrankencoin.initialize(minters, minterComments);
+
+        testMinter.mint(bridgedFrankencoin, msg.sender);
 
         ccipAdmin.registerToken(_ccipConfig.registryModuleOwnerCustom, ITokenPool(address(tokenPool)), _ccipConfig.chainsToAdd);
     }

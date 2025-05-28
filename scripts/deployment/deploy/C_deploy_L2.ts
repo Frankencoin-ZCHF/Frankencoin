@@ -28,7 +28,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   console.log("BridgedGovernance ConstructorArgs");
   console.log(JSON.stringify(BridgedGovernanceArgs));
-  console.log("")
+  console.log("");
   const bridgedGovernance = await deployContract<BridgedGovernance>(
     hre,
     "BridgedGovernance",
@@ -69,6 +69,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mainnetCcipParams
   );
   await verifyBridgedFrankencoin(
+    await (await ethers.getSigners())[0].getAddress(),
     l2Deployer,
     await bridgedGovernance.getAddress(),
     ccipParams,
@@ -83,11 +84,18 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await verifyTokenPool(l2Deployer, ccipParams);
   await verifyRegistration(l2Deployer, ccipParams);
 
+  const l2TestMinter = await ethers.getContractAt(
+    "L2TestMinter",
+    await l2Deployer.testMinter()
+  );
+  verifyProperty(true, await l2TestMinter.used(), "Teset minter didn't mint");
+
   console.log("Deployed contracts");
   console.log(`BridgedGovernance: ${await bridgedGovernance.getAddress()}`);
   console.log(`BridgedFrankencoin: ${await l2Deployer.bridgedFrankencoin()}`);
   console.log(`CCIPAdmin: ${await l2Deployer.ccipAdmin()}`);
   console.log(`TokenPool: ${await l2Deployer.tokenPool()}`);
+  console.log(`TestMinter: ${await l2Deployer.testMinter()}`);
   console.log("");
   // Etherscan verification
   console.log("Run these commands for etherscan verification");
@@ -113,6 +121,11 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     } ${await l2Deployer.ccipAdmin()} ${
       ccipParams["tokenAdminRegistry"]
     } ${await l2Deployer.bridgedFrankencoin()}`
+  );
+  console.log(
+    `npx hardhat verify --network ${
+      hre.network.name
+    } ${await l2Deployer.testMinter()}`
   );
 };
 
@@ -210,6 +223,7 @@ async function verifyBridgedGovernance(
 }
 
 async function verifyBridgedFrankencoin(
+  deployer: string,
   l2Deployer: L2Deployer,
   governance: string,
   ccipParams: { [index: string]: any },
@@ -256,6 +270,11 @@ async function verifyBridgedFrankencoin(
     true,
     await bridgedFrankencoin.isMinter(await l2Deployer.tokenPool()),
     "tokenpool minter"
+  );
+  verifyProperty(
+    ethers.parseEther("1"),
+    await bridgedFrankencoin.balanceOf(deployer),
+    "Deployer doesn't have 1 ZCHF"
   );
   console.log("BridgedFrankencoin verified!");
   console.log("");
