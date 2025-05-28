@@ -18,7 +18,6 @@ export const deployContract = async <T = Contract>(
     from: deployer,
     args: args,
     log: true,
-    gasLimit: 10000_000
   });
   return await ethers.getContractAt(contractName, deployment.address) as T;
 };

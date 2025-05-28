@@ -3,6 +3,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { deployContract } from "../deployUtils";
 import { L2Deployer } from "../../../typechain";
 import { ethers } from "hardhat";
+import { ITokenPool } from "../../../typechain/contracts/bridge/CCIPAdmin";
+import { BridgedGovernance } from "../../../typechain";
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const frankencoinParams = loadParamsFile(
@@ -18,6 +20,21 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mainnetCcipParams = loadParamsFile(11155111, "paramsCCIP.json");
   }
 
+  const BridgedGovernanceArgs = [
+    ccipParams["router"],
+    mainnetCcipParams["chainSelector"],
+    mainnetCcipParams["governanceSender"],
+  ];
+
+  console.log("BridgedGovernance ConstructorArgs");
+  console.log(JSON.stringify(BridgedGovernanceArgs));
+  console.log("")
+  const bridgedGovernance = await deployContract<BridgedGovernance>(
+    hre,
+    "BridgedGovernance",
+    BridgedGovernanceArgs
+  );
+
   const L2DeployerConstructorArgs = [
     [
       ccipParams["router"],
@@ -26,9 +43,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ccipParams["tokenAdminRegistry"],
       ccipParams["rmnProxy"],
       ccipParams["registryModuleOwner"],
-      [],
+      getChainUpdates(hre),
     ],
-    [mainnetCcipParams["governanceSender"]],
+    await bridgedGovernance.getAddress(),
     [
       frankencoinParams["minApplicationPeriod"],
       mainnetCcipParams["bridgeAccounting"],
@@ -36,8 +53,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
   ];
 
-  console.log("ConstructorArgs");
-  console.log(L2DeployerConstructorArgs);
+  console.log("L2 Deployer ConstructorArgs");
+  console.log(JSON.stringify(L2DeployerConstructorArgs));
 
   const l2Deployer = await deployContract<L2Deployer>(
     hre,
@@ -46,23 +63,38 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   console.log("Deployment complete. Start verification");
-  await verifyBridgedGovernance(l2Deployer, ccipParams, mainnetCcipParams);
+  await verifyBridgedGovernance(
+    bridgedGovernance,
+    ccipParams,
+    mainnetCcipParams
+  );
   await verifyBridgedFrankencoin(
     l2Deployer,
+    await bridgedGovernance.getAddress(),
     ccipParams,
     mainnetCcipParams,
     frankencoinParams
   );
-  await verifyCCIPAdmin(l2Deployer, ccipParams);
+  await verifyCCIPAdmin(
+    l2Deployer,
+    await bridgedGovernance.getAddress(),
+    ccipParams
+  );
   await verifyTokenPool(l2Deployer, ccipParams);
   await verifyRegistration(l2Deployer, ccipParams);
 
+  console.log("Deployed contracts");
+  console.log(`BridgedGovernance: ${await bridgedGovernance.getAddress()}`);
+  console.log(`BridgedFrankencoin: ${await l2Deployer.bridgedFrankencoin()}`);
+  console.log(`CCIPAdmin: ${await l2Deployer.ccipAdmin()}`);
+  console.log(`TokenPool: ${await l2Deployer.tokenPool()}`);
+  console.log("");
   // Etherscan verification
   console.log("Run these commands for etherscan verification");
   console.log(
     `npx hardhat verify --network ${
       hre.network.name
-    } ${await l2Deployer.bridgedGovernance()} ${ccipParams["router"]} ${
+    } ${await bridgedGovernance.getAddress()} ${ccipParams["router"]} ${
       mainnetCcipParams["chainSelector"]
     } ${mainnetCcipParams["governanceSender"]}`
   );
@@ -101,16 +133,63 @@ function loadParamsFile(chainId: number | undefined, paramsFile: string) {
   );
 }
 
+function getChainUpdates(
+  hre: HardhatRuntimeEnvironment
+): ITokenPool.ChainUpdateStruct[] {
+  const chainUpdates: ITokenPool.ChainUpdateStruct[] = [];
+  const abicoder = ethers.AbiCoder.defaultAbiCoder();
+  for (const remoteNetworkName in hre.userConfig.networks) {
+    const remoteNetwork = hre.userConfig.networks[remoteNetworkName];
+    if (
+      remoteNetwork?.testnet === hre.network.config.testnet &&
+      remoteNetwork?.chainId !== hre.network.config.chainId
+    ) {
+      try {
+        const ccipConfig = loadParamsFile(
+          remoteNetwork?.chainId,
+          "paramsCCIP.json"
+        );
+
+        if (
+          ccipConfig["chainSelector"] &&
+          ccipConfig["tokenPool"] &&
+          ccipConfig["frankencoin"]
+        ) {
+          chainUpdates.push({
+            inboundRateLimiterConfig: {
+              isEnabled: false,
+              capacity: 0,
+              rate: 0,
+            },
+            outboundRateLimiterConfig: {
+              isEnabled: false,
+              capacity: 0,
+              rate: 0,
+            },
+            remoteChainSelector: ccipConfig["chainSelector"],
+            remotePoolAddresses: [
+              abicoder.encode(["address"], [ccipConfig["tokenPool"]]),
+            ],
+            remoteTokenAddress: abicoder.encode(
+              ["address"],
+              [ccipConfig["frankencoin"]]
+            ),
+          });
+        }
+      } catch {
+        // ignore because if a chain is not configured for ccip it doesn't mean we need to abort the deployment
+      }
+    }
+  }
+  return chainUpdates;
+}
+
 async function verifyBridgedGovernance(
-  l2Deployer: L2Deployer,
+  bridgedGovernance: BridgedGovernance,
   ccipParams: { [index: string]: any },
   mainnetCcipParams: { [index: string]: any }
 ) {
   console.log("Verify BridgedGovernance");
-  const bridgedGovernance = await ethers.getContractAt(
-    "BridgedGovernance",
-    await l2Deployer.bridgedGovernance()
-  );
   verifyProperty(
     ccipParams["router"],
     await bridgedGovernance.getRouter(),
@@ -132,6 +211,7 @@ async function verifyBridgedGovernance(
 
 async function verifyBridgedFrankencoin(
   l2Deployer: L2Deployer,
+  governance: string,
   ccipParams: { [index: string]: any },
   mainnetCcipParams: { [index: string]: any },
   frankencoinParams: { [index: string]: any }
@@ -141,11 +221,7 @@ async function verifyBridgedFrankencoin(
     "BridgedFrankencoin",
     await l2Deployer.bridgedFrankencoin()
   );
-  verifyProperty(
-    await l2Deployer.bridgedGovernance(),
-    await bridgedFrankencoin.reserve(),
-    "reserve"
-  );
+  verifyProperty(governance, await bridgedFrankencoin.reserve(), "reserve");
   verifyProperty(
     ccipParams["router"],
     await bridgedFrankencoin.ROUTER(),
@@ -173,7 +249,7 @@ async function verifyBridgedFrankencoin(
   );
   verifyProperty(
     ccipParams["ccipAdmin"],
-    (await bridgedFrankencoin.getCCIPAdmin()).toLocaleLowerCase(),
+    await bridgedFrankencoin.getCCIPAdmin(),
     "ccipAdmin"
   );
   verifyProperty(
@@ -187,6 +263,7 @@ async function verifyBridgedFrankencoin(
 
 async function verifyCCIPAdmin(
   l2Deployer: L2Deployer,
+  governance: string,
   ccipParams: { [index: string]: any }
 ) {
   console.log("Verify CCIPAdmin");
@@ -194,11 +271,7 @@ async function verifyCCIPAdmin(
     "CCIPAdmin",
     await l2Deployer.ccipAdmin()
   );
-  verifyProperty(
-    await l2Deployer.bridgedGovernance(),
-    await ccipAdmin.GOVERNANCE(),
-    "governance"
-  );
+  verifyProperty(governance, await ccipAdmin.GOVERNANCE(), "governance");
   verifyProperty(
     ccipParams["tokenAdminRegistry"],
     await ccipAdmin.TOKEN_ADMIN_REGISTRY(),

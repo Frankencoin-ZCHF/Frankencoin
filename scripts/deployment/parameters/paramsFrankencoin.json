@@ -58,5 +58,11 @@
         "chainId": 100,
         "chainName" : "Gnosis",
         "minApplicationPeriod" : 1209600
+    },
+    {
+        "name": "Frankencoin",
+        "chainId": 146,
+        "chainName" : "Sonic",
+        "minApplicationPeriod" : 1209600
     }
 ]

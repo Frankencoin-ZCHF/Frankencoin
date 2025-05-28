@@ -21,28 +21,22 @@ contract L2Deployer {
         ITokenPool.ChainUpdate[] chainsToAdd;
     }
 
-    struct GovernanceConfig {
-        address mainnetGovernanceSender;
-    }
-
     struct FrankencoinConfig {
         uint256 minApplicationPeriod;
         address bridgeAccounting;
         address ccipAdmin;
     }
 
-    BridgedGovernance public bridgedGovernance;
     BridgedFrankencoin public bridgedFrankencoin;
     CCIPAdmin public ccipAdmin;
     BurnMintTokenPool public tokenPool;
 
     error CCIPAdminMismatch(address expected, address actual);
 
-    constructor(CCIPConfig memory _ccipConfig, GovernanceConfig memory _governanceConfig, FrankencoinConfig memory _frankencoinConfig) {
+    constructor(CCIPConfig memory _ccipConfig, BridgedGovernance _bridgedGovernance, FrankencoinConfig memory _frankencoinConfig) {
         // Deployment logic
-        bridgedGovernance = new BridgedGovernance(_ccipConfig.router, _ccipConfig.mainnetChainSelector, _governanceConfig.mainnetGovernanceSender);
         bridgedFrankencoin = new BridgedFrankencoin(
-            bridgedGovernance,
+            _bridgedGovernance,
             _ccipConfig.router,
             _frankencoinConfig.minApplicationPeriod,
             _ccipConfig.linkToken,
