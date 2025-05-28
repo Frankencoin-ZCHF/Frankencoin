@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
       testnet: true,
     },
     polygon: {
-      url: `https://virtual.polygon.rpc.tenderly.co/59fa380d-d2aa-44f6-8242-5ed8d8906173`,
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 137,
       gas: "auto",
       gasPrice: "auto",
@@ -92,7 +92,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     optimism: {
-      url: `https://virtual.optimism.rpc.tenderly.co/7041682d-1f98-4e4f-a500-d330f37945bf`,
+      url: `https://opt-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 10,
       gas: "auto",
       gasPrice: "auto",
@@ -101,7 +101,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     arbitrum: {
-      url: `https://virtual.arbitrum.rpc.tenderly.co/b4fd0976-3b5c-44c8-b6aa-f5c6a68c8cba`,
+      url: `https://arb-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 42161,
       gas: "auto",
       gasPrice: "auto",
@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     base: {
-      url: `https://virtual.base.rpc.tenderly.co/69ddfa3a-d326-4305-a5c5-21363c036e3e`,
+      url: `https://base-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 8453,
       gas: "auto",
       gasPrice: "auto",
@@ -119,7 +119,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     avalanche: {
-      url: `https://virtual.avalanche.rpc.tenderly.co/0644a35d-3766-4bf5-923a-5fa8f0b63214`,
+      url: `https://avax-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 43114,
       gas: "auto",
       gasPrice: "auto",
@@ -128,7 +128,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     gnosis: {
-      url: `https://virtual.gnosis.rpc.tenderly.co/dc8b8dee-b55e-45e0-99d7-dca7d9915925`,
+      url: `https://gnosis-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 100,
       gas: "auto",
       gasPrice: "auto",
@@ -137,7 +137,7 @@ const config: HardhatUserConfig = {
       testnet: false,
     },
     sonic: {
-      url: `https://virtual.sonic.rpc.tenderly.co/4dc7eb6a-3ce0-48eb-908b-80ffda59033c`,
+      url: `https://sonic-mainnet.g.alchemy.com/v2/${alchemy}`,
       chainId: 146,
       gas: "auto",
       gasPrice: "auto",
