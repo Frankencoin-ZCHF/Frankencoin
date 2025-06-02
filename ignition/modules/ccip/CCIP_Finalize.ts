@@ -1,6 +1,6 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { getChildFromSeed } from "../../../helper/wallet";
-import { ADDRESS } from "../../../exports/address.mainnet.config";
+import { ADDRESS, ChainAddress } from "../../../exports/address.mainnet.config";
 import { Chain } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 import { ethers } from "ethers";
@@ -12,7 +12,7 @@ const w0 = getChildFromSeed(seed, 0); // deployer
 
 // frankencoin addresses
 const id = process.env?.CHAINID || 1;
-const ADDR = ADDRESS[id as Chain["id"]];
+const ADDR = ADDRESS[Number(id)] as ChainAddress["1"];
 
 export const config = {
   deployer: w0.address,

@@ -1,8 +1,7 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { getChildFromSeed } from "../../../helper/wallet";
 import { storeConstructorArgs } from "../../../helper/store.args";
-import { ADDRESS } from "../../../exports/address.mainnet.config";
-import { Chain } from "viem";
+import { ADDRESS, ChainAddress } from "../../../exports/address.mainnet.config";
 
 const seed = process.env.DEPLOYER_SEED;
 if (!seed) throw new Error("Failed to import the seed string from .env");
@@ -11,7 +10,7 @@ const w0 = getChildFromSeed(seed, 0); // deployer
 
 // frankencoin addresses
 const id = process.env?.CHAINID || 1;
-const ADDR = ADDRESS[id as Chain["id"]];
+const ADDR = ADDRESS[Number(id)] as ChainAddress["1"];
 
 export const config = {
   deployer: w0.address,
@@ -42,13 +41,21 @@ console.log("BurnMintTokenPool Construcotr Args");
 console.log(tokenPoolArgs);
 
 // governance sender
-export const governanceSenderArgs = [ADDR.equity, ADDR.ccipRouter, ADDR.linkToken];
+export const governanceSenderArgs = [
+  ADDR.equity,
+  ADDR.ccipRouter,
+  ADDR.linkToken,
+];
 storeConstructorArgs("GovernanceSender", governanceSenderArgs, true);
 console.log("GovernanceSender Constructor Args");
 console.log(governanceSenderArgs);
 
 // leadrate sender
-export const leadrateSenderArgs = [ADDR.savingsReferral, ADDR.ccipRouter, ADDR.linkToken];
+export const leadrateSenderArgs = [
+  ADDR.savingsReferral,
+  ADDR.ccipRouter,
+  ADDR.linkToken,
+];
 storeConstructorArgs("LeadrateSender", leadrateSenderArgs, true);
 console.log("LeadrateSender Constructor Args");
 console.log(leadrateSenderArgs);
@@ -74,7 +81,9 @@ const CCIPPrepareModule = buildModule("CCIPPrepare", (m) => {
 
   console.log("");
   console.log("NEXT STEPS:");
-  console.log(`Ping the Chainlink team to propose CCIPAdmin as admin for ZCHF and then suggest the minters`);
+  console.log(
+    `Ping the Chainlink team to propose CCIPAdmin as admin for ZCHF and then suggest the minters`
+  );
 
   return {
     ccipAdmin,
