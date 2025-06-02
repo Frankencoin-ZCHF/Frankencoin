@@ -28,7 +28,7 @@ export * from "./abis/MintingHubV1/PositionFactoryV1";
 export * from "./abis/MintingHubV1/PositionV1";
 
 export * as LeadrateV2ABI from "./abis/MintingHubV2/Leadrate";
-export * as SavingsV2ABI from "./abis/MintingHubV2/savings";
+export * as SavingsV2ABI from "./abis/MintingHubV2/Savings";
 export * from "./abis/MintingHubV2/MintingHubV2";
 export * from "./abis/MintingHubV2/PositionFactoryV2";
 export * from "./abis/MintingHubV2/PositionV2";
