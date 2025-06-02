@@ -235,6 +235,11 @@ async function verifyBridgedFrankencoin(
     "BridgedFrankencoin",
     await l2Deployer.bridgedFrankencoin()
   );
+  verifyProperty(
+    ccipParams["frankencoin"],
+    await l2Deployer.bridgedFrankencoin(),
+    "address"
+  );
   verifyProperty(governance, await bridgedFrankencoin.reserve(), "reserve");
   verifyProperty(
     ccipParams["router"],
@@ -290,6 +295,11 @@ async function verifyCCIPAdmin(
     "CCIPAdmin",
     await l2Deployer.ccipAdmin()
   );
+  verifyProperty(
+    ccipParams["ccipAdmin"],
+    await l2Deployer.ccipAdmin(),
+    "address"
+  );
   verifyProperty(governance, await ccipAdmin.GOVERNANCE(), "governance");
   verifyProperty(
     ccipParams["tokenAdminRegistry"],
@@ -313,6 +323,11 @@ async function verifyTokenPool(
   const tokenPool = await ethers.getContractAt(
     "BurnMintTokenPool",
     await l2Deployer.tokenPool()
+  );
+  verifyProperty(
+    ccipParams["tokenPool"],
+    await l2Deployer.tokenPool(),
+    "address"
   );
   verifyProperty(
     await l2Deployer.bridgedFrankencoin(),
@@ -352,6 +367,11 @@ async function verifyRegistration(
       await l2Deployer.ccipAdmin()
     ),
     "administrator"
+  );
+  verifyProperty(
+    await l2Deployer.tokenPool(),
+    await tokenAdminRegistry.getPool(await l2Deployer.bridgedFrankencoin()),
+    "tokenpool"
   );
 
   console.log("Registration verified!");
