@@ -40,8 +40,8 @@
     "rmnProxy": "0x55b3FCa23EdDd28b1f5B4a3C7975f63EFd2d06CE",
     "registryModuleOwner": "0xAFEd606Bd2CAb6983fC6F10167c98aaC2173D77f",
     "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0xbe18ABb59FDD793048aBdA3D6aeA2C798fCCAbe2",
-    "frankencoin": "0xb0e1b3389A0F857F10Ca15010dDB889774678985"
+    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
+    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
   },
   {
     "chainId": 8453,
@@ -52,8 +52,8 @@
     "rmnProxy": "0xC842c69d54F83170C42C4d556B4F6B2ca53Dd3E8",
     "registryModuleOwner": "0xAFEd606Bd2CAb6983fC6F10167c98aaC2173D77f",
     "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0xbe18ABb59FDD793048aBdA3D6aeA2C798fCCAbe2",
-    "frankencoin": "0xb0e1b3389A0F857F10Ca15010dDB889774678985"
+    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
+    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
   },
   {
     "chainId": 43114,
@@ -64,8 +64,8 @@
     "rmnProxy": "0xcBD48A8eB077381c3c4Eb36b402d7283aB2b11Bc",
     "registryModuleOwner": "0x76Aa17dCda9E8529149E76e9ffaE4aD1C4AD701B",
     "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0xbe18ABb59FDD793048aBdA3D6aeA2C798fCCAbe2",
-    "frankencoin": "0xb0e1b3389A0F857F10Ca15010dDB889774678985"
+    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
+    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
   },
   {
     "chainId": 100,
@@ -76,8 +76,8 @@
     "rmnProxy": "0xf5e5e1676942520995c1e39aFaC58A75Fe1cd2bB",
     "registryModuleOwner": "0x1f524a11d89D68a4E4b1c8A195E91Fb1d8f0B56a",
     "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0xbe18ABb59FDD793048aBdA3D6aeA2C798fCCAbe2",
-    "frankencoin": "0xb0e1b3389A0F857F10Ca15010dDB889774678985"
+    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
+    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
   },
   {
     "chainId": 146,
@@ -88,7 +88,7 @@
     "rmnProxy": "0x60536Ef486DB5E0e1771874E31485c12e3c2844f",
     "registryModuleOwner": "0xb0112a2723D9D6CB5194580701A93B1eb67846D2",
     "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0xbe18ABb59FDD793048aBdA3D6aeA2C798fCCAbe2",
-    "frankencoin": "0xb0e1b3389A0F857F10Ca15010dDB889774678985"
+    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
+    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
   }
 ]
