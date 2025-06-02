@@ -42,12 +42,17 @@ const CCIPFinalizeModule = buildModule("CCIPFinalize", (m) => {
 
 function getChainUpdate(chainId: Chain["id"]) {
   const ADDR = ADDRESS[chainId];
-  if (ADDR && ADDR.frankenCoin && ADDR.ccipChainSelector && ADDR.ccipTokenPool) {
+  if (
+    ADDR &&
+    ADDR.frankencoin &&
+    ADDR.ccipChainSelector &&
+    ADDR.ccipTokenPool
+  ) {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
     return {
       remoteChainSelector: ADDR.ccipChainSelector,
       remotePoolAddresses: [abiCoder.encode(["address"], [ADDR.ccipTokenPool])],
-      remoteTokenAddress: abiCoder.encode(["address"], [ADDR.frankenCoin]),
+      remoteTokenAddress: abiCoder.encode(["address"], [ADDR.frankencoin]),
       outboundRateLimiterConfig: {
         isEnabled: false,
         capacity: 0,
