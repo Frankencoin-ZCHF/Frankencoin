@@ -39,9 +39,9 @@
     "tokenAdminRegistry": "0x657c42abE4CD8aa731Aec322f871B5b90cf6274F",
     "rmnProxy": "0x55b3FCa23EdDd28b1f5B4a3C7975f63EFd2d06CE",
     "registryModuleOwner": "0xAFEd606Bd2CAb6983fC6F10167c98aaC2173D77f",
-    "ccipAdmin": "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    "tokenPool": "0x5969777eEf73C08Df69FB2D8038836e797A0749e",
-    "frankencoin": "0xa022Bdf5720495b5CABD92c37c387568f941f9f2"
+    "ccipAdmin": "0x0d3620Eb00DD489F7A20A1Dd537Ff2fD5A720b04",
+    "tokenPool": "0x4d780fDF7FE77e0Aae68229D310d1930607cE39B",
+    "frankencoin": "0x97d60696D4273e5F64aB2B7E1160F885154F1cB9"
   },
   {
     "chainId": 8453,
