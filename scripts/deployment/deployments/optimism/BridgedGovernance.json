@@ -1,0 +1,489 @@
+{
+  "address": "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "router",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "mainnetChainSelector",
+          "type": "uint64"
+        },
+        {
+          "internalType": "address",
+          "name": "mainnetGovernanceAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "router",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidRouter",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSender",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSourceChain",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotQualified",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "Delegation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "messageId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "sourceChain",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalVotes",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "voter",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "votes",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "delegatee",
+              "type": "address"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct SyncVote[]",
+          "name": "syncedVotes",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "MessageReceived",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MAINNET_CHAIN_SELECTOR",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAINNET_GOVERNANCE_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "messageId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "sourceChainSelector",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "sender",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Client.EVMTokenAmount[]",
+              "name": "destTokenAmounts",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct Client.Any2EVMMessage",
+          "name": "message",
+          "type": "tuple"
+        }
+      ],
+      "name": "ccipReceive",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "checkQualified",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegate_",
+          "type": "address"
+        }
+      ],
+      "name": "delegateVoteTo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "delegates",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRouter",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "votes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "helpers",
+          "type": "address[]"
+        }
+      ],
+      "name": "votesDelegated",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8963f5d32024affe87a048efc1564c68048d66f5bb11c818aff108b524a8fc1d",
+  "receipt": {
+    "to": null,
+    "from": "0xb16f9a646201af698A21Bd0D3AFDA0518A86D2A7",
+    "contractAddress": "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
+    "transactionIndex": 118,
+    "gasUsed": "799710",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x4d3a71dfa287a4b17a68214f67edde7d7e3227d0b5c6c1d148e8fff0fa90e02a",
+    "transactionHash": "0x8963f5d32024affe87a048efc1564c68048d66f5bb11c818aff108b524a8fc1d",
+    "logs": [],
+    "blockNumber": 136677810,
+    "cumulativeGasUsed": "18478573",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f",
+    "5009297550715157269",
+    "0xFD23272DfcB13Dc3Fabd8DB851fCD4827Af876EB"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "57e6fd2aef4f74cdcfd241869345d37e",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"router\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"mainnetChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"address\",\"name\":\"mainnetGovernanceAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"router\",\"type\":\"address\"}],\"name\":\"InvalidRouter\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidSender\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidSourceChain\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotQualified\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"}],\"name\":\"Delegation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"messageId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"sourceChain\",\"type\":\"uint64\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalVotes\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"votes\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"delegatee\",\"type\":\"address\"}],\"indexed\":false,\"internalType\":\"struct SyncVote[]\",\"name\":\"syncedVotes\",\"type\":\"tuple[]\"}],\"name\":\"MessageReceived\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"MAINNET_CHAIN_SELECTOR\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAINNET_GOVERNANCE_ADDRESS\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"messageId\",\"type\":\"bytes32\"},{\"internalType\":\"uint64\",\"name\":\"sourceChainSelector\",\"type\":\"uint64\"},{\"internalType\":\"bytes\",\"name\":\"sender\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"internalType\":\"struct Client.EVMTokenAmount[]\",\"name\":\"destTokenAmounts\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Client.Any2EVMMessage\",\"name\":\"message\",\"type\":\"tuple\"}],\"name\":\"ccipReceive\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"checkQualified\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"delegate_\",\"type\":\"address\"}],\"name\":\"delegateVoteTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"delegates\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"delegate\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRouter\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalVotes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"holder\",\"type\":\"address\"}],\"name\":\"votes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"helpers\",\"type\":\"address[]\"}],\"name\":\"votesDelegated\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"ccipReceive((bytes32,uint64,bytes,bytes,(address,uint256)[]))\":{\"details\":\"Note ensure you check the msg.sender is the OffRampRouter\",\"params\":{\"message\":\"CCIP Message\"}},\"getRouter()\":{\"returns\":{\"_0\":\"CCIP router address\"}},\"supportsInterface(bytes4)\":{\"details\":\"Should indicate whether the contract implements IAny2EVMMessageReceiver e.g. return interfaceId == type(IAny2EVMMessageReceiver).interfaceId || interfaceId == type(IERC165).interfaceId This allows CCIP to check if ccipReceive is available before calling it. If this returns false or reverts, only tokens are transferred to the receiver. If this returns true, tokens are transferred and ccipReceive is called atomically. Additionally, if the receiver address does not have code associated with it at the time of execution (EXTCODESIZE returns 0), only tokens will be transferred.\",\"params\":{\"interfaceId\":\"The interfaceId to check\"},\"returns\":{\"_0\":\"true if the interfaceId is supported\"}},\"votes(address)\":{\"params\":{\"holder\":\"The address to check.\"}},\"votesDelegated(address,address[])\":{\"params\":{\"helpers\":\"An incrementally sorted list of helpers without duplicates and without the sender.                  The call fails if the list contains an address that does not delegate to sender.                  For indirect delegates, i.e. a -> b -> c, both a and b must be included for both to count.\",\"sender\":\"The address whose total voting power is of interest\"},\"returns\":{\"_0\":\"The total number of votes of sender at the current point in time.\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"ccipReceive((bytes32,uint64,bytes,bytes,(address,uint256)[]))\":{\"notice\":\"Called by the Router to deliver a message. If this reverts, any token transfers also revert. The message will move to a FAILED state and become available for manual execution.\"},\"checkQualified(address,address[])\":{\"notice\":\"Checks whether the sender address is qualified given a list of helpers that delegated their votes directly or indirectly to the sender. It is the responsiblity of the caller to figure out whether helps are necessary and to identify them by scanning the blockchain for Delegation events.\"},\"delegateVoteTo(address)\":{\"notice\":\"Increases the voting power of the delegate by your number of votes without taking away any voting power from the sender.\"},\"delegates(address)\":{\"notice\":\"Keeping track on who delegated votes to whom. Note that delegation does not mean you cannot vote / veto any more, it just means that the delegate can benefit from your votes when invoking a veto. Circular delegations are valid, do not help when voting.\"},\"getRouter()\":{\"notice\":\"Return the current router\"},\"supportsInterface(bytes4)\":{\"notice\":\"IERC165 supports an interfaceId\"},\"totalVotes()\":{\"notice\":\"Get the total number of votes.\"},\"votes(address)\":{\"notice\":\"Get the number of votes held by a holder.\"},\"votesDelegated(address,address[])\":{\"notice\":\"The number of votes the sender commands when taking the support of the helpers into account.\"}},\"notice\":\"This contract receives messages from the mainnet governance contract about the voting power of individual addresses as well as the total number of votes at the time of synchronization, and to whom they are delegating (if anyone).  Accounts that alone or with the help of delegations reach 2% of the votes gain veto power and are considered 'qualified'. See also the 'checkQualified' method in the parent class and the IGovernance interface. The governance process is not done through majority votes, but by exercising veto power. Generally, anyone can make governance proposals that pass automatically after a grace period unless a qualified user vetoes the proposal, leading to a very light-weight and decentralized governance process.  As the total number of votes increases with time (votes is the holding duration times the number of governance tokens held), the voting power of previously synchronized accounts tends to decrease with subsequent new synchronizations, leading to a natural and desired decay. Delegations can either be synchronized from mainnet or done locally on the current chain (with the risk of being overwritten when someone triggers a sync for the delegating account).\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/equity/BridgedGovernance.sol\":\"BridgedGovernance\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport {IAny2EVMMessageReceiver} from \\\"../interfaces/IAny2EVMMessageReceiver.sol\\\";\\n\\nimport {Client} from \\\"../libraries/Client.sol\\\";\\n\\nimport {IERC165} from \\\"../../vendor/openzeppelin-solidity/v5.0.2/contracts/utils/introspection/IERC165.sol\\\";\\n\\n/// @title CCIPReceiver - Base contract for CCIP applications that can receive messages.\\nabstract contract CCIPReceiver is IAny2EVMMessageReceiver, IERC165 {\\n  address internal immutable i_ccipRouter;\\n\\n  constructor(\\n    address router\\n  ) {\\n    if (router == address(0)) revert InvalidRouter(address(0));\\n    i_ccipRouter = router;\\n  }\\n\\n  /// @notice IERC165 supports an interfaceId\\n  /// @param interfaceId The interfaceId to check\\n  /// @return true if the interfaceId is supported\\n  /// @dev Should indicate whether the contract implements IAny2EVMMessageReceiver\\n  /// e.g. return interfaceId == type(IAny2EVMMessageReceiver).interfaceId || interfaceId == type(IERC165).interfaceId\\n  /// This allows CCIP to check if ccipReceive is available before calling it.\\n  /// If this returns false or reverts, only tokens are transferred to the receiver.\\n  /// If this returns true, tokens are transferred and ccipReceive is called atomically.\\n  /// Additionally, if the receiver address does not have code associated with\\n  /// it at the time of execution (EXTCODESIZE returns 0), only tokens will be transferred.\\n  function supportsInterface(\\n    bytes4 interfaceId\\n  ) public view virtual override returns (bool) {\\n    return interfaceId == type(IAny2EVMMessageReceiver).interfaceId || interfaceId == type(IERC165).interfaceId;\\n  }\\n\\n  /// @inheritdoc IAny2EVMMessageReceiver\\n  function ccipReceive(\\n    Client.Any2EVMMessage calldata message\\n  ) external virtual override onlyRouter {\\n    _ccipReceive(message);\\n  }\\n\\n  /// @notice Override this function in your implementation.\\n  /// @param message Any2EVMMessage\\n  function _ccipReceive(\\n    Client.Any2EVMMessage memory message\\n  ) internal virtual;\\n\\n  /////////////////////////////////////////////////////////////////////\\n  // Plumbing\\n  /////////////////////////////////////////////////////////////////////\\n\\n  /// @notice Return the current router\\n  /// @return CCIP router address\\n  function getRouter() public view virtual returns (address) {\\n    return address(i_ccipRouter);\\n  }\\n\\n  error InvalidRouter(address router);\\n\\n  /// @dev only calls from the set router are accepted.\\n  modifier onlyRouter() {\\n    if (msg.sender != getRouter()) revert InvalidRouter(msg.sender);\\n    _;\\n  }\\n}\\n\",\"keccak256\":\"0xdfac759d9e7f181e17154daebb2478b76c28c57003b836a3ea06a6a1e6c65e29\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IAny2EVMMessageReceiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {Client} from \\\"../libraries/Client.sol\\\";\\n\\n/// @notice Application contracts that intend to receive messages from\\n/// the router should implement this interface.\\ninterface IAny2EVMMessageReceiver {\\n  /// @notice Called by the Router to deliver a message.\\n  /// If this reverts, any token transfers also revert. The message\\n  /// will move to a FAILED state and become available for manual execution.\\n  /// @param message CCIP Message\\n  /// @dev Note ensure you check the msg.sender is the OffRampRouter\\n  function ccipReceive(\\n    Client.Any2EVMMessage calldata message\\n  ) external;\\n}\\n\",\"keccak256\":\"0x97bcf80c56b5ed4b30a351e3c3b6d5f28f053d4d601894a5067c4e697a00b74d\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n// End consumer library.\\nlibrary Client {\\n  /// @dev RMN depends on this struct, if changing, please notify the RMN maintainers.\\n  struct EVMTokenAmount {\\n    address token; // token address on the local chain.\\n    uint256 amount; // Amount of tokens.\\n  }\\n\\n  struct Any2EVMMessage {\\n    bytes32 messageId; // MessageId corresponding to ccipSend on source.\\n    uint64 sourceChainSelector; // Source chain selector.\\n    bytes sender; // abi.decode(sender) if coming from an EVM chain.\\n    bytes data; // payload sent in original message.\\n    EVMTokenAmount[] destTokenAmounts; // Tokens and their amounts in their destination chain representation.\\n  }\\n\\n  // If extraArgs is empty bytes, the default is 200k gas limit.\\n  struct EVM2AnyMessage {\\n    bytes receiver; // abi.encode(receiver address) for dest EVM chains\\n    bytes data; // Data payload\\n    EVMTokenAmount[] tokenAmounts; // Token transfers\\n    address feeToken; // Address of feeToken. address(0) means you will send msg.value.\\n    bytes extraArgs; // Populate this with _argsToBytes(EVMExtraArgsV2)\\n  }\\n\\n  // bytes4(keccak256(\\\"CCIP EVMExtraArgsV1\\\"));\\n  bytes4 public constant EVM_EXTRA_ARGS_V1_TAG = 0x97a657c9;\\n\\n  struct EVMExtraArgsV1 {\\n    uint256 gasLimit;\\n  }\\n\\n  function _argsToBytes(\\n    EVMExtraArgsV1 memory extraArgs\\n  ) internal pure returns (bytes memory bts) {\\n    return abi.encodeWithSelector(EVM_EXTRA_ARGS_V1_TAG, extraArgs);\\n  }\\n\\n  // bytes4(keccak256(\\\"CCIP EVMExtraArgsV2\\\"));\\n  bytes4 public constant EVM_EXTRA_ARGS_V2_TAG = 0x181dcf10;\\n\\n  /// @param gasLimit: gas limit for the callback on the destination chain.\\n  /// @param allowOutOfOrderExecution: if true, it indicates that the message can be executed in any order relative to other messages from the same sender.\\n  /// This value's default varies by chain. On some chains, a particular value is enforced, meaning if the expected value\\n  /// is not set, the message request will revert.\\n  struct EVMExtraArgsV2 {\\n    uint256 gasLimit;\\n    bool allowOutOfOrderExecution;\\n  }\\n\\n  function _argsToBytes(\\n    EVMExtraArgsV2 memory extraArgs\\n  ) internal pure returns (bytes memory bts) {\\n    return abi.encodeWithSelector(EVM_EXTRA_ARGS_V2_TAG, extraArgs);\\n  }\\n}\\n\",\"keccak256\":\"0x052174af3c87abcbf5e7754f3d3aa9d0ff5054ecef0d9d01ef087c28a468bb0b\",\"license\":\"MIT\"},\"@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v5.0.2/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"license\":\"MIT\"},\"contracts/equity/BridgedGovernance.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport {CCIPReceiver} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol\\\";\\nimport {Client} from \\\"@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol\\\";\\nimport {SyncVote, SyncMessage} from \\\"./IGovernance.sol\\\";\\nimport {Governance} from \\\"./Governance.sol\\\";\\n\\n/**\\n * This contract receives messages from the mainnet governance contract about the voting power of individual addresses\\n * as well as the total number of votes at the time of synchronization, and to whom they are delegating (if anyone).\\n * \\n * Accounts that alone or with the help of delegations reach 2% of the votes gain veto power and are considered 'qualified'.\\n * See also the 'checkQualified' method in the parent class and the IGovernance interface. The governance process is not\\n * done through majority votes, but by exercising veto power. Generally, anyone can make governance proposals that pass\\n * automatically after a grace period unless a qualified user vetoes the proposal, leading to a very light-weight and\\n * decentralized governance process.\\n * \\n * As the total number of votes increases with time (votes is the holding duration times the number of governance tokens\\n * held), the voting power of previously synchronized accounts tends to decrease with subsequent new synchronizations,\\n * leading to a natural and desired decay. Delegations can either be synchronized from mainnet or done locally on\\n * the current chain (with the risk of being overwritten when someone triggers a sync for the delegating account).\\n */\\ncontract BridgedGovernance is CCIPReceiver, Governance {\\n\\n    uint64 public immutable MAINNET_CHAIN_SELECTOR;\\n    address public immutable MAINNET_GOVERNANCE_ADDRESS;\\n\\n    mapping(address => uint256) private _votes;\\n    uint256 private _totalVotes;\\n\\n    event MessageReceived(bytes32 messageId, uint64 sourceChain, uint256 totalVotes, SyncVote[] syncedVotes);\\n\\n    error InvalidSourceChain();\\n    error InvalidSender();\\n\\n    constructor(address router, uint64 mainnetChainSelector, address mainnetGovernanceAddress) CCIPReceiver(router) {\\n        MAINNET_CHAIN_SELECTOR = mainnetChainSelector;\\n        MAINNET_GOVERNANCE_ADDRESS = mainnetGovernanceAddress;\\n    }\\n\\n    /// @notice Get the number of votes held by a holder.\\n    /// @param holder The address to check.\\n    function votes(address holder) public view override returns (uint256) {\\n        return _votes[holder];\\n    }\\n\\n    /// @notice Get the total number of votes.\\n    function totalVotes() public view override returns (uint256) {\\n        return _totalVotes;\\n    }\\n\\n    /// @notice Process a sync message.\\n    /// @param any2EvmMessage The message to process.\\n    function _ccipReceive(Client.Any2EVMMessage memory any2EvmMessage) internal override {\\n        if (any2EvmMessage.sourceChainSelector != MAINNET_CHAIN_SELECTOR) revert InvalidSourceChain();\\n        if (abi.decode(any2EvmMessage.sender, (address)) != MAINNET_GOVERNANCE_ADDRESS) revert InvalidSender();\\n\\n        SyncMessage memory syncMessage = abi.decode(any2EvmMessage.data, (SyncMessage)); // abi-decoding of the sent text\\n\\n        _processSyncMessage(syncMessage);\\n\\n        emit MessageReceived(any2EvmMessage.messageId, any2EvmMessage.sourceChainSelector, syncMessage.totalVotes, syncMessage.votes);\\n    }\\n\\n    /// @notice Updates internal state with received message\\n    /// @param syncMessage The message to process.\\n    function _processSyncMessage(SyncMessage memory syncMessage) internal {\\n        _totalVotes = syncMessage.totalVotes;\\n\\n        // omitted unchecked optimization for readability\\n        for (uint64 i = 0; i < syncMessage.votes.length; i++) {\\n            SyncVote memory syncVote = syncMessage.votes[i];\\n            _votes[syncVote.voter] = syncVote.votes;\\n            delegate(syncVote.voter, syncVote.delegatee);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x98ff7a2fd8fde2addfe61de19103c12b83d3a6e1fc4022392cba0cb02b2d23c4\",\"license\":\"MIT\"},\"contracts/equity/Governance.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IGovernance.sol\\\";\\n\\n/**\\n * Contract to consult when checking if someone has veto power.\\n * Veto power is reached with 2% of the votes.\\n */\\nabstract contract Governance is IGovernance {\\n\\n    /**\\n     * @notice The quorum in basis points. 100 is 1%.\\n     */\\n    uint32 private constant QUORUM = 200;\\n\\n    /**\\n     * @notice Keeping track on who delegated votes to whom.\\n     * Note that delegation does not mean you cannot vote / veto any more, it just means that the delegate can\\n     * benefit from your votes when invoking a veto. Circular delegations are valid, do not help when voting.\\n     */\\n    mapping(address owner => address delegate) public delegates;\\n\\n    event Delegation(address indexed from, address indexed to); // indicates a delegation\\n\\n    /**\\n     * @notice The votes of the holder, excluding votes from delegates.\\n     */\\n    function votes(address holder) virtual public view returns (uint256);\\n\\n    /**\\n     * @notice Total number of votes in the system.\\n     */\\n    function totalVotes() virtual public view returns (uint256);\\n\\n    /**\\n     * @notice The number of votes the sender commands when taking the support of the helpers into account.\\n     * @param sender    The address whose total voting power is of interest\\n     * @param helpers   An incrementally sorted list of helpers without duplicates and without the sender.\\n     *                  The call fails if the list contains an address that does not delegate to sender.\\n     *                  For indirect delegates, i.e. a -> b -> c, both a and b must be included for both to count.\\n     * @return          The total number of votes of sender at the current point in time.\\n     */\\n    function votesDelegated(address sender, address[] calldata helpers) public view returns (uint256) {\\n        uint256 _votes = votes(sender);\\n        require(_checkDuplicatesAndSorted(helpers));\\n        for (uint i = 0; i < helpers.length; i++) {\\n            address current = helpers[i];\\n            require(current != sender);\\n            require(_canVoteFor(sender, current));\\n            _votes += votes(current);\\n        }\\n        return _votes;\\n    }\\n\\n    function _checkDuplicatesAndSorted(address[] calldata helpers) internal pure returns (bool ok) {\\n        if (helpers.length <= 1) {\\n            return true;\\n        } else {\\n            address prevAddress = helpers[0];\\n            for (uint i = 1; i < helpers.length; i++) {\\n                if (helpers[i] <= prevAddress) {\\n                    return false;\\n                }\\n                prevAddress = helpers[i];\\n            }\\n            return true;\\n        }\\n    }\\n\\n    /**\\n     * @notice Checks whether the sender address is qualified given a list of helpers that delegated their votes\\n     * directly or indirectly to the sender. It is the responsiblity of the caller to figure out whether\\n     * helps are necessary and to identify them by scanning the blockchain for Delegation events.\\n     */\\n    function checkQualified(address sender, address[] calldata helpers) public view override {\\n        uint256 _votes = votesDelegated(sender, helpers);\\n        if (_votes * 10000 < QUORUM * totalVotes()) revert NotQualified();\\n    }\\n\\n    error NotQualified();\\n\\n    /**\\n     * @notice Increases the voting power of the delegate by your number of votes without taking away any voting power\\n     * from the sender.\\n     */\\n    function delegateVoteTo(address delegate_) external {\\n        delegate(msg.sender, delegate_);\\n    }\\n\\n    function delegate(address owner, address delegate_) internal {\\n        delegates[owner] = delegate_;\\n        emit Delegation(owner, delegate_);\\n    }\\n\\n    function _canVoteFor(address delegate_, address owner) internal view returns (bool) {\\n        if (owner == delegate_) {\\n            return true;\\n        } else if (owner == address(0x0)) {\\n            return false;\\n        } else {\\n            return _canVoteFor(delegate_, delegates[owner]);\\n        }\\n    }\\n\\n}\",\"keccak256\":\"0xa720eda045a92306593753381ef691c550dc458f3fb7f7c45c99d5e69bed3c59\",\"license\":\"MIT\"},\"contracts/equity/IGovernance.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IGovernance {\\n   function checkQualified(address sender, address[] calldata helpers) external view;\\n}\\n\\nstruct SyncVote {\\n    address voter;\\n    uint256 votes;\\n    address delegatee;\\n}\\n\\nstruct SyncMessage {\\n    SyncVote[] votes;\\n    uint256 totalVotes;\\n}\\n\",\"keccak256\":\"0xd6329ac67953e19cee718b79f14ff527f49984d8a01141b496ee68c91b0a4274\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60e060405234801561001057600080fd5b50604051610ea5380380610ea583398101604081905261002f916100a0565b826001600160a01b03811661005e576040516335fdcccd60e21b81526000600482015260240160405180910390fd5b6001600160a01b039081166080526001600160401b0390921660a0521660c052506100f2565b80516001600160a01b038116811461009b57600080fd5b919050565b6000806000606084860312156100b557600080fd5b6100be84610084565b60208501519093506001600160401b03811681146100db57600080fd5b91506100e960408501610084565b90509250925092565b60805160a05160c051610d706101356000396000818160ed015261057b0152600081816101c901526105250152600081816101a0015261038c0152610d706000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c80635895b773116100715780635895b7731461016557806385572ffb146101785780639823004f1461018b578063b0f479a11461019e578063c038e298146101c4578063d8bff5a51461020357600080fd5b806301ffc9a7146100ae5780630d15fd77146100d6578063269d34d4146100e8578063352e3a8314610127578063587cde1e1461013c575b600080fd5b6100c16100bc366004610744565b61022c565b60405190151581526020015b60405180910390f35b6002545b6040519081526020016100cd565b61010f7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016100cd565b61013a61013536600461078a565b610263565b005b61010f61014a366004610811565b6000602081905290815260409020546001600160a01b031681565b6100da61017336600461078a565b6102b7565b61013a61018636600461082e565b610381565b61013a610199366004610811565b6103e4565b7f000000000000000000000000000000000000000000000000000000000000000061010f565b6101eb7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160401b0390911681526020016100cd565b6100da610211366004610811565b6001600160a01b031660009081526001602052604090205490565b60006001600160e01b031982166385572ffb60e01b148061025d57506001600160e01b031982166301ffc9a760e01b145b92915050565b60006102708484846102b7565b905061027b60025490565b6102869060c861087e565b6102928261271061087e565b10156102b15760405163bcfcdc1160e01b815260040160405180910390fd5b50505050565b6001600160a01b0383166000908152600160205260408120546102da84846103ee565b6102e357600080fd5b60005b8381101561037857600085858381811061030257610302610895565b90506020020160208101906103179190610811565b9050866001600160a01b0316816001600160a01b03160361033757600080fd5b61034187826104bd565b61034a57600080fd5b6001600160a01b03811660009081526001602052604090205461036d90846108ab565b9250506001016102e6565b50949350505050565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146103d0576040516335fdcccd60e21b815233600482015260240160405180910390fd5b6103e16103dc82610ab6565b610523565b50565b6103e13382610658565b6000600182116104005750600161025d565b60008383600081811061041557610415610895565b905060200201602081019061042a9190610811565b905060015b838110156104b257816001600160a01b031685858381811061045357610453610895565b90506020020160208101906104689190610811565b6001600160a01b0316116104815760009250505061025d565b84848281811061049357610493610895565b90506020020160208101906104a89190610811565b915060010161042f565b506001949350505050565b6000826001600160a01b0316826001600160a01b0316036104e05750600161025d565b6001600160a01b0382166104f65750600061025d565b6001600160a01b0380831660009081526020819052604090205461051c918591166104bd565b905061025d565b7f00000000000000000000000000000000000000000000000000000000000000006001600160401b031681602001516001600160401b03161461057957604051639284b19760e01b815260040160405180910390fd5b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031681604001518060200190518101906105bb9190610b62565b6001600160a01b0316146105e257604051636edaef2f60e11b815260040160405180910390fd5b600081606001518060200190518101906105fc9190610b7f565b9050610607816106af565b7f7010cc6740340d7ccc25dd76569674c2b8945d3f87633d1cee16cd6176d13120826000015183602001518360200151846000015160405161064c9493929190610c89565b60405180910390a15050565b6001600160a01b0382811660008181526020819052604080822080546001600160a01b0319169486169485179055517fd000f39f92c3ed77f890f16b6ced1555e0ab2cdf470522d2210de67d8c83d45b9190a35050565b602081015160025560005b8151516001600160401b03821610156107405760008260000151826001600160401b0316815181106106ee576106ee610895565b6020908102919091018101518082015181516001600160a01b0316600090815260019093526040928390205580519181015190925061072d9190610658565b508061073881610d14565b9150506106ba565b5050565b60006020828403121561075657600080fd5b81356001600160e01b03198116811461076e57600080fd5b9392505050565b6001600160a01b03811681146103e157600080fd5b60008060006040848603121561079f57600080fd5b83356107aa81610775565b925060208401356001600160401b03808211156107c657600080fd5b818601915086601f8301126107da57600080fd5b8135818111156107e957600080fd5b8760208260051b85010111156107fe57600080fd5b6020830194508093505050509250925092565b60006020828403121561082357600080fd5b813561076e81610775565b60006020828403121561084057600080fd5b81356001600160401b0381111561085657600080fd5b820160a0818503121561076e57600080fd5b634e487b7160e01b600052601160045260246000fd5b808202811582820484141761025d5761025d610868565b634e487b7160e01b600052603260045260246000fd5b8082018082111561025d5761025d610868565b634e487b7160e01b600052604160045260246000fd5b604080519081016001600160401b03811182821017156108f6576108f66108be565b60405290565b60405160a081016001600160401b03811182821017156108f6576108f66108be565b604051606081016001600160401b03811182821017156108f6576108f66108be565b604051601f8201601f191681016001600160401b0381118282101715610968576109686108be565b604052919050565b80356001600160401b038116811461098757600080fd5b919050565b600082601f83011261099d57600080fd5b81356001600160401b038111156109b6576109b66108be565b6109c9601f8201601f1916602001610940565b8181528460208386010111156109de57600080fd5b816020850160208301376000918101602001919091529392505050565b60006001600160401b03821115610a1457610a146108be565b5060051b60200190565b600082601f830112610a2f57600080fd5b81356020610a44610a3f836109fb565b610940565b82815260069290921b84018101918181019086841115610a6357600080fd5b8286015b84811015610aab5760408189031215610a805760008081fd5b610a886108d4565b8135610a9381610775565b81528185013585820152835291830191604001610a67565b509695505050505050565b600060a08236031215610ac857600080fd5b610ad06108fc565b82358152610ae060208401610970565b602082015260408301356001600160401b0380821115610aff57600080fd5b610b0b3683870161098c565b60408401526060850135915080821115610b2457600080fd5b610b303683870161098c565b60608401526080850135915080821115610b4957600080fd5b50610b5636828601610a1e565b60808301525092915050565b600060208284031215610b7457600080fd5b815161076e81610775565b60006020808385031215610b9257600080fd5b82516001600160401b0380821115610ba957600080fd5b81850191506040808388031215610bbf57600080fd5b610bc76108d4565b835183811115610bd657600080fd5b84019250601f83018813610be957600080fd5b8251610bf7610a3f826109fb565b8181526060918202850187019187820191908b841115610c1657600080fd5b958801955b83871015610c705780878d031215610c335760008081fd5b610c3b61091e565b8751610c4681610775565b8152878a01518a82015286880151610c5d81610775565b8188015283529586019591880191610c1b565b5083525050928401519383019390935250949350505050565b60006080820186835260206001600160401b0387166020850152604086604086015260606080606087015283875180865260a08801915060208901955060005b81811015610d0357865180516001600160a01b03908116855287820151888601529086015116858401529585019591830191600101610cc9565b50909b9a5050505050505050505050565b60006001600160401b03808316818103610d3057610d30610868565b600101939250505056fea26469706673582212201450ed2b33355a1c4ac2d04155c616dd7b8645e1b3b9cc97c5c81b58308af20664736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100a95760003560e01c80635895b773116100715780635895b7731461016557806385572ffb146101785780639823004f1461018b578063b0f479a11461019e578063c038e298146101c4578063d8bff5a51461020357600080fd5b806301ffc9a7146100ae5780630d15fd77146100d6578063269d34d4146100e8578063352e3a8314610127578063587cde1e1461013c575b600080fd5b6100c16100bc366004610744565b61022c565b60405190151581526020015b60405180910390f35b6002545b6040519081526020016100cd565b61010f7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016100cd565b61013a61013536600461078a565b610263565b005b61010f61014a366004610811565b6000602081905290815260409020546001600160a01b031681565b6100da61017336600461078a565b6102b7565b61013a61018636600461082e565b610381565b61013a610199366004610811565b6103e4565b7f000000000000000000000000000000000000000000000000000000000000000061010f565b6101eb7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160401b0390911681526020016100cd565b6100da610211366004610811565b6001600160a01b031660009081526001602052604090205490565b60006001600160e01b031982166385572ffb60e01b148061025d57506001600160e01b031982166301ffc9a760e01b145b92915050565b60006102708484846102b7565b905061027b60025490565b6102869060c861087e565b6102928261271061087e565b10156102b15760405163bcfcdc1160e01b815260040160405180910390fd5b50505050565b6001600160a01b0383166000908152600160205260408120546102da84846103ee565b6102e357600080fd5b60005b8381101561037857600085858381811061030257610302610895565b90506020020160208101906103179190610811565b9050866001600160a01b0316816001600160a01b03160361033757600080fd5b61034187826104bd565b61034a57600080fd5b6001600160a01b03811660009081526001602052604090205461036d90846108ab565b9250506001016102e6565b50949350505050565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146103d0576040516335fdcccd60e21b815233600482015260240160405180910390fd5b6103e16103dc82610ab6565b610523565b50565b6103e13382610658565b6000600182116104005750600161025d565b60008383600081811061041557610415610895565b905060200201602081019061042a9190610811565b905060015b838110156104b257816001600160a01b031685858381811061045357610453610895565b90506020020160208101906104689190610811565b6001600160a01b0316116104815760009250505061025d565b84848281811061049357610493610895565b90506020020160208101906104a89190610811565b915060010161042f565b506001949350505050565b6000826001600160a01b0316826001600160a01b0316036104e05750600161025d565b6001600160a01b0382166104f65750600061025d565b6001600160a01b0380831660009081526020819052604090205461051c918591166104bd565b905061025d565b7f00000000000000000000000000000000000000000000000000000000000000006001600160401b031681602001516001600160401b03161461057957604051639284b19760e01b815260040160405180910390fd5b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031681604001518060200190518101906105bb9190610b62565b6001600160a01b0316146105e257604051636edaef2f60e11b815260040160405180910390fd5b600081606001518060200190518101906105fc9190610b7f565b9050610607816106af565b7f7010cc6740340d7ccc25dd76569674c2b8945d3f87633d1cee16cd6176d13120826000015183602001518360200151846000015160405161064c9493929190610c89565b60405180910390a15050565b6001600160a01b0382811660008181526020819052604080822080546001600160a01b0319169486169485179055517fd000f39f92c3ed77f890f16b6ced1555e0ab2cdf470522d2210de67d8c83d45b9190a35050565b602081015160025560005b8151516001600160401b03821610156107405760008260000151826001600160401b0316815181106106ee576106ee610895565b6020908102919091018101518082015181516001600160a01b0316600090815260019093526040928390205580519181015190925061072d9190610658565b508061073881610d14565b9150506106ba565b5050565b60006020828403121561075657600080fd5b81356001600160e01b03198116811461076e57600080fd5b9392505050565b6001600160a01b03811681146103e157600080fd5b60008060006040848603121561079f57600080fd5b83356107aa81610775565b925060208401356001600160401b03808211156107c657600080fd5b818601915086601f8301126107da57600080fd5b8135818111156107e957600080fd5b8760208260051b85010111156107fe57600080fd5b6020830194508093505050509250925092565b60006020828403121561082357600080fd5b813561076e81610775565b60006020828403121561084057600080fd5b81356001600160401b0381111561085657600080fd5b820160a0818503121561076e57600080fd5b634e487b7160e01b600052601160045260246000fd5b808202811582820484141761025d5761025d610868565b634e487b7160e01b600052603260045260246000fd5b8082018082111561025d5761025d610868565b634e487b7160e01b600052604160045260246000fd5b604080519081016001600160401b03811182821017156108f6576108f66108be565b60405290565b60405160a081016001600160401b03811182821017156108f6576108f66108be565b604051606081016001600160401b03811182821017156108f6576108f66108be565b604051601f8201601f191681016001600160401b0381118282101715610968576109686108be565b604052919050565b80356001600160401b038116811461098757600080fd5b919050565b600082601f83011261099d57600080fd5b81356001600160401b038111156109b6576109b66108be565b6109c9601f8201601f1916602001610940565b8181528460208386010111156109de57600080fd5b816020850160208301376000918101602001919091529392505050565b60006001600160401b03821115610a1457610a146108be565b5060051b60200190565b600082601f830112610a2f57600080fd5b81356020610a44610a3f836109fb565b610940565b82815260069290921b84018101918181019086841115610a6357600080fd5b8286015b84811015610aab5760408189031215610a805760008081fd5b610a886108d4565b8135610a9381610775565b81528185013585820152835291830191604001610a67565b509695505050505050565b600060a08236031215610ac857600080fd5b610ad06108fc565b82358152610ae060208401610970565b602082015260408301356001600160401b0380821115610aff57600080fd5b610b0b3683870161098c565b60408401526060850135915080821115610b2457600080fd5b610b303683870161098c565b60608401526080850135915080821115610b4957600080fd5b50610b5636828601610a1e565b60808301525092915050565b600060208284031215610b7457600080fd5b815161076e81610775565b60006020808385031215610b9257600080fd5b82516001600160401b0380821115610ba957600080fd5b81850191506040808388031215610bbf57600080fd5b610bc76108d4565b835183811115610bd657600080fd5b84019250601f83018813610be957600080fd5b8251610bf7610a3f826109fb565b8181526060918202850187019187820191908b841115610c1657600080fd5b958801955b83871015610c705780878d031215610c335760008081fd5b610c3b61091e565b8751610c4681610775565b8152878a01518a82015286880151610c5d81610775565b8188015283529586019591880191610c1b565b5083525050928401519383019390935250949350505050565b60006080820186835260206001600160401b0387166020850152604086604086015260606080606087015283875180865260a08801915060208901955060005b81811015610d0357865180516001600160a01b03908116855287820151888601529086015116858401529585019591830191600101610cc9565b50909b9a5050505050505050505050565b60006001600160401b03808316818103610d3057610d30610868565b600101939250505056fea26469706673582212201450ed2b33355a1c4ac2d04155c616dd7b8645e1b3b9cc97c5c81b58308af20664736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "ccipReceive((bytes32,uint64,bytes,bytes,(address,uint256)[]))": {
+        "details": "Note ensure you check the msg.sender is the OffRampRouter",
+        "params": {
+          "message": "CCIP Message"
+        }
+      },
+      "getRouter()": {
+        "returns": {
+          "_0": "CCIP router address"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "Should indicate whether the contract implements IAny2EVMMessageReceiver e.g. return interfaceId == type(IAny2EVMMessageReceiver).interfaceId || interfaceId == type(IERC165).interfaceId This allows CCIP to check if ccipReceive is available before calling it. If this returns false or reverts, only tokens are transferred to the receiver. If this returns true, tokens are transferred and ccipReceive is called atomically. Additionally, if the receiver address does not have code associated with it at the time of execution (EXTCODESIZE returns 0), only tokens will be transferred.",
+        "params": {
+          "interfaceId": "The interfaceId to check"
+        },
+        "returns": {
+          "_0": "true if the interfaceId is supported"
+        }
+      },
+      "votes(address)": {
+        "params": {
+          "holder": "The address to check."
+        }
+      },
+      "votesDelegated(address,address[])": {
+        "params": {
+          "helpers": "An incrementally sorted list of helpers without duplicates and without the sender.                  The call fails if the list contains an address that does not delegate to sender.                  For indirect delegates, i.e. a -> b -> c, both a and b must be included for both to count.",
+          "sender": "The address whose total voting power is of interest"
+        },
+        "returns": {
+          "_0": "The total number of votes of sender at the current point in time."
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "ccipReceive((bytes32,uint64,bytes,bytes,(address,uint256)[]))": {
+        "notice": "Called by the Router to deliver a message. If this reverts, any token transfers also revert. The message will move to a FAILED state and become available for manual execution."
+      },
+      "checkQualified(address,address[])": {
+        "notice": "Checks whether the sender address is qualified given a list of helpers that delegated their votes directly or indirectly to the sender. It is the responsiblity of the caller to figure out whether helps are necessary and to identify them by scanning the blockchain for Delegation events."
+      },
+      "delegateVoteTo(address)": {
+        "notice": "Increases the voting power of the delegate by your number of votes without taking away any voting power from the sender."
+      },
+      "delegates(address)": {
+        "notice": "Keeping track on who delegated votes to whom. Note that delegation does not mean you cannot vote / veto any more, it just means that the delegate can benefit from your votes when invoking a veto. Circular delegations are valid, do not help when voting."
+      },
+      "getRouter()": {
+        "notice": "Return the current router"
+      },
+      "supportsInterface(bytes4)": {
+        "notice": "IERC165 supports an interfaceId"
+      },
+      "totalVotes()": {
+        "notice": "Get the total number of votes."
+      },
+      "votes(address)": {
+        "notice": "Get the number of votes held by a holder."
+      },
+      "votesDelegated(address,address[])": {
+        "notice": "The number of votes the sender commands when taking the support of the helpers into account."
+      }
+    },
+    "notice": "This contract receives messages from the mainnet governance contract about the voting power of individual addresses as well as the total number of votes at the time of synchronization, and to whom they are delegating (if anyone).  Accounts that alone or with the help of delegations reach 2% of the votes gain veto power and are considered 'qualified'. See also the 'checkQualified' method in the parent class and the IGovernance interface. The governance process is not done through majority votes, but by exercising veto power. Generally, anyone can make governance proposals that pass automatically after a grace period unless a qualified user vetoes the proposal, leading to a very light-weight and decentralized governance process.  As the total number of votes increases with time (votes is the holding duration times the number of governance tokens held), the voting power of previously synchronized accounts tends to decrease with subsequent new synchronizations, leading to a natural and desired decay. Delegations can either be synchronized from mainnet or done locally on the current chain (with the risk of being overwritten when someone triggers a sync for the delegating account).",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 8050,
+        "contract": "contracts/equity/BridgedGovernance.sol:BridgedGovernance",
+        "label": "delegates",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_address)"
+      },
+      {
+        "astId": 6766,
+        "contract": "contracts/equity/BridgedGovernance.sol:BridgedGovernance",
+        "label": "_votes",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 6768,
+        "contract": "contracts/equity/BridgedGovernance.sol:BridgedGovernance",
+        "label": "_totalVotes",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_address)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
