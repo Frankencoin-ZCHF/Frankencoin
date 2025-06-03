@@ -109,11 +109,11 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
     `npx hardhat verify --network ${
       hre.network.name
-    } ${await l2Deployer.bridgedFrankencoin()} ${ccipParams["router"]} ${
-      frankencoinParams["minApplicationPeriod"]
-    } ${ccipParams["linkToken"]} ${mainnetCcipParams["chainSelector"]} ${
-      mainnetCcipParams["bridgeAccounting"]
-    } ${await l2Deployer.ccipAdmin()}`
+    } ${await l2Deployer.bridgedFrankencoin()} ${await bridgedGovernance.getAddress()} ${
+      ccipParams["router"]
+    } ${frankencoinParams["minApplicationPeriod"]} ${ccipParams["linkToken"]} ${
+      mainnetCcipParams["chainSelector"]
+    } ${mainnetCcipParams["bridgeAccounting"]} ${await l2Deployer.ccipAdmin()}`
   );
   console.log(
     `npx hardhat verify --network ${
