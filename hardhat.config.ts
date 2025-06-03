@@ -12,6 +12,25 @@ import { getChildFromSeed } from "./helper/wallet";
 import dotenv from "dotenv";
 dotenv.config();
 
+// Extend Hardhat typings
+declare module "hardhat/types/config" {
+  export interface HardhatNetworkUserConfig {
+    testnet?: boolean;
+  }
+
+  export interface HttpNetworkUserConfig {
+    testnet?: boolean;
+  }
+
+  export interface HardhatNetworkConfig {
+    testnet?: boolean;
+  }
+
+  export interface HttpNetworkConfig {
+    testnet?: boolean;
+  }
+}
+
 // ---------------------------------------------------------------------------------------
 
 const index = process.env.DEPLOYER_SEED_INDEX;
@@ -52,6 +71,7 @@ const config: HardhatUserConfig = {
       gasMultiplier: 0.7,
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: false,
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${alchemy}`,
@@ -60,6 +80,7 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: true,
     },
     polygon: {
       url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemy}`,
@@ -68,6 +89,61 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       accounts: [wallet.privateKey],
       timeout: 50_000,
+      testnet: false,
+    },
+    optimism: {
+      url: `https://opt-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 10,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
+    },
+    arbitrum: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 42161,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
+    },
+    base: {
+      url: `https://base-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 8453,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
+    },
+    avalanche: {
+      url: `https://avax-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 43114,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
+    },
+    gnosis: {
+      url: `https://gnosis-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 100,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
+    },
+    sonic: {
+      url: `https://sonic-mainnet.g.alchemy.com/v2/${alchemy}`,
+      chainId: 146,
+      gas: "auto",
+      gasPrice: "auto",
+      accounts: [wallet.privateKey],
+      timeout: 50_000,
+      testnet: false,
     },
     citrea: {
       url: `https://rpc.testnet.citrea.xyz`,
@@ -107,6 +183,8 @@ const config: HardhatUserConfig = {
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
+    deploy: "./scripts/deployment/deploy",
+    deployments: "./scripts/deployment/deployments",
   },
   contractSizer: {
     alphaSort: false,

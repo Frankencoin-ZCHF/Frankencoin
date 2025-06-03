@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe.only("TransferReference", () => {
+describe("TransferReference", () => {
   async function deployFixture() {
     const [owner, nonOwner] = await ethers.getSigners();
 

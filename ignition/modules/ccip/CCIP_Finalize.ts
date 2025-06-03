@@ -1,18 +1,18 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { getChildFromSeed } from "../../../helper/wallet";
-import { ADDRESS } from "../../../exports/address.mainnet.config";
+import { ADDRESS, ChainAddress } from "../../../exports/address.mainnet.config";
 import { Chain } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 import { ethers } from "ethers";
 
-const seed = process.env.DEPLOYER_ACCOUNT_SEED;
+const seed = process.env.DEPLOYER_SEED;
 if (!seed) throw new Error("Failed to import the seed string from .env");
 
 const w0 = getChildFromSeed(seed, 0); // deployer
 
 // frankencoin addresses
 const id = process.env?.CHAINID || 1;
-const ADDR = ADDRESS[id as Chain["id"]];
+const ADDR = ADDRESS[Number(id)] as ChainAddress["1"];
 
 export const config = {
   deployer: w0.address,
@@ -24,7 +24,7 @@ console.log(config);
 
 let chainUpdates: any[] = [];
 if (id === 1) {
-  chainUpdates = [getChainUpdate(polygon.id)];
+  chainUpdates = [];
 } else {
   chainUpdates = [getChainUpdate(polygonAmoy.id)];
 }
@@ -35,19 +35,24 @@ console.log(chainUpdates);
 
 const CCIPFinalizeModule = buildModule("CCIPFinalize", (m) => {
   const ccipAdmin = m.contractAt("CCIPAdmin", ADDR.ccipAdmin);
-  m.call(ccipAdmin, "acceptAdmin", [ADDR.tokenPool, chainUpdates]);
+  m.call(ccipAdmin, "acceptAdmin", [ADDR.ccipTokenPool, chainUpdates]);
 
   return {};
 });
 
 function getChainUpdate(chainId: Chain["id"]) {
   const ADDR = ADDRESS[chainId];
-  if (ADDR && ADDR.frankenCoin && ADDR.chainSelector && ADDR.tokenPool) {
+  if (
+    ADDR &&
+    ADDR.frankencoin &&
+    ADDR.ccipChainSelector &&
+    ADDR.ccipTokenPool
+  ) {
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
     return {
-      remoteChainSelector: ADDR.chainSelector,
-      remotePoolAddresses: [abiCoder.encode(["address"], [ADDR.tokenPool])],
-      remoteTokenAddress: abiCoder.encode(["address"], [ADDR.frankenCoin]),
+      remoteChainSelector: ADDR.ccipChainSelector,
+      remotePoolAddresses: [abiCoder.encode(["address"], [ADDR.ccipTokenPool])],
+      remoteTokenAddress: abiCoder.encode(["address"], [ADDR.frankencoin]),
       outboundRateLimiterConfig: {
         isEnabled: false,
         capacity: 0,
