@@ -6,6 +6,7 @@ import {
   mainnet,
   optimism,
   polygon,
+  sonic,
 } from "viem/chains";
 import { Address, zeroAddress } from "viem";
 
@@ -38,6 +39,8 @@ export interface ChainAddress {
     // multi chain support
     transferReference: Address; // separate SC for mainnet transfers
     savingsReferral: Address; // detached, implements referral
+
+    // ccip support
     ccipAdmin: Address;
     ccipTokenPool: Address;
     ccipBridgeAccounting: Address;
@@ -50,18 +53,57 @@ export interface ChainAddress {
   };
   // ###### MULTI CHAIN ######
   [polygon.id]: {
+    // standard bridges
     bridgePolygonFrankencoin: Address;
     bridgePolygonWfps: Address;
+
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
   };
   [arbitrum.id]: {
+    // standard bridges
     bridgeArbitrumFrankencoin: Address;
+
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
   };
   [optimism.id]: {
+    // standard bridges
     bridgeOptimismFrankencoin: Address;
+
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
   };
-  [base.id]: {};
-  [avalanche.id]: {};
-  [gnosis.id]: {};
+  [base.id]: {
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
+  };
+  [avalanche.id]: {
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
+  };
+  [gnosis.id]: {
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
+  };
+  [sonic.id]: {
+    // ccip cross chain support
+    ccipAdmin: Address;
+    ccipBridgedFrankencoin: Address;
+    ccipBridgedGovernance: Address;
+  };
 }
 
 export const ADDRESS: ChainAddress = {
@@ -105,14 +147,43 @@ export const ADDRESS: ChainAddress = {
   [polygon.id]: {
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",
     bridgePolygonWfps: "0x54Cc50D5CC4914F0c5DA8b0581938dC590d29b3D",
+
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
   },
   [arbitrum.id]: {
     bridgeArbitrumFrankencoin: "0xB33c4255938de7A6ec1200d397B2b2F329397F9B",
+
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
   },
   [optimism.id]: {
     bridgeOptimismFrankencoin: "0x4F8a84C442F9675610c680990EdDb2CCDDB8aB6f",
+
+    ccipAdmin: "0x0d3620Eb00DD489F7A20A1Dd537Ff2fD5A720b04",
+    ccipBridgedFrankencoin: "0x97d60696D4273e5F64aB2B7E1160F885154F1cB9",
+    ccipBridgedGovernance: "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
   },
-  [base.id]: {},
-  [avalanche.id]: {},
-  [gnosis.id]: {},
+  [base.id]: {
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+  },
+  [avalanche.id]: {
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+  },
+  [gnosis.id]: {
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+  },
+  [sonic.id]: {
+    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
+    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
+    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+  },
 };
