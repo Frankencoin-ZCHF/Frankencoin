@@ -31,29 +31,29 @@ abstract contract CrossChainReference is CrossChainERC20 {
     }
 
     // transfer within the cross chain context
-    function transfer(uint64 targetChain, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+    function transfer(uint64 targetChain, address recipient, uint256 amount, string calldata ref) public payable returns (bool) {
         return transfer(targetChain, _toReceiver(recipient), amount, "", ref);
     }
 
-    function transfer(uint64 targetChain, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+    function transfer(uint64 targetChain, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public payable returns (bool) {
         return transfer(targetChain, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
     }
 
-    function transfer(uint64 targetChain, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public returns (bool) {
+    function transfer(uint64 targetChain, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public payable returns (bool) {
         _crossTransfer(targetChain, msg.sender, recipient, amount, extraArgs, ref);
         return true;
     }
 
     // cross transfer from
-    function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public returns (bool) {
+    function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, string calldata ref) public payable returns (bool) {
         return transferFrom(targetChain, owner, _toReceiver(recipient), amount, "", ref);
     }
 
-    function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public returns (bool) {
+    function transferFrom(uint64 targetChain, address owner, address recipient, uint256 amount, Client.EVMExtraArgsV2 calldata extraArgs, string calldata ref) public payable returns (bool) {
         return transferFrom(targetChain, owner, _toReceiver(recipient), amount, Client._argsToBytes(extraArgs), ref);
     }
 
-    function transferFrom(uint64 targetChain, address owner, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public returns (bool) {
+    function transferFrom(uint64 targetChain, address owner, bytes memory recipient, uint256 amount, bytes memory extraArgs, string calldata ref) public payable returns (bool) {
         _useAllowance(owner, msg.sender, amount);
         _crossTransfer(targetChain, owner, recipient, amount, extraArgs, ref);
         return true;
