@@ -5,25 +5,27 @@ import { Address } from "viem";
 import { mainnet } from "viem/chains";
 
 // config and select
-export const NAME: string = "ReferenceTransfer"; // <-- select smart contract
-export const FILE: string = "ReferenceSavings"; // <-- name exported file
+export const NAME: string = "TransferReference"; // <-- select smart contract
+export const FILE: string = "TransferReference"; // <-- name exported file
 export const MOD: string = NAME + "Module";
 console.log(NAME);
 
 // params
 export type DeploymentParams = {
-  zchf: Address;
-  savings: Address;
+  token: Address;
+  router: Address;
+  link: Address;
 };
 
 export const params: DeploymentParams = {
-  zchf: ADDRESS[mainnet.id].frankencoin,
-  savings: ADDRESS[mainnet.id].savings,
+  token: ADDRESS[mainnet.id].frankencoin,
+  router: ADDRESS[mainnet.id].ccipRouter,
+  link: ADDRESS[mainnet.id].linkToken,
 };
 
-export type ConstructorArgs = [Address, Address];
+export type ConstructorArgs = [Address, Address, Address];
 
-export const args: ConstructorArgs = [params.zchf, params.savings];
+export const args: ConstructorArgs = [params.token, params.router, params.link];
 
 console.log("Imported Params:");
 console.log(params);
