@@ -1,4 +1,5 @@
 // chain addresses and helpers
+export * from "./address.mainnet.config";
 export * as deployment from "./address.mainnet.config";
 export * as testing from "./address.testnet.config";
 

@@ -1,6 +1,6 @@
 {
   "name": "@frankencoin/zchf",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "It shall support a wide range of collateralized minting methods that are governed by a democratic process.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
