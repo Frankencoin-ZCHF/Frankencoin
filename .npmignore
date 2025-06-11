@@ -36,6 +36,7 @@ tsconfig.ts
 
 tst.ts
 
-solcover.js
+.gitmodules
+.solcover.js
 .solhint.json
 dbg.project.json
