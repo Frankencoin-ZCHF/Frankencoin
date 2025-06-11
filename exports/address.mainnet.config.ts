@@ -13,6 +13,10 @@ import { Address, zeroAddress } from "viem";
 export interface ChainAddress {
   // ###### NATIVE CHAIN ######
   [mainnet.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // core
     frankencoin: Address; // ZCHF token
     equity: Address; // FPS token
@@ -53,6 +57,10 @@ export interface ChainAddress {
   };
   // ###### MULTI CHAIN ######
   [polygon.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // standard bridges
     bridgePolygonFrankencoin: Address;
     bridgePolygonWfps: Address;
@@ -63,6 +71,10 @@ export interface ChainAddress {
     ccipBridgedGovernance: Address;
   };
   [arbitrum.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // standard bridges
     bridgeArbitrumFrankencoin: Address;
 
@@ -72,6 +84,10 @@ export interface ChainAddress {
     ccipBridgedGovernance: Address;
   };
   [optimism.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // standard bridges
     bridgeOptimismFrankencoin: Address;
 
@@ -81,24 +97,40 @@ export interface ChainAddress {
     ccipBridgedGovernance: Address;
   };
   [base.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // ccip cross chain support
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
   };
   [avalanche.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // ccip cross chain support
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
   };
   [gnosis.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // ccip cross chain support
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
   };
   [sonic.id]: {
+    // identifier
+    chainId: number;
+    chainSelector: string;
+
     // ccip cross chain support
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
@@ -108,6 +140,10 @@ export interface ChainAddress {
 
 export const ADDRESS: ChainAddress = {
   [mainnet.id]: {
+    // identifier
+    chainId: 1,
+    chainSelector: "5009297550715157269",
+
     // core
     frankencoin: "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
     equity: "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
@@ -136,8 +172,8 @@ export const ADDRESS: ChainAddress = {
     savingsReferral: "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
     ccipAdmin: "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
     ccipTokenPool: "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
-    ccipBridgeAccounting: zeroAddress,
-    ccipGovernanceSender: zeroAddress,
+    ccipBridgeAccounting: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    ccipGovernanceSender: "0xFD23272DfcB13Dc3Fabd8DB851fCD4827Af876EB",
     ccipLeadrateSender: zeroAddress,
     ccipTokenAdminRegistry: "0xb22764f98dD05c789929716D677382Df22C05Cb6",
     ccipRmnProxy: "0x411dE17f12D1A34ecC7F45f49844626267c75e81",
@@ -145,45 +181,83 @@ export const ADDRESS: ChainAddress = {
     linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
   },
   [polygon.id]: {
+    // identifier
+    chainId: 137,
+    chainSelector: "4051577828743386545",
+
+    // bridge
     bridgePolygonFrankencoin: "0x02567e4b14b25549331fCEe2B56c647A8bAB16FD",
     bridgePolygonWfps: "0x54Cc50D5CC4914F0c5DA8b0581938dC590d29b3D",
 
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [arbitrum.id]: {
+    // identifier
+    chainId: 42161,
+    chainSelector: "4949039107694359620",
+
+    // bridge
     bridgeArbitrumFrankencoin: "0xB33c4255938de7A6ec1200d397B2b2F329397F9B",
 
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [optimism.id]: {
+    // identifier
+    chainId: 10,
+    chainSelector: "3734403246176062136",
+
+    // bridge
     bridgeOptimismFrankencoin: "0x4F8a84C442F9675610c680990EdDb2CCDDB8aB6f",
 
-    ccipAdmin: "0x0d3620Eb00DD489F7A20A1Dd537Ff2fD5A720b04",
-    ccipBridgedFrankencoin: "0x97d60696D4273e5F64aB2B7E1160F885154F1cB9",
-    ccipBridgedGovernance: "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [base.id]: {
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // identifier
+    chainId: 8453,
+    chainSelector: "15971525489660198786",
+
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [avalanche.id]: {
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // identifier
+    chainId: 43114,
+    chainSelector: "6433500567565415381",
+
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [gnosis.id]: {
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // identifier
+    chainId: 100,
+    chainSelector: "465200170687744372",
+
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
   [sonic.id]: {
-    ccipAdmin: "0x31E483753fbEd8306631244422c46aC1a60FFc1d",
-    ccipBridgedFrankencoin: "0xa022Bdf5720495b5CABD92c37c387568f941f9f2",
-    ccipBridgedGovernance: "0x88fd2ECD0B9250F203e99E80eb78b0C32B8AdB16",
+    // identifier
+    chainId: 146,
+    chainSelector: "1673871237479749969",
+
+    // ccip
+    ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+    ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
 };
