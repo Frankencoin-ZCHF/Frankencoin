@@ -25,16 +25,16 @@ export interface ChainAddress {
     positionFactoryV1: Address;
 
     // minting hub v2 + utils v2
-    savings: Address;
-    roller: Address;
+    savingsV2: Address;
+    rollerV2: Address;
     mintingHubV2: Address;
     positionFactoryV2: Address;
 
     // stablecoin swap bridges
     stablecoinBridgeXCHF: Address;
-    xchf: Address;
+    xchfToken: Address;
     stablecoinBridgeVCHF: Address;
-    vchf: Address;
+    vchfToken: Address;
 
     // multi chain support
     transferReference: Address; // separate SC for mainnet transfers
@@ -120,19 +120,19 @@ export const ADDRESS: ChainAddress = {
     positionFactoryV1: "0x0CDE500e6940931ED190ded77bb48640c9486392",
 
     // minting hub v2 + utils v2
-    savings: "0x3BF301B0e2003E75A3e86AB82bD1EFF6A9dFB2aE",
-    roller: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
+    savingsV2: "0x3BF301B0e2003E75A3e86AB82bD1EFF6A9dFB2aE",
+    rollerV2: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
 
     // stablecoin swap bridges
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
-    xchf: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
+    xchfToken: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
     stablecoinBridgeVCHF: "0x3b71ba73299f925a837836160c3e1fec74340403",
-    vchf: "0x79d4f0232A66c4c91b89c76362016A1707CFBF4f",
+    vchfToken: "0x79d4f0232A66c4c91b89c76362016A1707CFBF4f",
 
     // multi chain support
-    transferReference: "0x6A9ffB6727dfd8811B7e67a578e2E576f779ab7e",
+    transferReference: "0xf98c221661F51578f5E5236B189a493E2a8a1916",
     savingsReferral: "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
     ccipAdmin: "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
     ccipTokenPool: "0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79",

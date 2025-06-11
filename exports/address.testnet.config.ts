@@ -17,8 +17,8 @@ export interface ChainAddress {
     positionFactoryV1: Address;
 
     // minting hub v2 + utils v2
-    savings: Address;
-    roller: Address;
+    savingsV2: Address;
+    rollerV2: Address;
     mintingHubV2: Address;
     positionFactoryV2: Address;
   };
@@ -40,8 +40,8 @@ export const ADDRESS: ChainAddress = {
     positionFactoryV1: "0x56Fa604fD5F96e456798F2dB50c88528A8a81F57",
 
     // minting hub v2 + utils v2
-    savings: "0xc50bF51ee9AaC98E2886ABD8c18876dA11D38709",
-    roller: "0xA640dcc5a7050020A7b38D57bEe2C06a4301fb4E",
+    savingsV2: "0xc50bF51ee9AaC98E2886ABD8c18876dA11D38709",
+    rollerV2: "0xA640dcc5a7050020A7b38D57bEe2C06a4301fb4E",
     mintingHubV2: "0xf214ea93D12F425F71Fc28b5D15F38E700e2daeC",
     positionFactoryV2: "0x151E58D4dAA67EC33f4809491441791e48d1Fe56",
   },
