@@ -66,6 +66,7 @@ export interface ChainAddress {
     bridgePolygonWfps: Address;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -79,6 +80,7 @@ export interface ChainAddress {
     bridgeArbitrumFrankencoin: Address;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -92,6 +94,7 @@ export interface ChainAddress {
     bridgeOptimismFrankencoin: Address;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -102,6 +105,7 @@ export interface ChainAddress {
     chainSelector: string;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -112,6 +116,7 @@ export interface ChainAddress {
     chainSelector: string;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -122,6 +127,7 @@ export interface ChainAddress {
     chainSelector: string;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -132,6 +138,7 @@ export interface ChainAddress {
     chainSelector: string;
 
     // ccip cross chain support
+    ccipTokenPool: Address;
     ccipAdmin: Address;
     ccipBridgedFrankencoin: Address;
     ccipBridgedGovernance: Address;
@@ -190,6 +197,7 @@ export const ADDRESS: ChainAddress = {
     bridgePolygonWfps: "0x54Cc50D5CC4914F0c5DA8b0581938dC590d29b3D",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -203,6 +211,7 @@ export const ADDRESS: ChainAddress = {
     bridgeArbitrumFrankencoin: "0xB33c4255938de7A6ec1200d397B2b2F329397F9B",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -216,6 +225,7 @@ export const ADDRESS: ChainAddress = {
     bridgeOptimismFrankencoin: "0x4F8a84C442F9675610c680990EdDb2CCDDB8aB6f",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -226,6 +236,7 @@ export const ADDRESS: ChainAddress = {
     chainSelector: "15971525489660198786",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -236,6 +247,7 @@ export const ADDRESS: ChainAddress = {
     chainSelector: "6433500567565415381",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -246,6 +258,7 @@ export const ADDRESS: ChainAddress = {
     chainSelector: "465200170687744372",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
@@ -256,6 +269,7 @@ export const ADDRESS: ChainAddress = {
     chainSelector: "1673871237479749969",
 
     // ccip
+    ccipTokenPool: "0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743",
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
