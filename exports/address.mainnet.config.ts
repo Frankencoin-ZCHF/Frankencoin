@@ -8,144 +8,10 @@ import {
   polygon,
   sonic,
 } from "viem/chains";
-import { Address, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
+import { ChainAddressMap } from "./address.mainnet.types";
 
-export interface ChainAddress {
-  // ###### NATIVE CHAIN ######
-  [mainnet.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // core
-    frankencoin: Address; // ZCHF token
-    equity: Address; // FPS token
-
-    // utils
-    wFPS: Address; // wrapped FPS
-
-    // minting hub v1
-    mintingHubV1: Address;
-    positionFactoryV1: Address;
-
-    // minting hub v2 + utils v2
-    savingsV2: Address;
-    rollerV2: Address;
-    mintingHubV2: Address;
-    positionFactoryV2: Address;
-
-    // stablecoin swap bridges
-    stablecoinBridgeXCHF: Address;
-    xchfToken: Address;
-    stablecoinBridgeVCHF: Address;
-    vchfToken: Address;
-
-    // multi chain support
-    transferReference: Address; // separate SC for mainnet transfers
-    savingsReferral: Address; // detached, implements referral
-
-    // ccip support
-    ccipAdmin: Address;
-    ccipTokenPool: Address;
-    ccipBridgeAccounting: Address;
-    ccipGovernanceSender: Address;
-    ccipLeadrateSender: Address;
-    ccipTokenAdminRegistry: Address;
-    ccipRmnProxy: Address;
-    ccipRouter: Address;
-    linkToken: Address;
-  };
-  // ###### MULTI CHAIN ######
-  [polygon.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // standard bridges
-    bridgePolygonFrankencoin: Address;
-    bridgePolygonWfps: Address;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [arbitrum.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // standard bridges
-    bridgeArbitrumFrankencoin: Address;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [optimism.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // standard bridges
-    bridgeOptimismFrankencoin: Address;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [base.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [avalanche.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [gnosis.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-  [sonic.id]: {
-    // identifier
-    chainId: number;
-    chainSelector: string;
-
-    // ccip cross chain support
-    ccipTokenPool: Address;
-    ccipAdmin: Address;
-    ccipBridgedFrankencoin: Address;
-    ccipBridgedGovernance: Address;
-  };
-}
-
-export const ADDRESS: ChainAddress = {
+export const ADDRESS: ChainAddressMap = {
   [mainnet.id]: {
     // identifier
     chainId: 1,
@@ -274,4 +140,4 @@ export const ADDRESS: ChainAddress = {
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
   },
-};
+} as const;
