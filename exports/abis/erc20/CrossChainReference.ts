@@ -45,22 +45,6 @@ export const CrossChainReferenceABI = [
     inputs: [
       {
         internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    name: "InfiniteAllowanceRequired",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
         name: "token",
         type: "address",
       },
@@ -537,7 +521,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -685,7 +669,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -766,7 +750,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -873,7 +857,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -912,7 +896,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -968,7 +952,7 @@ export const CrossChainReferenceABI = [
         type: "bool",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
 ] as const;
