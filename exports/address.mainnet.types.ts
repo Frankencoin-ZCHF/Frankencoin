@@ -81,6 +81,7 @@ export type ChainAddressPolygon = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressArbitrum = {
@@ -96,6 +97,7 @@ export type ChainAddressArbitrum = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressOptimism = {
@@ -111,6 +113,7 @@ export type ChainAddressOptimism = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressBase = {
@@ -123,6 +126,7 @@ export type ChainAddressBase = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressAvalanche = {
@@ -135,6 +139,7 @@ export type ChainAddressAvalanche = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressGnosis = {
@@ -147,6 +152,7 @@ export type ChainAddressGnosis = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressSonic = {
@@ -159,6 +165,7 @@ export type ChainAddressSonic = {
   ccipAdmin: Address;
   ccipBridgedFrankencoin: Address;
   ccipBridgedGovernance: Address;
+  ccipRouter: Address;
 };
 
 export type ChainAddressMap = {

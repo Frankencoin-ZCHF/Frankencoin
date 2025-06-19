@@ -67,6 +67,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe",
   },
   [arbitrum.id]: {
     // identifier
@@ -81,6 +82,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0x141fa059441E0ca23ce184B6A78bafD2A517DdE8",
   },
   [optimism.id]: {
     // identifier
@@ -95,6 +97,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f",
   },
   [base.id]: {
     // identifier
@@ -106,6 +109,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0x881e3A65B4d4a04dD529061dd0071cf975F58bCD",
   },
   [avalanche.id]: {
     // identifier
@@ -117,6 +121,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0xF4c7E640EdA248ef95972845a62bdC74237805dB",
   },
   [gnosis.id]: {
     // identifier
@@ -128,6 +133,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0x4aAD6071085df840abD9Baf1697d5D5992bDadce",
   },
   [sonic.id]: {
     // identifier
@@ -139,5 +145,6 @@ export const ADDRESS: ChainAddressMap = {
     ccipAdmin: "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
     ccipBridgedFrankencoin: "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
+    ccipRouter: "0xB4e1Ff7882474BB93042be9AD5E1fA387949B860",
   },
 } as const;
