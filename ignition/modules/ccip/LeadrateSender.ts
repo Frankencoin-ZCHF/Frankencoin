@@ -1,6 +1,6 @@
 import { getChildFromSeed } from "../../../helper/wallet";
 import { ADDRESS } from "../../../exports/address.mainnet.config";
-import { ChainAddressMap } from "../../../exports/address.mainnet.types";
+import { ChainIdMain } from "../../../exports/address.mainnet.types";
 import { buildModule } from "@nomicfoundation/ignition-core";
 import { Address } from "viem";
 import { storeConstructorArgs } from "../../../helper/store.args";
@@ -12,7 +12,7 @@ const w0 = getChildFromSeed(seed, 0); // deployer
 
 // frankencoin addresses
 const id = parseInt(process.env?.CHAINID || "1");
-const ADDR = ADDRESS[Number(id)] as ChainAddressMap["1"];
+const ADDR = ADDRESS[Number(id) as ChainIdMain];
 
 export const config = {
   deployer: w0.address,

@@ -1,6 +1,6 @@
 import { getChildFromSeed } from "../../../helper/wallet";
 import { ADDRESS } from "../../../exports/address.mainnet.config";
-import { ChainAddressMap } from "../../../exports/address.mainnet.types";
+import { ChainIdSide } from "../../../exports/address.mainnet.types";
 import { buildModule } from "@nomicfoundation/ignition-core";
 import { Address } from "viem";
 import { mainnet } from "viem/chains";
@@ -12,8 +12,8 @@ if (!seed) throw new Error("Failed to import the seed string from .env");
 const w0 = getChildFromSeed(seed, 0); // deployer
 
 // frankencoin addresses
-const id = parseInt(process.env?.CHAINID || "1");
-const ADDR = ADDRESS[Number(id)] as ChainAddressMap["137"];
+const id = parseInt(process.env?.CHAINID || "137");
+const ADDR = ADDRESS[Number(id) as ChainIdSide];
 
 const MAINNET_ADDR = ADDRESS[mainnet.id];
 
