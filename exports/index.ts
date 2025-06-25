@@ -1,9 +1,6 @@
 // chain addresses and helpers
-export * from "./address.mainnet.config";
-export * from "./address.mainnet.types";
-
-export * as deployment from "./address.mainnet.config";
-export * as testing from "./address.testnet.config";
+export * from "./address.config";
+export * from "./address.types";
 
 // abi exports
 export * from "./abis/bridge/CCIPAdmin";
@@ -58,5 +55,6 @@ export * from "./abis/swap/StablecoinBridge";
 export * from "./abis/transfer/ITransferReference";
 export * from "./abis/transfer/TransferReference";
 
+export * from "./abis/utils/OCR2Aggregator";
 export * from "./abis/utils/Ownable";
 export * from "./abis/utils/UniswapV3Pool";

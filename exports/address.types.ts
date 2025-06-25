@@ -34,6 +34,8 @@ export type ChainAddressMainnet = {
 
   // utils
   wFPS: Address; // wrapped FPS
+  uniswapPoolV3ZCHFUSDT: Address;
+  chainlinkOCR2Aggregator: Address;
 
   // minting hub v1
   mintingHubV1: Address;

@@ -9,7 +9,7 @@ import {
   sonic,
 } from "viem/chains";
 import { zeroAddress } from "viem";
-import { ChainAddressMap } from "./address.mainnet.types";
+import { ChainAddressMap } from "./address.types";
 
 export const ADDRESS: ChainAddressMap = {
   [mainnet.id]: {
@@ -23,6 +23,8 @@ export const ADDRESS: ChainAddressMap = {
 
     // utils
     wFPS: "0x5052D3Cc819f53116641e89b96Ff4cD1EE80B182",
+    uniswapPoolV3ZCHFUSDT: "0x8E4318E2cb1ae291254B187001a59a1f8ac78cEF",
+    chainlinkOCR2Aggregator: "0x449d117117838fFA61263B61dA6301AA2a88B13A",
 
     // minting hub v1
     mintingHubV1: "0x7546762fdb1a6d9146b33960545C3f6394265219",
