@@ -4,7 +4,6 @@
     "type": "mock",
     "chainName": "Sepolia",
     "chainId": 11155111,
-    "collateralTknAddr": "0x37935cedc62b3ec5decc0a9776ee4fee37965ca3",
     "minCollateral": 5,
     "initialCollateral": 25,
     "initialLimitZCHF": 40000,

@@ -1,10 +1,11 @@
 artifacts
 artifacts*/
-audits
+audits/
 abi/
+ignition/
 
 cache
-contracts
+contracts/artifacts
 coverage
 coverage.json
 
@@ -34,3 +35,8 @@ tsconfig.ts
 .vscode/settings.json
 
 tst.ts
+
+.gitmodules
+.solcover.js
+.solhint.json
+dbg.project.json

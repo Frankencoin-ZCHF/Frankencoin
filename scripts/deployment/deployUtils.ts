@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Contract } from "ethers";
 
-export const deployContract = async (
+export const deployContract = async <T = Contract>(
   hre: HardhatRuntimeEnvironment,
   contractName: string,
   args?: any[]
-): Promise<Contract> => {
+): Promise<T> => {
   const {
     deployments: { deploy, log, get },
     getNamedAccounts,
@@ -19,7 +19,7 @@ export const deployContract = async (
     args: args,
     log: true,
   });
-  return await ethers.getContractAt(contractName, deployment.address);
+  return await ethers.getContractAt(contractName, deployment.address) as T;
 };
 
 export function sleep(ms: number) {

@@ -53,6 +53,7 @@ ALCHEMY_RPC_KEY=...
 DEPLOYER_SEED="test test test test test test test test test test test junk"
 DEPLOYER_SEED_INDEX=1 // optional, select deployer
 ETHERSCAN_API=...
+CHAINID=1 // Replace with correct chain id
 ```
 
 > Create new session or re-navigate to the current directory, to make sure environment is loaded from `.env`
@@ -281,3 +282,64 @@ const nextConfig = {
 
 module.exports = nextConfig;
 ```
+
+# CCIP Integration
+
+The Frankencoin is also integrated with the CCIP (Cross-Chain Interoperability Protocol) to enable seamless cross-chain transactions. This allows users to transfer tokens between different blockchain networks seamlessly.
+
+The main contracts involved in CCIP integration are:
+| Contract | Description |
+| --- | --- |
+| `CCIPAdmin.sol` | The CCIPAdmin contract is responsible for managing the CCIP integration. It provides functions for setting up and configuring the CCIP integration. |
+| `BridgeAccounting.sol` | The BridgeAccounting contract is responsible for handling losses and profits occured on remote chains. It informs the mainnet system about the losses and profits. |
+| `BridgedGovernance.sol` | The BridgedGovernance is the governance contract used on remote chains to manage the deployment there. Voting power and delegation is synced from mainnet. |
+| `GovernanceSender.sol` | The contract that informs remote chains about the voting power and delegation of voters on mainnet. |
+| `CrossChainERC20.sol` | Abstract contract that provides users with a simple integration to send and receive tokens across different blockchain networks. |
+| `BridgedLeadrate.sol` | The leadrate contract for remote chains. It receives the current leadrate from the mainnet and stores it. |
+| `LeadrateSender.sol` | The contract that informs remote chains about the current leadrate on mainnet. |
+| `BridgedSavings.sol` | Uses the `BridgedLeadrate.sol` contract to provide the savings functionality for remote chains. |
+| `BridgedFrankencoin.sol` | The Frankencoin contract for remote chains. It uses the `CrossChainERC20.sol` contract to provide users with a simple integration to send and receive tokens across different blockchain networks. |
+
+## Deployment to new remote chains
+
+To deploy the Frankencoin contracts to a new remote chain, follow these steps:
+
+### 1. Update configurations
+
+Update the `scripts/deployment/parameters/paramsCCIP.json` file with the necessary parameters for the new remote chain.
+Under the key `remoteChains` you can add initial connections to other chains that should be available.
+Also update all other `scripts/deployment/parameters/params*.json` files with the correct values for the new remote chain.
+
+Then update the `hardhat.config.ts` file with the new remote chain.
+
+### 2. Set Environment
+
+> See .env.example
+
+```JSON
+file: .env
+
+ALCHEMY_RPC_KEY=...
+DEPLOYER_SEED="test test test test test test test test test test test junk"
+DEPLOYER_SEED_INDEX=1 // optional, select deployer
+ETHERSCAN_API=...
+CHAINID=1 // Replace with correct chain id
+```
+
+> Create new session or re-navigate to the current directory, to make sure environment is loaded from `.env`
+
+### 3. Deploy contracts
+
+```sh
+npx hardhat deploy --tags l2 --network YOUR_CHAIN
+```
+
+### 4. Verify contracts
+
+The deployment scripts log for each deployed contract the command that needs to be run to verify the contract.
+Follow the instructions of the deployment script to verify all deployed contracts.
+
+### 5. Update configuration files
+
+After all contracts are deployed and verified, update the `scripts/deployment/parameters/paramsCCIP.json` file with the addresses of the deployed contracts.
+Also update `exports/address.config.ts` with the addresses of the deployed contracts so they are available in the NPM module.

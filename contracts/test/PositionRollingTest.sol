@@ -3,18 +3,17 @@ pragma solidity ^0.8.0;
 
 import "./Strings.sol";
 import "./TestToken.sol";
-import "../Equity.sol";
+import "../equity/Equity.sol";
 import "../utils/Ownable.sol";
-import "../Position.sol";
-import "../MintingHub.sol";
-import "../StablecoinBridge.sol";
-import "../interface/IPosition.sol";
-import "../interface/IReserve.sol";
-import "../interface/IFrankencoin.sol";
-import "../interface/IERC20.sol";
+import "../minting/Position.sol";
+import "../minting/MintingHub.sol";
+import "../swap/StablecoinBridge.sol";
+import "../minting/IPosition.sol";
+import "../equity/IGovernance.sol";
+import "../stablecoin/IFrankencoin.sol";
+import "../erc20/IERC20.sol";
 
 contract PositionRollingTest {
-
     MintingHub hub;
     TestToken col;
     IFrankencoin zchf;
@@ -42,7 +41,7 @@ contract PositionRollingTest {
     function openPosition(uint256 collateral, uint40 initializationDelay) public returns (address) {
         col.mint(address(this), collateral);
         col.approve(address(hub), collateral);
-        return hub.openPosition(address(col), 10, collateral, 1000000 * 10**18, initializationDelay, 30 days, 10 hours, 50000, 1000 * 10**36, 200000);
+        return hub.openPosition(address(col), 10, collateral, 1000000 * 10 ** 18, initializationDelay, 30 days, 10 hours, 50000, 1000 * 10 ** 36, 200000);
     }
 
     function roll() public {
@@ -51,5 +50,4 @@ contract PositionRollingTest {
         require(p1.minted() == 0);
         require(zchf.balanceOf(address(this)) == 0);
     }
-
 }
