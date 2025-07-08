@@ -10,6 +10,21 @@ import {
 } from "viem/chains";
 import { Address } from "viem";
 
+// network and chains
+export const ChainMain = mainnet;
+export const ChainSide = [
+  polygon,
+  arbitrum,
+  optimism,
+  base,
+  avalanche,
+  gnosis,
+  sonic,
+];
+
+export const SupportedChains = [ChainMain, ...ChainSide];
+
+// chain ids
 export type ChainIdMain = typeof mainnet.id;
 
 export type ChainIdSide =
