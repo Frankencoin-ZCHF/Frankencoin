@@ -38,7 +38,8 @@ export type ChainId = ChainIdMain | ChainIdSide;
 
 // supported chains
 export const SupportedChains = { ...ChainMain, ...ChainSide } as const;
-type SupportedChain = (typeof SupportedChains)[keyof typeof SupportedChains];
+export type SupportedChain =
+  (typeof SupportedChains)[keyof typeof SupportedChains];
 
 export const SupportedChainsMap: { [K in ChainId]: SupportedChain | Chain } = {
   [mainnet.id]: mainnet,
@@ -50,6 +51,10 @@ export const SupportedChainsMap: { [K in ChainId]: SupportedChain | Chain } = {
   [gnosis.id]: gnosis,
   [sonic.id]: sonic,
 } as const;
+
+export const SupportedChainIds = Object.values(SupportedChains).map(
+  (chain) => chain.id
+);
 
 // chain Address
 export type ChainAddressMainnet = {
