@@ -11,7 +11,7 @@ import { evm_increaseTime } from "./helper";
 import { expect } from "chai";
 import { AmplifiedPosition } from "../typechain/contracts/swap/Amplifier.sol";
 
-describe.only("Amplifier", async () => {
+describe("Amplifier", async () => {
   let owner: HardhatEthersSigner;
   let alice: HardhatEthersSigner;
 
