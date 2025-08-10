@@ -1,6 +1,6 @@
 # Frankencoin's Cross-Chain Governance
 
-Light-weight cross-chain governance for decentralized protocols.
+Lean cross-chain governance for decentralized protocols.
 
 ## The Challenge
 
