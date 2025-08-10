@@ -4,9 +4,11 @@ Lean cross-chain governance for decentralized protocols.
 
 ## The Challenge
 
-The challenge is to build a decentralized stablecoin whose functionality spans across chains. Often, decentralized protocols are bound to their native chain. This limits their reach and fragments their ecosystem. An ideal decentralized protocol spans across multiple chains, with its full functionality available for all users on all supported chains. For Frankencoin, this means that merely bridging the stablecoin using one of the available standard bridges does not cut it. We want direct support of all protocol functions across chains. This requires a cross-chain governance system that allows the governance process to project its decision taking power across chains. Fortunately, the Frankencoin's veto-based governance system lends itself perfectly to such use cases. It allows very efficient cross-chain governance with minimal interventions and maximal versatility.
+The challenge is to build a decentralized stablecoin whose functionality spans across chains.
+
+Often, decentralized protocols are bound to their native chain. This limits their reach and fragments their ecosystem. An ideal decentralized protocol spans across multiple chains, with its full functionality available for all users on all supported chains. For Frankencoin, this means that merely bridging the stablecoin using one of the available standard bridges does not cut it. We want direct support of all protocol functions across chains. This requires a cross-chain governance system that allows the governance process to project its decision taking power across chains. Fortunately, the Frankencoin's veto-based governance system lends itself perfectly to such use cases. It allows very efficient cross-chain governance with minimal interventions and maximal versatility.
  
-## The Power of Veto-Based Governance
+## Veto-Based Governance
 
 Let us first look at how the Frankencoin stays modular and extensible without resorting to a centralized authority.
 
