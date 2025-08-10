@@ -6,7 +6,7 @@ Lean cross-chain governance for decentralized protocols.
 
 The challenge is to build a decentralized stablecoin whose functionality spans across chains.
 
-Often, decentralized protocols are bound to their native chain. This limits their reach and fragments their ecosystem. An ideal decentralized protocol spans across multiple chains, with its full functionality available for all users on all supported chains. For Frankencoin, this means that merely bridging the stablecoin using one of the available standard bridges does not cut it. We want direct support of all protocol functions across chains. This requires a cross-chain governance system that allows the governance process to project its decision taking power across chains. Fortunately, the Frankencoin's veto-based governance system lends itself perfectly to such use cases. It allows very efficient cross-chain governance with minimal interventions and maximal versatility.
+Often, decentralized protocols are bound to their native chain. This limits their reach and fragments their ecosystem. An ideal decentralized protocol spans across multiple chains, with its full functionality available for all users on all supported chains. For Frankencoin, this means that merely bridging the stablecoin using one of the available standard bridges does not cut it. We want direct support of all protocol functions everywhere. This requires a cross-chain governance system that allows the governance process to project its decision taking power across chains. Fortunately, the Frankencoin's veto-based governance system lends itself perfectly to such use cases. It allows very efficient cross-chain governance with minimal interventions and maximal versatility.
  
 ## Veto-Based Governance
 
@@ -16,7 +16,7 @@ Some decentralized protocols are immutable. They cannot be changed or extended. 
 
 In the Frankencoin system, holders of at least 2% of the governance token gain veto power over time. Proposals to amend the system can be made by anyone paying a small fee. The proposals pass automatically if no one casts a veto. This leads to a process that is extremely lean: most of the time, new proposals pass without anyone having to cast a vote or veto ever. If everyone behaves rationally, no one makes a bad proposal and good new ideas just pass without much ado. There are some safeguards against griefing, but their presence suffices to deter bad actors. Fortunately, this light-weight process lends itself extraordinarily well to decentralized cross-chain governance.
 
-## Projecting Power Across Chains
+## Projecting Power
 
 The Frankencoin system consists of almost identical smart contracts across all chains. The bridged ERC-20 contract that represents the stablecoin on Base has the same modular extensibility as the original contract on Ethereum mainnet. Base users can propose new functionality directly on the base blockchain and pass them without ever performing a mainnet transaction. Only if someone wants to veto a proposal, they need to first prove their veto power through a cross-chain message that is routed using Chainlink CCIP. Once it has been proven that someone possesses veto power, that veto power can be used to cast any number of vetoes on the given chain, until someone else proves that the user's address no longer has veto power in a new cross-chain message.
 
