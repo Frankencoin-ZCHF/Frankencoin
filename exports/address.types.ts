@@ -8,8 +8,21 @@ import {
   polygon,
   sonic,
 } from "viem/chains";
-import { Address } from "viem";
+import { Address, Chain } from "viem";
 
+// network and chains
+export const ChainMain = { mainnet } as const;
+export const ChainSide = {
+  polygon,
+  arbitrum,
+  optimism,
+  base,
+  avalanche,
+  gnosis,
+  sonic,
+} as const;
+
+// chain ids
 export type ChainIdMain = typeof mainnet.id;
 
 export type ChainIdSide =
@@ -23,6 +36,27 @@ export type ChainIdSide =
 
 export type ChainId = ChainIdMain | ChainIdSide;
 
+// supported chains
+export const SupportedChains = { ...ChainMain, ...ChainSide } as const;
+export type SupportedChain =
+  (typeof SupportedChains)[keyof typeof SupportedChains];
+
+export const SupportedChainsMap: { [K in ChainId]: SupportedChain | Chain } = {
+  [mainnet.id]: mainnet,
+  [polygon.id]: polygon,
+  [arbitrum.id]: arbitrum,
+  [optimism.id]: optimism,
+  [base.id]: base,
+  [avalanche.id]: avalanche,
+  [gnosis.id]: gnosis,
+  [sonic.id]: sonic,
+} as const;
+
+export const SupportedChainIds = Object.values(SupportedChains).map(
+  (chain) => chain.id
+);
+
+// chain Address
 export type ChainAddressMainnet = {
   // identifier
   chainId: typeof mainnet.id;
