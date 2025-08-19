@@ -192,13 +192,13 @@ describe("Amplifier", async () => {
 
       const usdtUserBefore = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolBefore = await usdt.balanceOf(await pool.getAddress());
-      const zchfPoolBefore = await usdt.balanceOf(await pool.getAddress());
+      const zchfPoolBefore = await zchf.balanceOf(await pool.getAddress());
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
       await expect(
         position.mint(
-          await amplifier.TICK_LOW_LIMIT(),
+          (await amplifier.TICK_LOW_LIMIT()),
           (await amplifier.TICK_HIGH_LIMIT()) - 800n,
           "500000000000000"
         )
@@ -206,13 +206,13 @@ describe("Amplifier", async () => {
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
-      const zchfPoolAfter = await usdt.balanceOf(await pool.getAddress());
+      const zchfPoolAfter = await zchf.balanceOf(await pool.getAddress());
       const borrowedAfter = await position.borrowed();
       const totalBorrowedAfter = await amplifier.totalBorrowed();
 
       expect(usdtUserAfter).to.be.lessThan(usdtUserBefore);
-      expect(usdtPoolAfter).to.be.greaterThan(usdtPoolBefore);
-      expect(zchfPoolAfter).to.be.greaterThan(zchfPoolBefore);
+      expect(usdtPoolAfter).to.be.equal(usdtPoolBefore + usdtUserBefore - usdtUserAfter);
+      expect(zchfPoolAfter).to.be.equal(zchfPoolBefore + borrowedAfter - borrowedBefore);
       expect(borrowedAfter).to.be.greaterThan(borrowedBefore);
       expect(totalBorrowedAfter).to.be.greaterThan(totalBorrowedBefore);
     });
@@ -220,7 +220,7 @@ describe("Amplifier", async () => {
     it("should partially burn", async () => {
       const usdtUserBefore = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolBefore = await usdt.balanceOf(await pool.getAddress());
-      const zchfPoolBefore = await usdt.balanceOf(await pool.getAddress());
+      const zchfPoolBefore = await zchf.balanceOf(await pool.getAddress());
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
@@ -234,7 +234,7 @@ describe("Amplifier", async () => {
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
-      const zchfPoolAfter = await usdt.balanceOf(await pool.getAddress());
+      const zchfPoolAfter = await zchf.balanceOf(await pool.getAddress());
       const borrowedAfter = await position.borrowed();
       const totalBorrowedAfter = await amplifier.totalBorrowed();
 

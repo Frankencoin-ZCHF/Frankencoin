@@ -153,7 +153,7 @@ contract Amplifier {
         if (totalBorrowed > LIMIT) revert LimitExceeded(totalBorrowed, LIMIT);
 
         emit Borrowed(zchfAmount, totalBorrowed);
-        return totalBorrowed;
+        return zchfAmount;
     }
 
     /// @notice Identifies which amounts belong to which token
