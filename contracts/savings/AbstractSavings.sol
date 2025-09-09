@@ -128,7 +128,6 @@ abstract contract AbstractSavings is AbstractLeadrate {
      */
     function save(address owner, uint192 amount) public {
         if (currentRatePPM == 0) revert ModuleDisabled();
-       // if (nextRatePPM == 0 && (nextChange <= block.timestamp + INTEREST_DELAY)) revert ModuleDisabled(); TODO: figure out why this was in there
         Account storage balance = refresh(owner);
         ZCHF.transferFrom(msg.sender, address(this), amount);
         uint64 ticks = currentTicks();
