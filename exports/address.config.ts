@@ -8,7 +8,6 @@ import {
   polygon,
   sonic,
 } from "viem/chains";
-import { zeroAddress } from "viem";
 import { ChainAddressMap } from "./address.types";
 
 export const ADDRESS: ChainAddressMap = {
@@ -54,6 +53,9 @@ export const ADDRESS: ChainAddressMap = {
     ccipRmnProxy: "0x411dE17f12D1A34ecC7F45f49844626267c75e81",
     ccipRouter: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
     linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+
+    // utils
+    svZCHF: "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
   },
   [polygon.id]: {
     // identifier
@@ -142,6 +144,9 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0xbF594D0feD79AE56d910Cb01b5dD4f4c57B04402",
     ccipRouter: "0x4aAD6071085df840abD9Baf1697d5D5992bDadce",
+
+    // custom
+    svZCHF: "0x6165946250dd04740ab1409217e95a4f38374fe9",
   },
   [sonic.id]: {
     // identifier

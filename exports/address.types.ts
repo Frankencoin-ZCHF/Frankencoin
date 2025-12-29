@@ -101,6 +101,9 @@ export type ChainAddressMainnet = {
   ccipRmnProxy: Address;
   ccipRouter: Address;
   linkToken: Address;
+
+  // custom
+  svZCHF: Address;
 };
 
 export type ChainAddressPolygon = {
@@ -195,6 +198,9 @@ export type ChainAddressGnosis = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // custom
+  svZCHF: Address;
 };
 
 export type ChainAddressSonic = {
