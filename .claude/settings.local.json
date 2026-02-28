@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx hardhat compile)",
+      "Bash(npm ls hardhat)",
+      "Bash(npm install)",
+      "Bash(npm install --legacy-peer-deps)",
+      "Bash(node_modules/.bin/hardhat compile)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\(''dependencies'',{}\\); devdeps=d.get\\(''devDependencies'',{}\\); [print\\(k,v\\) for k,v in {**deps,**devdeps}.items\\(\\) if ''git'' in v.lower\\(\\) or ''ssh'' in v.lower\\(\\) or ''github'' in v.lower\\(\\)]\")",
+      "Bash(npm ls zksync-web3)",
+      "Bash(node_modules/.bin/hardhat test test/FPS2Tests.ts)"
+    ]
+  }
+}
