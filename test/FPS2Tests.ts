@@ -70,7 +70,7 @@ describe("FPS2 Tests", () => {
       expect(await fps2.zchf()).to.be.equal(await zchf.getAddress());
     });
     it("should have initial price matching FPS", async () => {
-      expect(await fps2.price()).to.be.equal(await equity.price());
+      expect(await fps2.ask()).to.be.equal(await equity.price());
     });
   });
 
@@ -99,7 +99,7 @@ describe("FPS2 Tests", () => {
 
       await expect(
         fps2.invest(investAmount, floatToDec18(999_999))
-      ).to.be.revertedWith("slippage");
+      ).to.be.revertedWithoutReason();
     });
 
     it("should require ZCHF approval", async () => {
@@ -186,7 +186,7 @@ describe("FPS2 Tests", () => {
     });
   });
 
-  describe("delegation", () => {
+  describe("delegation and governance (inherited from Governance, 2% quorum)", () => {
     beforeEach(async () => {
       await equity.invest(floatToDec18(1000), 0);
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
@@ -210,63 +210,29 @@ describe("FPS2 Tests", () => {
       expect(withHelpers).to.be.greaterThan(withoutHelpers);
     });
 
-    it("should revert votesDelegated if helper did not delegate", async () => {
-      await expect(
-        fps2.votesDelegated(owner.address, [alice.address])
-      ).to.be.revertedWithoutReason();
-    });
-
-    it("should emit Delegation event", async () => {
-      await expect(fps2.connect(alice).delegateVoteTo(owner.address))
-        .to.emit(fps2, "Delegation")
-        .withArgs(alice.address, owner.address);
-    });
-  });
-
-  describe("governance (1% quorum)", () => {
-    it("checkQualified should pass for holder with >= 1% of votes", async () => {
-      await equity.invest(floatToDec18(1000), 0);
-      await zchf.approve(await fps2.getAddress(), floatToDec18(10_000));
-      await fps2.invest(floatToDec18(10_000), 0);
-
+    it("checkQualified should pass for holder with >= 2% of votes", async () => {
       await evm_increaseTime(100);
-
-      // Owner is sole holder -> 100% of votes -> should pass 1% check
+      // Owner is a major holder -> should pass 2% check
       await fps2.checkQualified(owner.address, []);
     });
 
-    it("checkQualified should revert for holder with < 1% of votes", async () => {
-      await equity.invest(floatToDec18(1000), 0);
-
-      // Owner invests a lot
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2.invest(floatToDec18(50_000), 0);
-
-      // Alice invests very little
-      await zchf.connect(alice).approve(await fps2.getAddress(), 1);
-      await fps2.connect(alice).invest(1, 0);
-
+    it("checkQualified should revert for holder with < 2% of votes", async () => {
+      // Bob has no FPS2 at all
       await evm_increaseTime(100);
 
       await expect(
-        fps2.checkQualified(alice.address, [])
+        fps2.checkQualified(bob.address, [])
       ).to.be.revertedWithCustomError(fps2, "NotQualified");
     });
   });
 
   describe("spread mechanism", () => {
-    it("capacity should return fps.totalSupply() / 10", async () => {
-      await equity.invest(floatToDec18(1000), 0);
-      const fpsTotalSupply = await equity.totalSupply();
-      expect(await fps2.capacity()).to.be.equal(fpsTotalSupply / 10n);
+    it("weightedRecentRedemptions should be 0 initially", async () => {
+      expect(await fps2.weightedRecentRedemptions()).to.be.equal(0);
     });
 
-    it("currentUsedCapacity should be 0 initially", async () => {
-      expect(await fps2.currentUsedCapacity()).to.be.equal(0);
-    });
-
-    it("currentUsedCapacity should decay linearly over 30 days", async () => {
-      // We need to sell to set usedCapacity. Set up the full lifecycle.
+    it("weightedRecentRedemptions should decay linearly over 30 days", async () => {
+      // We need to sell to set recentlyRedeemed. Set up the full lifecycle.
       await equity.invest(floatToDec18(1000), 0);
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2.invest(floatToDec18(50_000), 0);
@@ -274,21 +240,21 @@ describe("FPS2 Tests", () => {
       // Wait 90 days so FPS2 can redeem
       await evm_increaseTime(90 * 86400 + 60);
 
-      // Sell a small amount to set usedCapacity
+      // Sell a small amount to set recentlyRedeemed
       const sellAmount = floatToDec18(1);
       await fps2.redeem(owner.address, sellAmount);
 
-      const usedAfterSell = await fps2.currentUsedCapacity();
-      expect(usedAfterSell).to.be.greaterThan(0);
+      const recentAfterSell = await fps2.weightedRecentRedemptions();
+      expect(recentAfterSell).to.be.greaterThan(0);
 
       // Wait 15 days -> should be roughly half
       await evm_increaseTime(15 * 86400);
-      const usedAfterHalf = await fps2.currentUsedCapacity();
-      expect(usedAfterHalf).to.be.approximately(usedAfterSell / 2n, usedAfterSell / 100n);
+      const recentAfterHalf = await fps2.weightedRecentRedemptions();
+      expect(recentAfterHalf).to.be.approximately(recentAfterSell / 2n, recentAfterSell / 100n);
 
       // Wait another 15 days -> should be 0
       await evm_increaseTime(15 * 86400);
-      expect(await fps2.currentUsedCapacity()).to.be.equal(0);
+      expect(await fps2.weightedRecentRedemptions()).to.be.equal(0);
     });
 
     it("calculateEffectiveProceeds should return less than underlying proceeds", async () => {
@@ -306,15 +272,59 @@ describe("FPS2 Tests", () => {
       expect(effectiveProceeds).to.be.greaterThan(underlyingProceeds * 9n / 10n);
     });
 
-    it("calculateEffectiveProceeds should return 0 if exceeds capacity", async () => {
+    it("calculateEffectiveProceeds should be capped when underlying proceeds exceed capacity", async () => {
       await equity.invest(floatToDec18(1000), 0);
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2.invest(floatToDec18(50_000), 0);
 
-      // Try to sell more than capacity (10% of total FPS)
-      const cap = await fps2.capacity();
-      const effectiveProceeds = await fps2.calculateEffectiveProceeds(cap + 1n);
-      expect(effectiveProceeds).to.be.equal(0);
+      // Selling all FPS2 shares: underlying proceeds far exceed 10% of equity capital
+      const allShares = await fps2.totalSupply();
+      const underlyingProceeds = await equity.calculateProceeds(allShares);
+      const equityCapital = await zchf.equity();
+      const cap = equityCapital / 10n;
+      // Underlying proceeds should exceed the cap
+      expect(underlyingProceeds).to.be.greaterThan(cap);
+      const effectiveProceeds = await fps2.calculateEffectiveProceeds(allShares);
+      // Should get partial proceeds: cap² / (2 * cap) = cap / 2
+      expect(effectiveProceeds).to.be.greaterThan(0);
+      expect(effectiveProceeds).to.be.approximately(cap / 2n, cap / 100n);
+    });
+  });
+
+  describe("path independence", () => {
+    it("selling 2 FPS2 at once vs 1+1 should give similar total proceeds", async () => {
+      // Setup: invest, wait 90 days, then use snapshots to compare
+      // both scenarios from the exact same blockchain state
+      await equity.invest(floatToDec18(1000), 0);
+      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
+      await fps2.invest(floatToDec18(50_000), 0);
+      await evm_increaseTime(90 * 86400 + 60);
+
+      const oneShare = floatToDec18(1);
+      const twoShares = floatToDec18(2);
+
+      // Take snapshot before any redemption
+      const snapshot = await ethers.provider.send("evm_snapshot", []);
+
+      // Scenario A: sell 2 at once
+      const balBeforeA = await zchf.balanceOf(alice.address);
+      await fps2.redeem(alice.address, twoShares);
+      const proceedsA = (await zchf.balanceOf(alice.address)) - balBeforeA;
+
+      // Revert to snapshot for a clean comparison
+      await ethers.provider.send("evm_revert", [snapshot]);
+
+      // Scenario B: sell 1, then 1 (from the exact same state)
+      const balBeforeB = await zchf.balanceOf(alice.address);
+      await fps2.redeem(alice.address, oneShare);
+      await fps2.redeem(alice.address, oneShare);
+      const proceedsB = (await zchf.balanceOf(alice.address)) - balBeforeB;
+
+      // The ZCHF-based spread formula is path-independent in ZCHF space.
+      // However, Equity's own non-linear pricing means the underlying proceeds
+      // for 2 shares != 2 * proceeds for 1 share, causing a small difference.
+      const tolerance = proceedsA / 100n; // 1%
+      expect(proceedsA).to.be.approximately(proceedsB, tolerance);
     });
   });
 
@@ -360,47 +370,48 @@ describe("FPS2 Tests", () => {
       expect(received).to.be.greaterThan(underlyingProceeds * 90n / 100n);
     });
 
-    it("should send spread back to Equity", async () => {
+    it("should keep spread in FPS2 (not send back to Equity)", async () => {
       await evm_increaseTime(90 * 86400 + 60);
 
       const sellAmount = floatToDec18(1);
-      const equityBalBefore = await zchf.balanceOf(await equity.getAddress());
-      await fps2.redeem(owner.address, sellAmount);
-      const equityBalAfter = await zchf.balanceOf(await equity.getAddress());
-
-      // Equity should have received the spread (minus the underlying proceeds that left)
-      // Net effect: equity lost underlying proceeds but got spread back
-      // So the net loss to equity = effectiveProceeds (what user received)
-      // This means equityBalAfter should be > equityBalBefore - underlyingProceeds
-      // (i.e., the spread went back)
       const underlyingProceeds = await equity.calculateProceeds(sellAmount);
-      const received = await zchf.balanceOf(owner.address); // just check equity balance increased from spread
-      // Since the FPS redemption already moved ZCHF out, and then spread went back,
-      // we just verify the equity balance didn't drop by the full underlying amount
-      expect(equityBalBefore - equityBalAfter).to.be.lessThan(underlyingProceeds);
+      const effectiveProceeds = await fps2.calculateEffectiveProceeds(sellAmount);
+      const expectedSpread = underlyingProceeds - effectiveProceeds;
+      expect(expectedSpread).to.be.greaterThan(0);
+
+      await fps2.redeem(owner.address, sellAmount);
+      const fps2Bal = await zchf.balanceOf(await fps2.getAddress());
+
+      // FPS2 should retain the spread as a ZCHF surplus
+      expect(fps2Bal).to.be.approximately(expectedSpread, expectedSpread / 100n);
     });
 
-    it("should revert when exceeding capacity", async () => {
+    it("should return partial proceeds when volume exceeds capacity (no revert)", async () => {
       await evm_increaseTime(90 * 86400 + 60);
 
-      const cap = await fps2.capacity();
-      // Try to sell more than capacity
-      await expect(
-        fps2.redeem(owner.address, cap + 1n)
-      ).to.be.revertedWithCustomError(fps2, "CapacityExceeded");
+      // Sell all shares — proceeds exceed capacity but user gets partial amount
+      const allShares = await fps2.balanceOf(owner.address);
+      const balBefore = await zchf.balanceOf(owner.address);
+      await fps2.redeem(owner.address, allShares);
+      const balAfter = await zchf.balanceOf(owner.address);
+
+      // User gets the integral over the positive price curve, not 0
+      expect(balAfter - balBefore).to.be.greaterThan(0);
     });
 
-    it("should update usedCapacity after sell", async () => {
+    it("should update weightedRecentRedemptions in ZCHF after sell", async () => {
       await evm_increaseTime(90 * 86400 + 60);
 
-      expect(await fps2.currentUsedCapacity()).to.be.equal(0);
+      expect(await fps2.weightedRecentRedemptions()).to.be.equal(0);
 
       const sellAmount = floatToDec18(1);
+      const underlyingProceeds = await equity.calculateProceeds(sellAmount);
       await fps2.redeem(owner.address, sellAmount);
 
-      expect(await fps2.currentUsedCapacity()).to.be.approximately(
-        sellAmount,
-        floatToDec18(0.01)
+      // Should track the raw ZCHF proceeds to keep (equity + recent) constant
+      expect(await fps2.weightedRecentRedemptions()).to.be.approximately(
+        underlyingProceeds,
+        underlyingProceeds / 100n
       );
     });
 
@@ -436,48 +447,116 @@ describe("FPS2 Tests", () => {
 
       // Sell to use some capacity
       await fps2.redeem(owner.address, floatToDec18(1));
-      const usedAfterSell = await fps2.currentUsedCapacity();
-      expect(usedAfterSell).to.be.greaterThan(0);
+      const recentAfterSell = await fps2.weightedRecentRedemptions();
+      expect(recentAfterSell).to.be.greaterThan(0);
 
       // Wait 30 days -> full recovery
       await evm_increaseTime(30 * 86400);
-      expect(await fps2.currentUsedCapacity()).to.be.equal(0);
+      expect(await fps2.weightedRecentRedemptions()).to.be.equal(0);
 
       // Should be able to sell again with near-full price
       await fps2.redeem(owner.address, floatToDec18(1));
-      expect(await fps2.currentUsedCapacity()).to.be.greaterThan(0);
+      expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
+    });
+
+    it("investing should reduce the net redemption counter", async () => {
+      await evm_increaseTime(90 * 86400 + 60);
+
+      // Sell to set the redemption counter
+      await fps2.redeem(owner.address, floatToDec18(1));
+      const recentAfterSell = await fps2.weightedRecentRedemptions();
+      expect(recentAfterSell).to.be.greaterThan(0);
+
+      // Invest some ZCHF -> should reduce the counter
+      const investAmount = recentAfterSell / 2n;
+      await zchf.connect(alice).approve(await fps2.getAddress(), investAmount);
+      await fps2.connect(alice).invest(investAmount, 0);
+
+      const recentAfterInvest = await fps2.weightedRecentRedemptions();
+      expect(recentAfterInvest).to.be.approximately(
+        recentAfterSell - investAmount,
+        recentAfterSell / 100n
+      );
+    });
+
+    it("investing more than recent redemptions should zero the counter", async () => {
+      await evm_increaseTime(90 * 86400 + 60);
+
+      // Sell to set the redemption counter
+      await fps2.redeem(owner.address, floatToDec18(1));
+      expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
+
+      // Invest more than was recently redeemed
+      const bigInvestment = floatToDec18(10_000);
+      await zchf.connect(alice).approve(await fps2.getAddress(), bigInvestment);
+      await fps2.connect(alice).invest(bigInvestment, 0);
+
+      expect(await fps2.weightedRecentRedemptions()).to.be.equal(0);
     });
   });
 
-  describe("minter pre-announcement", () => {
-    it("should record pre-announcement timestamp", async () => {
-      const minter = alice.address;
-      await fps2.preAnnounceMinter(minter);
-      expect(await fps2.preAnnouncements(minter)).to.be.greaterThan(0);
+  describe("minter suggestion via FPS2", () => {
+    beforeEach(async () => {
+      // Seed equity so FPS2 can have voting power
+      await equity.invest(floatToDec18(1000), 0);
+
+      // Invest a large amount through FPS2 so it holds substantial FPS
+      await zchf.approve(await fps2.getAddress(), floatToDec18(100_000));
+      await fps2.invest(floatToDec18(100_000), 0);
+
+      // Wait so FPS2 accumulates voting power in Equity
+      await evm_increaseTime(90 * 86400 + 60);
     });
 
-    it("should emit MinterPreAnnounced event", async () => {
-      const minter = alice.address;
-      await expect(fps2.preAnnounceMinter(minter)).to.emit(fps2, "MinterPreAnnounced");
+    it("should record announcement and forward to Frankencoin", async () => {
+      const minter = ethers.Wallet.createRandom().address;
+      const fee = floatToDec18(1000);
+      const period = 90 * 86400; // 90 days
+
+      await zchf.connect(alice).approve(await fps2.getAddress(), fee);
+      await fps2.connect(alice).suggestMinter(minter, period, fee, "test minter");
+
+      // Should be recorded in FPS2 announcements
+      expect(await fps2.announcements(minter)).to.be.greaterThan(0);
+
+      // Should also be registered on Frankencoin
+      expect(await zchf.minters(minter)).to.be.greaterThan(0);
     });
 
-    it("should revert if minter already pre-announced", async () => {
-      const minter = alice.address;
-      await fps2.preAnnounceMinter(minter);
+    it("should emit MinterAnnounced event", async () => {
+      const minter = ethers.Wallet.createRandom().address;
+      const fee = floatToDec18(1000);
+      const period = 90 * 86400;
+
+      await zchf.connect(alice).approve(await fps2.getAddress(), fee);
+      await expect(fps2.connect(alice).suggestMinter(minter, period, fee, "test"))
+        .to.emit(fps2, "MinterAnnounced");
+    });
+
+    it("should revert if application period < 90 days", async () => {
+      const minter = ethers.Wallet.createRandom().address;
+      const fee = floatToDec18(1000);
+      const shortPeriod = 10 * 86400; // only 10 days
+
+      await zchf.connect(alice).approve(await fps2.getAddress(), fee);
       await expect(
-        fps2.preAnnounceMinter(minter)
-      ).to.be.revertedWithCustomError(fps2, "AlreadyPreAnnounced");
+        fps2.connect(alice).suggestMinter(minter, shortPeriod, fee, "test")
+      ).to.be.revertedWithCustomError(fps2, "PeriodTooShort");
     });
 
-    it("anyone can pre-announce", async () => {
-      const minter = bob.address;
-      // Alice pre-announces
-      await fps2.connect(alice).preAnnounceMinter(minter);
-      expect(await fps2.preAnnouncements(minter)).to.be.greaterThan(0);
+    it("anyone can suggest a minter through FPS2", async () => {
+      const minter = ethers.Wallet.createRandom().address;
+      const fee = floatToDec18(1000);
+      const period = 90 * 86400;
+
+      await zchf.connect(bob).approve(await fps2.getAddress(), fee);
+      await fps2.connect(bob).suggestMinter(minter, period, fee, "test");
+
+      expect(await fps2.announcements(minter)).to.be.greaterThan(0);
     });
   });
 
-  describe("minter veto", () => {
+  describe("minter veto (denyMinter)", () => {
     let minterAddress: string;
 
     beforeEach(async () => {
@@ -491,62 +570,43 @@ describe("FPS2 Tests", () => {
       // Wait so FPS2 accumulates voting power in Equity
       await evm_increaseTime(90 * 86400 + 60);
 
-      // Suggest a new minter through Frankencoin
+      // Suggest a new minter directly through Frankencoin (bypassing FPS2)
       minterAddress = ethers.Wallet.createRandom().address;
-      // We need to use the bridge to suggest a minter (since it's an approved minter)
-      // Actually we need someone to call suggestMinter with a fee
-      // Let's have owner suggest a minter
       const fee = floatToDec18(1000);
       await zchf.connect(alice).approve(await zchf.getAddress(), fee);
       await zchf.connect(alice).suggestMinter(minterAddress, 10 * 86400, fee, "test minter");
     });
 
-    it("should allow veto of non-pre-announced minter", async () => {
-      // FPS2 should be able to veto since it holds enough FPS
-      // The veto is permissionless - anyone can call it
-      await fps2.vetoMinter(minterAddress, [], "veto");
+    it("should veto minter not announced through FPS2", async () => {
+      // Minter was suggested directly on Frankencoin, not through FPS2
+      await fps2.denyMinter(minterAddress, []);
 
       // Minter should be denied
       expect(await zchf.minters(minterAddress)).to.be.equal(0);
     });
 
-    it("should allow veto of recently pre-announced minter (< 3 months)", async () => {
-      // Pre-announce the minter
-      await fps2.preAnnounceMinter(minterAddress);
-
-      // But only 0 seconds have passed, less than 90 days
-      // Veto should still work
-      await fps2.vetoMinter(minterAddress, [], "veto");
-      expect(await zchf.minters(minterAddress)).to.be.equal(0);
-    });
-
-    it("should block veto of minter pre-announced >= 3 months ago", async () => {
-      // Pre-announce the minter
-      await fps2.preAnnounceMinter(minterAddress);
-
-      // Wait 90+ days
-      await evm_increaseTime(90 * 86400 + 60);
-
-      // Need to re-suggest the minter since the old one might have expired
-      const minterAddress2 = ethers.Wallet.createRandom().address;
+    it("should block veto of minter announced through FPS2", async () => {
+      // Suggest a new minter through FPS2 (which records announcement)
+      const minter2 = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(1000);
-      await zchf.connect(alice).approve(await zchf.getAddress(), fee);
-      await zchf.connect(alice).suggestMinter(minterAddress2, 10 * 86400, fee, "test minter 2");
+      await zchf.connect(alice).approve(await fps2.getAddress(), fee);
+      await fps2.connect(alice).suggestMinter(minter2, 90 * 86400, fee, "properly announced");
 
-      // Pre-announce was for minterAddress, not minterAddress2
-      // Let's pre-announce minterAddress2 and wait
-      await fps2.preAnnounceMinter(minterAddress2);
-      await evm_increaseTime(90 * 86400 + 60);
-
-      // Now veto should be blocked
+      // Trying to veto through FPS2 should be blocked since it was announced
       await expect(
-        fps2.vetoMinter(minterAddress2, [], "veto")
-      ).to.be.revertedWithCustomError(fps2, "VetoBlocked");
+        fps2.denyMinter(minter2, [])
+      ).to.be.revertedWithCustomError(fps2, "MinterCorrectlyAnnounced");
     });
 
     it("should emit MinterVetoed event", async () => {
-      await expect(fps2.vetoMinter(minterAddress, [], "veto"))
+      await expect(fps2.denyMinter(minterAddress, []))
         .to.emit(fps2, "MinterVetoed");
+    });
+
+    it("anyone can trigger the veto", async () => {
+      // Bob (who has no FPS2) can trigger the veto
+      await fps2.connect(bob).denyMinter(minterAddress, []);
+      expect(await zchf.minters(minterAddress)).to.be.equal(0);
     });
   });
 
@@ -568,8 +628,8 @@ describe("FPS2 Tests", () => {
       // 4. Wait 90 days
       await evm_increaseTime(90 * 86400 + 60);
 
-      // 5. Sell some FPS2
-      const sellAmount = fps2Balance / 10n;
+      // 5. Sell a small portion of FPS2 (1% to stay well within capacity)
+      const sellAmount = fps2Balance / 100n;
       const balBefore = await zchf.balanceOf(owner.address);
       await fps2.redeem(owner.address, sellAmount);
       const balAfter = await zchf.balanceOf(owner.address);
@@ -591,7 +651,7 @@ describe("FPS2 Tests", () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(10_000));
       await fps2.invest(floatToDec18(10_000), 0);
 
-      expect(await fps2.price()).to.be.equal(await equity.price());
+      expect(await fps2.ask()).to.be.equal(await equity.price());
     });
   });
 });
