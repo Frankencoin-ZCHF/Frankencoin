@@ -156,19 +156,6 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: etherscan,
-    // apiKey: {
-    // citrea: 'your API key',
-    // },
-    // customChains: [
-    // 	{
-    // 		network: 'citrea',
-    // 		chainId: 5115,
-    // 		urls: {
-    // 			apiURL: 'https://explorer.testnet.citrea.xyz/api',
-    // 			browserURL: 'https://explorer.testnet.citrea.xyz',
-    // 		},
-    // 	},
-    // ],
   },
   sourcify: {
     enabled: true,
