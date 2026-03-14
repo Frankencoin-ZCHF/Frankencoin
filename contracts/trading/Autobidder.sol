@@ -2,12 +2,13 @@
 pragma solidity ^0.8;
 
 IHub constant HUB = IHub(0xDe12B620A8a714476A97EfD14E6F7180Ca653557);
+address constant EQUITY = 0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2;
 
 /**
  * Autobidder allows you to place a 'sleeper order' on a challenge. The idea is to give the MEV bots
  * a way to easily make some free bucks by helping to execute the trade at the optimal point in time.
  * 
- * Deployed under 0xa05bfd161ed9B9E7baCd5C03635Cb8073E72c4C4
+ * Deployed under 0x79507527b2B48Fbe0df98D70d0102A054e17B39a
  * 
  * This contract provides convenience functions for participating in MintingHubV2 auctions in the Frankencoin system.
  * It is in scope for the bug bounty, but errors found in this contract are not considered critical.
@@ -62,7 +63,8 @@ contract SleeperBid {
     error AlreadyInitialized();
     error MaxPriceTooHigh(uint256 maxPrice, uint256 liqPrice);
 
-    event BidExecuted(address executor, uint256 acquiredCollateral, uint256 price, uint256 reward);
+    event Profit(address indexed reportingMinter, uint256 amount);
+    event BidExecuted(address executor, uint256 acquiredCollateral, uint256 price, uint256 reward, uint256 donation);
 
     constructor(){
         owner = address(1);
@@ -146,11 +148,14 @@ contract SleeperBid {
         uint256 acquired = amountAfter - amountBefore;
 
         // reward the sender with the price spread on the actually acquired collateral
-        uint256 reward = acquired * (maxPrice - price) / 1e18;
-        zchf.transfer(msg.sender, reward);
+        uint256 spread = acquired * (maxPrice - price) / 1e18;
+        uint256 reward = spread / 3;
+        zchf.transfer(msg.sender, reward);  // One third of the spread goes to the sender
+        zchf.transfer(EQUITY, spread - reward); // Rest goes to the protocol as profits or loss compensation :)
+        emit Profit(address(0), spread - reward);
         // return the remaining funds to the owner, if any
         zchf.transfer(owner, zchf.balanceOf(address(this)));
-        emit BidExecuted(msg.sender, acquired, price, reward);
+        emit BidExecuted(msg.sender, acquired, price, reward, spread - reward);
     }
 
 }
@@ -172,8 +177,8 @@ interface IHub {
 
 
 interface IPosition {
-	function collateral() external view returns (IERC20);
     function price() external view returns (uint256);
+	function collateral() external view returns (IERC20);
     function challengeData() external view returns (uint256 liqPrice, uint40 phase);
 }
 
