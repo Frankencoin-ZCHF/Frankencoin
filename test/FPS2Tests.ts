@@ -64,10 +64,10 @@ describe("FPS2 Tests", () => {
       expect(await fps2.decimals()).to.be.equal(18);
     });
     it("should reference the correct Equity contract", async () => {
-      expect(await fps2.fps()).to.be.equal(await equity.getAddress());
+      expect(await fps2.FPS()).to.be.equal(await equity.getAddress());
     });
     it("should reference the correct Frankencoin contract", async () => {
-      expect(await fps2.zchf()).to.be.equal(await zchf.getAddress());
+      expect(await fps2.ZCHF()).to.be.equal(await zchf.getAddress());
     });
     it("should have initial price matching FPS", async () => {
       expect(await fps2.ask()).to.be.equal(await equity.price());

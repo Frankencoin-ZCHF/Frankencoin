@@ -37,7 +37,7 @@ abstract contract AbstractLeadrate {
      */
     function updateRate(uint24 rate) internal {
         uint40 timeNow = uint40(block.timestamp);
-        ticksAnchor += (timeNow - anchorTime) * currentRatePPM;
+        ticksAnchor += uint64(timeNow - anchorTime) * currentRatePPM;
         anchorTime = timeNow;
         currentRatePPM = rate;
         emit RateChanged(rate);

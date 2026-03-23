@@ -6,10 +6,11 @@ import "../Governance.sol";
 import "../Equity.sol";
 
 /**
- * @notice Governance contract for the FPS2 equity. It is used to check if an address has veto power.
- * Veto power is reached with 2% of the votes.
+ * This contract adds time- and balance-based vote accumulation to the basic ERC20 functionality.
+ * Addresses that reach a cap can be cut down to the cap by anyone.
+ * This code is mostly copied from the Equity contract.
  */
-abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
+contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
 
     uint8 private constant TIME_RESOLUTION_BITS = 20;
     uint256 public constant HOLDING_DURATION_CAP = 365 days;
@@ -31,9 +32,9 @@ abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
     function cap(address holder) external {
         if (holdingDuration(holder) > HOLDING_DURATION_CAP) {
             uint256 votesBefore = votes(holder);
-            voteAnchor[holder] = uint64(_anchorTime() - HOLDING_DURATION_CAP);
+            voteAnchor[holder] = uint64(_anchorTime() - (HOLDING_DURATION_CAP << TIME_RESOLUTION_BITS));
             uint256 votesAfter = votes(holder);
-            totalVotesAtAnchor = uint192(totalVotes() - (votesAfter - votesBefore));
+            totalVotesAtAnchor = uint192(totalVotes() - (votesBefore - votesAfter));
             totalVotesAnchorTime = _anchorTime();
         }
     }
@@ -70,6 +71,17 @@ abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
         uint64 time = _anchorTime();
         uint256 lostVotes = from == address(0x0) ? 0 : (time - voteAnchor[from]) * amount;
         totalVotesAtAnchor = uint192(totalVotes() - roundingLoss - lostVotes);
+        totalVotesAnchorTime = time;
+    }
+
+    function creditVotes(address holder, uint256 additionalVotes) internal {
+        uint64 time = _anchorTime();
+        uint256 recipientVotesBefore = votes(holder);
+        uint256 balance = balanceOf(holder);
+        voteAnchor[holder] = uint64(_anchorTime() - (recipientVotesBefore + additionalVotes) / balance);
+        uint256 recipientVotesAfter = votes(holder); // calculate again to account for rounding
+        uint256 voteIncrease = recipientVotesAfter - recipientVotesBefore;
+        totalVotesAtAnchor = uint192(totalVotes() + voteIncrease);
         totalVotesAnchorTime = time;
     }
 

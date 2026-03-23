@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
+import "../IEquity.sol";
 
 /**
  * @title FPS2
@@ -19,11 +20,19 @@ import "./FPS2MintRedeem.sol";
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
-    constructor(IFrankencoin zchf_, ICCIPAdmin ccipAdmin_)
+    event Wrapped(address who, uint amount);
+    event Unwrapped(address who, uint amount);
+    
+    error CannotWipeSelf();
+    error Binding();
+
+    constructor(IFrankencoin zchf_, IGovernance fps1_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrow, ILeadrateProposal savings)
         AccumulatingVotesToken()
-        FPS2Governance(zchf_, ccipAdmin_)
         FPS2MintRedeem(Equity(address(zchf_.reserve())))
-    {}
+    {
+        FPS2Governance mintGov = new FPS2Governance(this, zchf_, ccipAdmin_, borrow, savings);
+        fps1_.delegateTo(address(mintGov));
+    }
 
     function name() external pure override returns (string memory) {
         return "Frankencoin Pool Share 2";
@@ -33,8 +42,65 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         return "FPS2";
     }
 
+    /**
+     * @notice Wrap FPS tokens into FPS2 tokens 1:1.
+     * The caller must have approved this contract to spend their FPS.
+     * @param amount  Number of FPS to wrap
+     */
+    function wrap(uint256 amount) external {
+        uint256 votesBefore = FPS1.votes(msg.sender);
+        IERC20(address(FPS1)).transferFrom(msg.sender, address(this), amount);
+        uint256 votesAfter = FPS1.votes(msg.sender);
+        _mint(msg.sender, amount);
+        // credit after minting, otherwise it won't work when starting with a 0 balance
+        creditVotes(msg.sender, votesBefore - votesAfter);
+        emit Wrapped(msg.sender, amount);
+    }
+
+    /**
+     * This contract is binding and there is no escape any more once more than half of all FPS1 are wrapped.
+     * 
+     * Note that FPS2 could become "unbinding" again in case a lot of FPS2 are redeemed or FPS1 minted.
+     */
+    function isBinding() public view returns (bool) {
+        return FPS1.balanceOf(address(this)) > FPS1.totalSupply() / 2;
+    }
+
+    function unwrap(uint256 amount) external {
+        if (isBinding()) revert Binding();
+        _burn(msg.sender, amount);
+        FPS1.transfer(msg.sender, amount);
+        emit Unwrapped(msg.sender, amount);
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override(AccumulatingVotesToken, ERC20) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    /**
+     * @notice Restructure the cap table of the old Equity contract when equity is critically low.
+     * Wraps Equity.restructureCapTable, which checks qualification against the old Equity contract.
+     * @param helpers          FPS2 holders who delegate their votes to the caller
+     * @param addressesToWipe  Addresses whose FPS will be burned on the old Equity contract
+     */
+    function restructureCapTable(address[] calldata helpers, address[] calldata fps1HoldersToWipe, address[] calldata fps2HoldersToWipe) external {
+        checkQualified(msg.sender, helpers);
+        for (uint256 i = 0; i < fps1HoldersToWipe.length; i++) {
+            if (fps1HoldersToWipe[i] == address(this)) revert CannotWipeSelf();
+        }
+        FPS1.restructureCapTable(new address[](0), fps1HoldersToWipe);
+        for (uint256 i = 0; i < fps2HoldersToWipe.length; i++) {
+            address current = fps2HoldersToWipe[i];
+            _burn(current, balanceOf(current));
+        }
+        uint256 fps1Balance = FPS1.balanceOf(address(this));
+        uint256 fps2Supply = totalSupply();
+        if (fps1Balance > fps2Supply) {
+            // redeem excess FPS from the old equity
+            uint256 proceeds = FPS1.redeem(address(this), fps1Balance - fps2Supply); 
+            // return ZCHF to equity contract
+            ZCHF.transfer(address(FPS1), proceeds);
+        }
     }
 
 }

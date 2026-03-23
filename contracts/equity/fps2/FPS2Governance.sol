@@ -2,7 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "../Governance.sol";
+import "./FPS2.sol";
+import "./MinterGovernance.sol";
+import "../IGovernance.sol";
 import "../../stablecoin/IFrankencoin.sol";
 import "../../minting/IPosition.sol";
 import {ITokenPool} from "../../bridge/ITokenPool.sol";
@@ -12,68 +14,23 @@ import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Rat
  * @notice Governance contract for the FPS2 equity. It is used to check if an address has veto power.
  * Veto power is reached with 2% of the votes.
  */
-abstract contract FPS2Governance is IGovernance {
-
-    // --- Announcement tracking for minters ---
-    mapping(address minter => uint256 timestamp) public announcements;
-
-    // --- Constants ---
-    uint256 public constant MIN_APPLICATION_PERIOD = 90 days;
+contract FPS2Governance is MinterGovernance {
 
     // --- References to other contracts ---
-    IFrankencoin public immutable zchf;
-    ICCIPAdmin public immutable ccipAdmin;
-    ILeadrateProposal public constant BORROWING_LEADRATE = ILeadrateProposal(0x3BF301B0e2003E75A3e86AB82bD1EFF6A9dFB2aE);
-    ILeadrateProposal public constant SAVINGS_LEADRATE = ILeadrateProposal(0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38);
+    ICCIPAdmin public immutable CCIP_ADMIN;
+    ILeadrateProposal public immutable BORROWING_LEADRATE;
+    ILeadrateProposal public immutable SAVINGS_LEADRATE;
 
-    event MinterAnnounced(address indexed who, address indexed minter, uint256 timestamp);
-    event MinterVetoed(address indexed minter, string message);
-
-    error MinterCorrectlyAnnounced();
-    error PeriodTooShort();
-
-    constructor(IFrankencoin zchf_, ICCIPAdmin ccipAdmin_) {
-        zchf = zchf_;
-        ccipAdmin = ccipAdmin_;
-    }
-
-    // ==================== Minter Suggestion & Veto ====================
-
-    /**
-     * @notice Publicly accessible method to suggest a new way of minting Frankencoin.
-     *
-     * Wraps the existing functionality in Frankencoin to enforce a 90 days application period.
-     * The fee is forwarded to Frankencoin. Minters suggested through this contract are recorded
-     * and protected from being vetoed through denyMinter.
-     */
-    function suggestMinter(address _minter, uint256 _applicationPeriod, uint256 _applicationFee, string calldata _message) external {
-        if (_applicationPeriod < MIN_APPLICATION_PERIOD) revert PeriodTooShort();
-        zchf.transferFrom(msg.sender, address(this), _applicationFee);
-        zchf.suggestMinter(_minter, _applicationPeriod, _applicationFee, _message);
-        announcements[_minter] = block.timestamp;
-        emit MinterAnnounced(msg.sender, _minter, block.timestamp);
-    }
-
-    /**
-     * @notice Veto a minter that was not announced through FPS2. Anyone can call this.
-     * Minters that were properly announced through suggestMinter are protected.
-     * @param minter          The minter to veto
-     */
-    function denyUnannouncedMinter(address minter) external {
-        if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();
-        zchf.denyMinter(minter, new address[](0), "Minters must be suggested through the FPS2 contract");
-        emit MinterVetoed(minter, "Minters must be suggested through the FPS2 contract");
-    }
-
-    function denyMinter(address minter, address[] calldata helpers, string calldata message) external {
-        this.checkQualified(msg.sender, helpers);
-        zchf.denyMinter(minter, new address[](0), message);
+    constructor(FPS2 fps2_, IFrankencoin zchf_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrowingLeadrate_, ILeadrateProposal savingsLeadrate_) MinterGovernance(zchf_, fps2_) {
+        CCIP_ADMIN = ccipAdmin_;
+        BORROWING_LEADRATE = borrowingLeadrate_;
+        SAVINGS_LEADRATE = savingsLeadrate_;
     }
 
     // ==================== Access to existing governance functions ====================
 
     /**
-     * @notice Deny a minting position on behalf of qualified FPS2 holders.
+     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders.
      * Wraps Position.deny, which checks qualification against the old Equity contract.
      * Since FPS2 holds FPS, it passes the old equity's qualification check.
      * @param position  The position contract to deny
@@ -81,8 +38,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param message   Reason for the denial
      */
     function denyPosition(address position, address[] calldata helpers, string calldata message) external {
-        this.checkQualified(msg.sender, helpers);
-        IPosition(position).deny(new address[](0), message);
+        FPS2.checkQualified(msg.sender, helpers);
+        IPosition(position).deny(helpers(), message);
     }
 
     /**
@@ -91,8 +48,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers       FPS2 holders who delegate their votes to the caller
      */
     function proposeBorrowingRate(uint24 newRatePPM, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        BORROWING_LEADRATE.proposeChange(newRatePPM, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        BORROWING_LEADRATE.proposeChange(newRatePPM, helpers());
     }
 
     /**
@@ -101,19 +58,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers       FPS2 holders who delegate their votes to the caller
      */
     function proposeSavingsRate(uint24 newRatePPM, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        SAVINGS_LEADRATE.proposeChange(newRatePPM, new address[](0));
-    }
-
-    /**
-     * @notice Restructure the cap table of the old Equity contract when equity is critically low.
-     * Wraps Equity.restructureCapTable, which checks qualification against the old Equity contract.
-     * @param helpers          FPS2 holders who delegate their votes to the caller
-     * @param addressesToWipe  Addresses whose FPS will be burned on the old Equity contract
-     */
-    function restructureCapTable(address[] calldata helpers, address[] calldata addressesToWipe) external {
-        this.checkQualified(msg.sender, helpers);
-        IEquityRestructure(address(zchf.reserve())).restructureCapTable(new address[](0), addressesToWipe);
+        FPS2.checkQualified(msg.sender, helpers);
+        SAVINGS_LEADRATE.proposeChange(newRatePPM, helpers());
     }
 
     // ==================== CCIPAdmin governance functions ====================
@@ -124,8 +70,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers FPS2 holders who delegate their votes to the caller
      */
     function ccipProposeRemotePoolUpdate(ICCIPAdmin.RemotePoolUpdate memory update, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.proposeRemotePoolUpdate(update, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeRemotePoolUpdate(update, helpers());
     }
 
     /**
@@ -134,8 +80,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers  FPS2 holders who delegate their votes to the caller
      */
     function ccipProposeRemoveChain(uint64 chainId, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.proposeRemoveChain(chainId, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeRemoveChain(chainId, helpers());
     }
 
     /**
@@ -144,8 +90,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers  FPS2 holders who delegate their votes to the caller
      */
     function ccipProposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.proposeAddChain(config, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeAddChain(config, helpers());
     }
 
     /**
@@ -154,8 +100,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers   FPS2 holders who delegate their votes to the caller
      */
     function ccipProposeAdminTransfer(address newAdmin, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.proposeAdminTransfer(newAdmin, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeAdminTransfer(newAdmin, helpers());
     }
 
     /**
@@ -166,8 +112,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers   FPS2 holders who delegate their votes to the caller
      */
     function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.applyRateLimit(chain, inbound, outbound, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.applyRateLimit(chain, inbound, outbound, helpers());
     }
 
     /**
@@ -176,8 +122,8 @@ abstract contract FPS2Governance is IGovernance {
      * @param helpers  FPS2 holders who delegate their votes to the caller
      */
     function ccipDenyProposal(bytes32 hash, address[] calldata helpers) external {
-        this.checkQualified(msg.sender, helpers);
-        ccipAdmin.deny(hash, new address[](0));
+        FPS2.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.deny(hash, helpers());
     }
 
 }
@@ -187,13 +133,6 @@ abstract contract FPS2Governance is IGovernance {
  */
 interface ILeadrateProposal {
     function proposeChange(uint24 newRatePPM_, address[] calldata helpers) external;
-}
-
-/**
- * @notice Minimal interface for calling restructureCapTable on the Equity contract.
- */
-interface IEquityRestructure {
-    function restructureCapTable(address[] calldata helpers, address[] calldata addressesToWipe) external;
 }
 
 /**
