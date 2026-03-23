@@ -41,16 +41,15 @@ contract CloneHelper {
         collateral.approve(address(HUB), initialCollateral);
 
         // Clone and mint at the parent's price
-        address pos = HUB.clone(address(this), parent, initialCollateral, initialMint, expiration);
+        address pos = HUB.clone(address(this), parent, initialCollateral, 0, expiration);
+
+        // Mint correctly to sender
+        IPositionV2(pos).mint(msg.sender, initialMint);
 
         // Only adjust if the desired price differs from what was inherited
         if (newPrice != IPositionV2(parent).price()) {
             IPositionV2(pos).adjustPrice(newPrice);
         }
-
-        // Forward any minted ZCHF to the caller
-        IERC20 zchf = IERC20(address(HUB.zchf()));
-        zchf.transfer(msg.sender, zchf.balanceOf(address(this)));
 
         // Transfer ownership to the caller
         Ownable(pos).transferOwnership(msg.sender);
