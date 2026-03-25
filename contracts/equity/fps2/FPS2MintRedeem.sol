@@ -43,14 +43,29 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     function convertToShares(uint256 assets) public view returns (uint256) {
-        return _divD18(assets, FPS1.price());
+        return _divD18(assets, ask());
     }
 
     function convertToAssets(uint256 shares) public view returns (uint256) {
-        return _mulD18(shares, FPS1.price());
+        return _mulD18(shares, bid());
     }
 
-    // ==================== Deposit ====================
+    /**
+     * @notice The investment price of one FPS2 in ZCHF, equal to the underlying FPS price.
+     */
+    function ask() public view returns (uint256) {
+        return FPS1.price();
+    }
+
+    /**
+     * @notice The marginal redemption price of one FPS2 in ZCHF, reflecting the current discount.
+     */
+    function bid() public view returns (uint256) {
+        uint256 recent = weightedRecentRedemptions();
+        return _mulD18(FPS1.price(), discount(recent, 0));
+    }
+
+    // ==================== Deposit & Mint ====================
 
     function maxDeposit(address) public pure returns (uint256) {
         return type(uint256).max;
@@ -65,8 +80,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * at the unaltered price.
      */
     function deposit(uint256 assets, address receiver) public returns (uint256 shares) {
-        shares = _deposit(msg.sender, receiver, assets);
-        emit Deposit(msg.sender, receiver, assets, shares);
+        return _deposit(receiver, assets);
     }
 
     /**
@@ -76,12 +90,19 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * @return The number of FPS2 shares minted
      */
     function deposit(uint256 amount, uint256 expectedShares) external returns (uint256) {
-        uint256 shares = _deposit(msg.sender, msg.sender, amount);
+        uint256 shares = _deposit(msg.sender, amount);
         require(shares >= expectedShares);
         return shares;
     }
 
-    // ==================== Mint ====================
+    function _deposit(address to, uint256 amount) internal returns (uint256) {
+        ZCHF.transferFrom(msg.sender, address(this), amount);
+        uint256 shares = FPS1.invest(amount, 0);
+        _mint(to, shares);
+        _notifyInvestment(shares);
+        emit Deposit(msg.sender, to, amount, shares);
+        return shares;
+    }
 
     function maxMint(address) public pure returns (uint256) {
         return type(uint256).max;
@@ -104,7 +125,40 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         emit Deposit(msg.sender, receiver, assets, shares);
     }
 
-    // ==================== Withdraw ====================
+    /**
+     * @notice Binary search for the minimum ZCHF needed to receive at least the given number of FPS shares.
+     */
+    function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
+        if (shares == 0) return 0;
+        uint256 lo = _mulD18(shares, FPS1.price());
+        uint256 hi = lo + lo / 5 + 1;
+        while (FPS1.calculateShares(hi) < shares) {
+            hi *= 2;
+        }
+        while (lo < hi) {
+            uint256 mid = lo + (hi - lo) / 2;
+            if (FPS1.calculateShares(mid) >= shares) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
+    
+    function _notifyInvestment(uint256 fpsShares) internal {
+        uint256 recent = weightedRecentRedemptions();
+        if (recent == 0) {
+            // nothing to offset
+        } else if (fpsShares > recent) {
+            recentlyRedeemed = 0;
+        } else {
+            recentlyRedeemed = uint192(recent - fpsShares);
+            lastRedemption = uint64(block.timestamp);
+        }
+    }
+
+    // ==================== Withdraw & Redeem ====================
 
     function maxWithdraw(address owner) public view returns (uint256) {
         return calculateEffectiveProceeds(balanceOf(owner));
@@ -136,7 +190,26 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 
-    // ==================== Redeem ====================
+    /**
+     * @notice Binary search for the minimum FPS2 shares to redeem in order to receive at least the given ZCHF amount.
+     */
+    function _findSharesForAssets(uint256 assets) internal view returns (uint256) {
+        if (assets == 0) return 0;
+        uint256 lo = _divD18(assets, FPS1.price());
+        uint256 hi = lo + lo / 5 + 1;
+        while (calculateEffectiveProceeds(hi) < assets) {
+            hi *= 2;
+        }
+        while (lo < hi) {
+            uint256 mid = lo + (hi - lo) / 2;
+            if (calculateEffectiveProceeds(mid) >= assets) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
 
     function maxRedeem(address owner) public view returns (uint256) {
         return balanceOf(owner);
@@ -155,7 +228,6 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
             _useAllowance(owner, msg.sender, shares);
         }
         assets = _redeem(owner, receiver, shares);
-        emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 
     /**
@@ -177,22 +249,22 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         require(proceeds >= expectedProceeds);
         return proceeds;
     }
-
-    // ==================== Pricing ====================
-
-    /**
-     * @notice The investment price of one FPS2 in ZCHF, equal to the underlying FPS price.
-     */
-    function ask() public view returns (uint256) {
-        return FPS1.price();
-    }
-
-    /**
-     * @notice The marginal redemption price of one FPS2 in ZCHF, reflecting the current discount.
-     */
-    function bid() public view returns (uint256) {
+    
+    function _redeem(address from, address to, uint256 shares) internal returns (uint256 effectiveProceeds) {
         uint256 recent = weightedRecentRedemptions();
-        return _mulD18(FPS1.price(), discount(recent, 0));
+        uint256 discountFactor = discount(recent, shares);
+
+        _burn(from, shares);
+        uint256 rawProceeds = FPS1.redeem(address(this), shares);
+        effectiveProceeds = _mulD18(rawProceeds, discountFactor);
+
+        recentlyRedeemed = uint192(recent + shares);
+        lastRedemption = uint64(block.timestamp);
+
+        ZCHF.transfer(to, effectiveProceeds);
+        ZCHF.transfer(address(FPS1), rawProceeds - effectiveProceeds);
+
+        emit Withdraw(msg.sender, to, from, effectiveProceeds, shares);
     }
 
     /**
@@ -202,8 +274,6 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         uint256 recent = weightedRecentRedemptions();
         return _mulD18(FPS1.calculateProceeds(shares), discount(recent, shares));
     }
-
-    // ==================== Discount ====================
 
     /**
      * @notice Calculate the discount factor for a redemption using an 8th-power curve.
@@ -232,84 +302,6 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
             return 0;
         } else {
             return recentlyRedeemed * (RECOVERY_PERIOD - elapsed) / RECOVERY_PERIOD;
-        }
-    }
-
-    // ==================== Internals ====================
-
-    function _deposit(address from, address to, uint256 amount) internal returns (uint256 shares) {
-        ZCHF.transferFrom(from, address(this), amount);
-        shares = FPS1.invest(amount, 0);
-        _mint(to, shares);
-        _notifyInvestment(shares);
-    }
-
-    function _redeem(address from, address to, uint256 shares) internal returns (uint256 effectiveProceeds) {
-        uint256 recent = weightedRecentRedemptions();
-        uint256 discountFactor = discount(recent, shares);
-
-        _burn(from, shares);
-        uint256 rawProceeds = FPS1.redeem(address(this), shares);
-        effectiveProceeds = _mulD18(rawProceeds, discountFactor);
-
-        recentlyRedeemed = uint192(recent + shares);
-        lastRedemption = uint64(block.timestamp);
-
-        ZCHF.transfer(to, effectiveProceeds);
-        ZCHF.transfer(address(FPS1), rawProceeds - effectiveProceeds);
-    }
-
-    /**
-     * @notice Binary search for the minimum ZCHF needed to receive at least the given number of FPS shares.
-     */
-    function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
-        if (shares == 0) return 0;
-        uint256 lo = _mulD18(shares, FPS1.price());
-        uint256 hi = lo + lo / 5 + 1;
-        while (FPS1.calculateShares(hi) < shares) {
-            hi *= 2;
-        }
-        while (lo < hi) {
-            uint256 mid = lo + (hi - lo) / 2;
-            if (FPS1.calculateShares(mid) >= shares) {
-                hi = mid;
-            } else {
-                lo = mid + 1;
-            }
-        }
-        return lo;
-    }
-
-    /**
-     * @notice Binary search for the minimum FPS2 shares to redeem in order to receive at least the given ZCHF amount.
-     */
-    function _findSharesForAssets(uint256 assets) internal view returns (uint256) {
-        if (assets == 0) return 0;
-        uint256 lo = _divD18(assets, FPS1.price());
-        uint256 hi = lo + lo / 5 + 1;
-        while (calculateEffectiveProceeds(hi) < assets) {
-            hi *= 2;
-        }
-        while (lo < hi) {
-            uint256 mid = lo + (hi - lo) / 2;
-            if (calculateEffectiveProceeds(mid) >= assets) {
-                hi = mid;
-            } else {
-                lo = mid + 1;
-            }
-        }
-        return lo;
-    }
-
-    function _notifyInvestment(uint256 fpsShares) internal {
-        uint256 recent = weightedRecentRedemptions();
-        if (recent == 0) {
-            // nothing to offset
-        } else if (fpsShares > recent) {
-            recentlyRedeemed = 0;
-        } else {
-            recentlyRedeemed = uint192(recent - fpsShares);
-            lastRedemption = uint64(block.timestamp);
         }
     }
 
