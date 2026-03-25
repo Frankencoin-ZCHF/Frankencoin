@@ -24,6 +24,8 @@ interface IEquity is IERC20, IGovernance {
 
     function holdingDuration(address holder) external view returns (uint256);
 
+    function votes(address holder) external view returns (uint256);
+
     function relativeVotes(address holder) external view returns (uint256);
 
     function restructureCapTable(address[] calldata helpers, address[] calldata addressesToWipe) external;

@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-import "./FPS2.sol";
 import "./MinterGovernance.sol";
 import "../IGovernance.sol";
 import "../../stablecoin/IFrankencoin.sol";
@@ -21,7 +20,7 @@ contract FPS2Governance is MinterGovernance {
     ILeadrateProposal public immutable BORROWING_LEADRATE;
     ILeadrateProposal public immutable SAVINGS_LEADRATE;
 
-    constructor(FPS2 fps2_, IFrankencoin zchf_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrowingLeadrate_, ILeadrateProposal savingsLeadrate_) MinterGovernance(zchf_, fps2_) {
+    constructor(IGovernance fps2_, IFrankencoin zchf_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrowingLeadrate_, ILeadrateProposal savingsLeadrate_) MinterGovernance(zchf_, fps2_) {
         CCIP_ADMIN = ccipAdmin_;
         BORROWING_LEADRATE = borrowingLeadrate_;
         SAVINGS_LEADRATE = savingsLeadrate_;
@@ -39,7 +38,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function denyPosition(address position, address[] calldata helpers, string calldata message) external {
         FPS2.checkQualified(msg.sender, helpers);
-        IPosition(position).deny(helpers(), message);
+        IPosition(position).deny(fps2AsHelper(), message);
     }
 
     /**
@@ -49,7 +48,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function proposeBorrowingRate(uint24 newRatePPM, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        BORROWING_LEADRATE.proposeChange(newRatePPM, helpers());
+        BORROWING_LEADRATE.proposeChange(newRatePPM, fps2AsHelper());
     }
 
     /**
@@ -59,7 +58,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function proposeSavingsRate(uint24 newRatePPM, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        SAVINGS_LEADRATE.proposeChange(newRatePPM, helpers());
+        SAVINGS_LEADRATE.proposeChange(newRatePPM, fps2AsHelper());
     }
 
     // ==================== CCIPAdmin governance functions ====================
@@ -71,7 +70,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipProposeRemotePoolUpdate(ICCIPAdmin.RemotePoolUpdate memory update, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeRemotePoolUpdate(update, helpers());
+        CCIP_ADMIN.proposeRemotePoolUpdate(update, fps2AsHelper());
     }
 
     /**
@@ -81,7 +80,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipProposeRemoveChain(uint64 chainId, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeRemoveChain(chainId, helpers());
+        CCIP_ADMIN.proposeRemoveChain(chainId, fps2AsHelper());
     }
 
     /**
@@ -91,7 +90,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipProposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeAddChain(config, helpers());
+        CCIP_ADMIN.proposeAddChain(config, fps2AsHelper());
     }
 
     /**
@@ -101,7 +100,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipProposeAdminTransfer(address newAdmin, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeAdminTransfer(newAdmin, helpers());
+        CCIP_ADMIN.proposeAdminTransfer(newAdmin, fps2AsHelper());
     }
 
     /**
@@ -113,7 +112,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.applyRateLimit(chain, inbound, outbound, helpers());
+        CCIP_ADMIN.applyRateLimit(chain, inbound, outbound, fps2AsHelper());
     }
 
     /**
@@ -123,7 +122,7 @@ contract FPS2Governance is MinterGovernance {
      */
     function ccipDenyProposal(bytes32 hash, address[] calldata helpers) external {
         FPS2.checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.deny(hash, helpers());
+        CCIP_ADMIN.deny(hash, fps2AsHelper());
     }
 
 }

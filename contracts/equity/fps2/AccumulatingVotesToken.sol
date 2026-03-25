@@ -10,7 +10,7 @@ import "../Equity.sol";
  * Addresses that reach a cap can be cut down to the cap by anyone.
  * This code is mostly copied from the Equity contract.
  */
-contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
+abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
 
     uint8 private constant TIME_RESOLUTION_BITS = 20;
     uint256 public constant HOLDING_DURATION_CAP = 365 days;

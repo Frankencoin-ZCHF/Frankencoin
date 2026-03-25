@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
+import "./FPS2Governance.sol";
 import "../IEquity.sol";
 
 /**
@@ -25,13 +26,14 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     
     error CannotWipeSelf();
     error Binding();
+    error NotBinding();
 
     constructor(IFrankencoin zchf_, IGovernance fps1_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrow, ILeadrateProposal savings)
         AccumulatingVotesToken()
-        FPS2MintRedeem(Equity(address(zchf_.reserve())))
+        FPS2MintRedeem(zchf_)
     {
         FPS2Governance mintGov = new FPS2Governance(this, zchf_, ccipAdmin_, borrow, savings);
-        fps1_.delegateTo(address(mintGov));
+        fps1_.delegateVoteTo(address(mintGov));
     }
 
     function name() external pure override returns (string memory) {
@@ -66,6 +68,20 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         return FPS1.balanceOf(address(this)) > FPS1.totalSupply() / 2;
     }
 
+    /**
+     * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
+     * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all FPS1 are wrapped.
+     * 
+     * @param target           the FPS1 holder whose votes to destroy
+     */
+    function shoot(address target) external {
+        if (!isBinding()) revert NotBinding();
+        address[] memory targets = new address[](1);
+        targets[0] = target;
+        uint256 votesToDestroy = FPS1.votes(target);
+        FPS1.kamikaze(targets, votesToDestroy);
+    }
+
     function unwrap(uint256 amount) external {
         if (isBinding()) revert Binding();
         _burn(msg.sender, amount);
@@ -80,8 +96,9 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     /**
      * @notice Restructure the cap table of the old Equity contract when equity is critically low.
      * Wraps Equity.restructureCapTable, which checks qualification against the old Equity contract.
-     * @param helpers          FPS2 holders who delegate their votes to the caller
-     * @param addressesToWipe  Addresses whose FPS will be burned on the old Equity contract
+     * @param helpers              FPS2 holders who delegate their votes to the caller
+     * @param fps1HoldersToWipe    Addresses whose FPS1 will be burned on the old Equity contract
+     * @param fps2HoldersToWipe    Addresses whose FPS2 will be burned on this contract
      */
     function restructureCapTable(address[] calldata helpers, address[] calldata fps1HoldersToWipe, address[] calldata fps2HoldersToWipe) external {
         checkQualified(msg.sender, helpers);

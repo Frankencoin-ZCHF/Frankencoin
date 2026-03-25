@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../stablecoin/IFrankencoin.sol";
+import "../../stablecoin/IFrankencoin.sol";
 
 /**
  * @title MinterGovernance
@@ -89,7 +89,7 @@ contract MinterGovernance {
      */
     function denyUnannouncedMinter(address minter) external {
         if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();
-        ZCHF.denyMinter(minter, helpers(), "Minters must be suggested through the FPS2 contract");
+        ZCHF.denyMinter(minter, fps2AsHelper(), "Minters must be suggested through the FPS2 contract");
         uint256 reward = rewardPool() / 10;
         ZCHF.transfer(msg.sender, reward); // reward the caller with 10% of the reward pool for helping to enforce the announcement requirement
         emit Rewarded(msg.sender, reward, address(ZCHF));
@@ -101,10 +101,10 @@ contract MinterGovernance {
      */
     function denyMinter(address minter, address[] calldata helpers, string calldata message) external {
         FPS2.checkQualified(msg.sender, helpers);
-        ZCHF.denyMinter(minter, helpers(), message);
+        ZCHF.denyMinter(minter, fps2AsHelper(), message);
     }
 
-    function helpers() internal view returns (address[] memory) {
+    function fps2AsHelper() internal view returns (address[] memory) {
         address[] memory helper = new address[](1);
         helper[0] = address(FPS2);
         return helper;

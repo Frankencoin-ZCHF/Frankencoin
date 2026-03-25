@@ -22,6 +22,8 @@ interface IBasicFrankencoin is IERC20 {
 
     function reserve() external view returns (IGovernance);
 
+    function minters(address minter) external view returns (uint256);
+
     function isMinter(address minter) external view returns (bool);
 
     function getPositionParent(address position) external view returns (address);
