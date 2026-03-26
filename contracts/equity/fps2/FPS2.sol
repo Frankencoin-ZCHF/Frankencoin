@@ -6,6 +6,7 @@ import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
 import "./MainnetGovernance.sol";
 import "../IEquity.sol";
+import "./GovernanceFactory.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
 /**
@@ -34,6 +35,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     error NotBinding();
 
     constructor(
+        GovernanceFactory factory,
         IFrankencoin zchf_,
         IGovernance fps1_,
         ICCIPAdmin ccipAdmin_,
@@ -45,8 +47,8 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         AccumulatingVotesToken()
         FPS2MintRedeem(zchf_)
     {
-        MainnetGovernance mintGov = new MainnetGovernance(this, zchf_, ccipAdmin_, borrow, savings, router_, linkToken_);
-        fps1_.delegateVoteTo(address(mintGov));
+        address mintGov = factory.deployMainnet(address(this), zchf_, ccipAdmin_, borrow, savings, router_, linkToken_);
+        fps1_.delegateVoteTo(mintGov);
     }
 
     function name() external pure override returns (string memory) {

@@ -21,7 +21,6 @@ abstract contract MinterGovernance is Governance {
 
     // --- References to other contracts ---
     IFrankencoin public immutable ZCHF;
-    IGovernance public immutable GOV2;
     address private immutable MAINNET_FPS2;
     
     event MinterAnnounced(address indexed who, address indexed minter, uint256 timestamp);

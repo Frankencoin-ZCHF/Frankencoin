@@ -29,7 +29,6 @@ import {SyncVote, SyncMessage} from "../IGovernance.sol";
 contract BridgedGovernance is CCIPGovernance, CCIPReceiver {
 
     uint64 public immutable MAINNET_CHAIN_SELECTOR;
-    address public immutable MAINNET_SENDER;
 
     mapping(address => uint256) private _fps2Votes;
     uint256 private _fps2TotalVotes;
@@ -44,15 +43,13 @@ contract BridgedGovernance is CCIPGovernance, CCIPReceiver {
         IFrankencoin zchf_,
         ICCIPAdmin ccipAdmin_,
         address router_,
-        uint64 mainnetChainSelector_,
-        address mainnetSender_
+        uint64 mainnetChainSelector_
     ) CCIPGovernance(
         mainnetFPS2_,
         zchf_,
         ccipAdmin_
     ) CCIPReceiver(router_) {
         MAINNET_CHAIN_SELECTOR = mainnetChainSelector_;
-        MAINNET_SENDER = mainnetSender_;
     }
 
     // ==================== Governance overrides (bridged FPS2 votes) ====================
@@ -69,7 +66,9 @@ contract BridgedGovernance is CCIPGovernance, CCIPReceiver {
 
     function _ccipReceive(Client.Any2EVMMessage memory any2EvmMessage) internal override {
         if (any2EvmMessage.sourceChainSelector != MAINNET_CHAIN_SELECTOR) revert InvalidSourceChain();
-        if (abi.decode(any2EvmMessage.sender, (address)) != MAINNET_SENDER) revert InvalidSender();
+
+        // Mainnet governance contract is the only valid sender and it should have the same address as this contract (deployed via factory), so we can just check if the sender is address(this)
+        if (abi.decode(any2EvmMessage.sender, (address)) != address(this)) revert InvalidSender();
 
         SyncMessage memory syncMessage = abi.decode(any2EvmMessage.data, (SyncMessage));
 

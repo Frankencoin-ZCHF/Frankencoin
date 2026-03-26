@@ -3,11 +3,20 @@
 pragma solidity ^0.8.0;
 
 import "./CCIPGovernance.sol";
-import "./FPS2.sol";
 import {CCIPSender} from "../../bridge/CCIPSender.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {SyncVote, SyncMessage} from "../IGovernance.sol";
+
+/**
+ * @notice Interface for reading votes, total votes, and delegations from the FPS2 token.
+ * Implemented by FPS2 (via AccumulatingVotesToken -> Governance).
+ */
+interface IFPS2Votes {
+    function votes(address holder) external view returns (uint256);
+    function totalVotes() external view returns (uint256);
+    function delegates(address owner) external view returns (address);
+}
 
 /**
  * @notice Mainnet-only FPS2 governance. Adds leadrate proposals and CCIP vote syncing
@@ -15,20 +24,22 @@ import {SyncVote, SyncMessage} from "../IGovernance.sol";
  */
 contract MainnetGovernance is CCIPGovernance, CCIPSender {
 
+    IFPS2Votes public immutable VOTES;
     ILeadrateProposal public immutable BORROWING_LEADRATE;
     ILeadrateProposal public immutable SAVINGS_LEADRATE;
 
     event FPS2VotesSynced(uint64 indexed chain, address receiver, address[] syncedVoters);
 
     constructor(
-        FPS2 fps2_,
+        address fps2_,
         IFrankencoin zchf_,
         ICCIPAdmin ccipAdmin_,
         ILeadrateProposal borrowingLeadrate_,
         ILeadrateProposal savingsLeadrate_,
         IRouterClient router_,
         address linkToken_
-    ) CCIPGovernance(address(fps2_), zchf_, ccipAdmin_) CCIPSender(router_, linkToken_) {
+    ) CCIPGovernance(fps2_, zchf_, ccipAdmin_) CCIPSender(router_, linkToken_) {
+        VOTES = IFPS2Votes(fps2_);
         BORROWING_LEADRATE = borrowingLeadrate_;
         SAVINGS_LEADRATE = savingsLeadrate_;
     }
@@ -37,14 +48,14 @@ contract MainnetGovernance is CCIPGovernance, CCIPSender {
      * @notice The votes of the holder, excluding votes from delegates.
      */
     function votes(address holder) public override view returns (uint256){
-        return FPS2(address(FPS2)).votes(holder);
+        return VOTES.votes(holder);
     }
 
     /**
      * @notice Total number of votes in the system.
      */
     function totalVotes() public override view returns (uint256) {
-        return FPS2(address(FPS2)).totalVotes();
+        return VOTES.totalVotes();
     }
 
     // ==================== Position governance ====================
