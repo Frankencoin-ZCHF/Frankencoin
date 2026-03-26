@@ -90,7 +90,7 @@ contract MinterGovernance {
     function denyUnannouncedMinter(address minter) external {
         if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();
         ZCHF.denyMinter(minter, fps2AsHelper(), "Minters must be suggested through the FPS2 contract");
-        uint256 reward = rewardPool() / 10;
+        uint256 reward = checkReward(minter);
         ZCHF.transfer(msg.sender, reward); // reward the caller with 10% of the reward pool for helping to enforce the announcement requirement
         emit Rewarded(msg.sender, reward, address(ZCHF));
     }

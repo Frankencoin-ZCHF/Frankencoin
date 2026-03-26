@@ -9,15 +9,19 @@ import "../IEquity.sol";
 
 /**
  * @title FPS2
- * @notice A wrapper token around the Frankencoin Pool Share (FPS) that removes the 90-day
- * redemption lock in favor of a spread-based pricing mechanism. It comes with its own
- * governance system and a minter pre-announcement system that
- * effectively extends the veto period for new minting modules to 3 months.
+ * 
+ * Wraps the Frankencoin Pool Share to alter the governance dynamics of the Frankencoin system. Think of this
+ * contract as a "shareholder agreement" for FPS token holders. No one is forced to join, but it makes sense to join.
+ *  
+ * The most important features are:
+ * - Reduce the veto power threshold from 2% in FPS1 to 1% in FPS2
+ * - Increase minter proposal fee to 5000 ZCHF and minimum application period of 90 days
+ * - Minting and redemption following the ERC 4626 standard
+ * - No more waiting period for redemption, but potentially very low redemption prices
+ * - Redemption limit (about 20% of capital per month) to prevent equity holders from exiting first in a crisis
+ * - Ability to prevent FPS1 holders from participating in governance or redeeming their FPS by "shooting" them
  *
- * Investment price is unaltered (same as investing directly in FPS). Selling incurs a discount
- * based on an 8th-power curve that increases with recently redeemed FPS volume.
- * Investing reduces the redemption counter (net redemptions). The counter linearly
- * recovers over 30 days.
+ * The FPS2 contract is "binding" as long as more than 50% of all votes are controlled by this contract.
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
@@ -60,17 +64,17 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     }
 
     /**
-     * This contract is binding and there is no escape any more once more than half of all FPS1 are wrapped.
+     * This contract is binding and there is no escape any more once more than half of all votes are controlled by this contract.
      * 
      * Note that FPS2 could become "unbinding" again in case a lot of FPS2 are redeemed or FPS1 minted.
      */
     function isBinding() public view returns (bool) {
-        return FPS1.balanceOf(address(this)) > FPS1.totalSupply() / 2;
+        return FPS1.relativeVotes(address(this)) > 1e18 / 2;
     }
 
     /**
      * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
-     * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all FPS1 are wrapped.
+     * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all votes are controlled by this contract.
      * 
      * @param target           the FPS1 holder whose votes to destroy
      */
