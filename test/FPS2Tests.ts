@@ -6,8 +6,7 @@ import {
   Equity,
   Frankencoin,
   FPS2,
-  FPS2Governance,
-  MinterGovernance,
+  MainnetFPS2Governance,
   StablecoinBridge,
   TestToken,
 } from "../typechain";
@@ -26,7 +25,7 @@ describe("FPS2 Tests", () => {
   let zchf: Frankencoin;
   let xchf: TestToken;
   let bridge: StablecoinBridge;
-  let fps2Gov: FPS2Governance;
+  let fps2Gov: MainnetFPS2Governance;
 
   before(async () => {
     [owner, alice, bob] = await ethers.getSigners();
@@ -67,14 +66,16 @@ describe("FPS2 Tests", () => {
     fps2 = await fps2Factory.deploy(
       await zchf.getAddress(),
       await equity.getAddress(),
-      ethers.ZeroAddress,
-      ethers.ZeroAddress,
-      ethers.ZeroAddress
+      ethers.ZeroAddress, // ccipAdmin
+      ethers.ZeroAddress, // borrowing leadrate
+      ethers.ZeroAddress, // savings leadrate
+      ethers.ZeroAddress, // CCIP router
+      ethers.ZeroAddress  // LINK token
     );
 
-    // Retrieve FPS2Governance address from equity's delegation
+    // Retrieve MainnetFPS2Governance address from equity's delegation
     const fps2GovAddress = await equity.delegates(await fps2.getAddress());
-    fps2Gov = await ethers.getContractAt("FPS2Governance", fps2GovAddress);
+    fps2Gov = await ethers.getContractAt("MainnetFPS2Governance", fps2GovAddress);
   });
 
   // ==================== Initialization ====================

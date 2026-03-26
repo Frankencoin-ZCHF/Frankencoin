@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 
 import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
-import "./FPS2Governance.sol";
+import "./MainnetGovernance.sol";
 import "../IEquity.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
 /**
  * @title FPS2
@@ -32,11 +33,19 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     error Binding();
     error NotBinding();
 
-    constructor(IFrankencoin zchf_, IGovernance fps1_, ICCIPAdmin ccipAdmin_, ILeadrateProposal borrow, ILeadrateProposal savings)
+    constructor(
+        IFrankencoin zchf_,
+        IGovernance fps1_,
+        ICCIPAdmin ccipAdmin_,
+        ILeadrateProposal borrow,
+        ILeadrateProposal savings,
+        IRouterClient router_,
+        address linkToken_
+    )
         AccumulatingVotesToken()
         FPS2MintRedeem(zchf_)
     {
-        FPS2Governance mintGov = new FPS2Governance(this, zchf_, ccipAdmin_, borrow, savings);
+        MainnetGovernance mintGov = new MainnetGovernance(this, zchf_, ccipAdmin_, borrow, savings, router_, linkToken_);
         fps1_.delegateVoteTo(address(mintGov));
     }
 

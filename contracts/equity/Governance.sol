@@ -12,8 +12,10 @@ abstract contract Governance is IGovernance {
 
     /**
      * @notice The quorum in basis points. 100 is 1%.
+     * 
+     * Used to be 200 in earlier versions, most notably in FPS1.
      */
-    uint32 private constant QUORUM = 200;
+    uint32 private constant QUORUM = 100;
 
     /**
      * @notice Keeping track on who delegated votes to whom.
