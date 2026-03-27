@@ -26,7 +26,7 @@ import {SyncVote, SyncMessage} from "../IGovernance.sol";
  * should be deployed at the same address as the MainnetFPS2Governance (via a factory),
  * the synced delegation is automatically valid.
  */
-contract BridgedGovernance is CCIPGovernance, CCIPReceiver {
+contract BridgedGovernance2 is CCIPGovernance, CCIPReceiver {
 
     uint64 public immutable MAINNET_CHAIN_SELECTOR;
 

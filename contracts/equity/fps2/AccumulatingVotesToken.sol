@@ -2,15 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import "../Governance.sol";
-import "../Equity.sol";
+import "../../erc20/ERC20.sol";
+import "../../utils/MathUtil.sol";
 
 /**
  * This contract adds time- and balance-based vote accumulation to the basic ERC20 functionality.
  * Addresses that reach a cap can be cut down to the cap by anyone.
  * This code is mostly copied from the Equity contract.
  */
-abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
+abstract contract AccumulatingVotesToken is ERC20, MathUtil {
 
     uint8 private constant TIME_RESOLUTION_BITS = 20;
     uint256 public constant HOLDING_DURATION_CAP = 365 days;
@@ -43,11 +43,11 @@ abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
         return uint64(block.timestamp << TIME_RESOLUTION_BITS);
     }
 
-    function votes(address holder) public view override returns (uint256) {
+    function votes(address holder) public view returns (uint256) {
         return balanceOf(holder) * (_anchorTime() - voteAnchor[holder]);
     }
 
-    function totalVotes() public view override returns (uint256) {
+    function totalVotes() public view returns (uint256) {
         return totalVotesAtAnchor + totalSupply() * (_anchorTime() - totalVotesAnchorTime);
     }
 
@@ -83,6 +83,32 @@ abstract contract AccumulatingVotesToken is Governance, ERC20, MathUtil {
         uint256 voteIncrease = recipientVotesAfter - recipientVotesBefore;
         totalVotesAtAnchor = uint192(totalVotes() + voteIncrease);
         totalVotesAnchorTime = time;
+    }
+
+    /**
+     * Allows a holder to sacrifice their own votes to destroy the votes of targets.
+     * The caller's votes are reduced first, then used as a budget to reduce targets' votes.
+     */
+    function kamikaze(address[] calldata targets, uint256 votesToDestroy) external {
+        uint256 budget = _reduceVotes(msg.sender, votesToDestroy);
+        uint256 destroyedVotes = 0;
+        for (uint256 i = 0; i < targets.length && destroyedVotes < budget; i++) {
+            destroyedVotes += _reduceVotes(targets[i], budget - destroyedVotes);
+        }
+        require(destroyedVotes > 0);
+        totalVotesAtAnchor = uint192(totalVotes() - destroyedVotes - budget);
+        totalVotesAnchorTime = _anchorTime();
+    }
+
+    function _reduceVotes(address target, uint256 amount) internal returns (uint256) {
+        uint256 votesBefore = votes(target);
+        if (amount >= votesBefore) {
+            voteAnchor[target] = _anchorTime();
+            return votesBefore;
+        } else {
+            voteAnchor[target] = uint64(_anchorTime() - (votesBefore - amount) / balanceOf(target));
+            return votesBefore - votes(target);
+        }
     }
 
     function _adjustRecipientVoteAnchor(address to, uint256 amount) internal returns (uint256) {

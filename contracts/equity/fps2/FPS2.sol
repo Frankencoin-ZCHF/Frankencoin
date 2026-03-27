@@ -27,6 +27,8 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
+    MainnetGovernance public immutable MAINNET_GOVERNANCE;
+
     event Wrapped(address who, uint amount);
     event Unwrapped(address who, uint amount);
     
@@ -49,6 +51,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     {
         address mintGov = factory.deployMainnet(address(this), zchf_, ccipAdmin_, borrow, savings, router_, linkToken_);
         fps1_.delegateVoteTo(mintGov);
+        MAINNET_GOVERNANCE = MainnetGovernance(mintGov);
     }
 
     function name() external pure override returns (string memory) {
@@ -116,7 +119,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
      * @param fps2HoldersToWipe    Addresses whose FPS2 will be burned on this contract
      */
     function restructureCapTable(address[] calldata helpers, address[] calldata fps1HoldersToWipe, address[] calldata fps2HoldersToWipe) external {
-        checkQualified(msg.sender, helpers);
+        MAINNET_GOVERNANCE.checkQualified(msg.sender, helpers);
         for (uint256 i = 0; i < fps1HoldersToWipe.length; i++) {
             if (fps1HoldersToWipe[i] == address(this)) revert CannotWipeSelf();
         }

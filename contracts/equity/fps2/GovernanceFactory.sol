@@ -3,16 +3,16 @@
 pragma solidity ^0.8.0;
 
 import "./MainnetGovernance.sol";
-import "./BridgedGovernance.sol";
+import "./BridgedGovernance2.sol";
 
 /**
  * @title GovernanceFactory
- * @notice Deploys either MainnetGovernance or BridgedGovernance at a deterministic address.
+ * @notice Deploys either MainnetGovernance or BridgedGovernance2 at a deterministic address.
  *
  * This factory must be deployed via CREATE2 at the same address on all chains. The first
  * (and only) contract it creates via CREATE uses nonce 1, producing an identical address
  * regardless of which governance variant is deployed. This ensures that the MainnetGovernance
- * on mainnet and BridgedGovernance on L2s share the same address, which is required for the
+ * on mainnet and BridgedGovernance2 on L2s share the same address, which is required for the
  * synced FPS1 delegation to remain valid across chains.
  *
  * Deployment flow:
@@ -40,7 +40,7 @@ contract GovernanceFactory {
     }
 
     /**
-     * @notice Deploy BridgedGovernance (call on each L2, once).
+     * @notice Deploy BridgedGovernance2 (call on each L2, once).
      * The mainnetSender is automatically set to the predicted governance address,
      * since MainnetGovernance on mainnet will be at the same address.
      */
@@ -51,7 +51,7 @@ contract GovernanceFactory {
         address router_,
         uint64 mainnetChainSelector_
     ) external returns (address) {
-        BridgedGovernance gov = new BridgedGovernance(mainnetFPS2_, zchf_, ccipAdmin_, router_, mainnetChainSelector_);
+        BridgedGovernance2 gov = new BridgedGovernance2(mainnetFPS2_, zchf_, ccipAdmin_, router_, mainnetChainSelector_);
         return address(gov);
     }
 

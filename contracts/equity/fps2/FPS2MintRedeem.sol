@@ -289,4 +289,13 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         }
     }
 
+    /**
+     * @notice The current discount factor that would apply when redeeming the given number of shares.
+     * @param shares  Number of FPS2 shares to redeem (use 0 for the marginal discount)
+     * @return The discount factor with 18 decimals (1e18 = no discount, 0 = full discount)
+     */
+    function currentDiscount(uint256 shares) public view returns (uint256) {
+        return discount(weightedRecentRedemptions(), shares);
+    }
+
 }

@@ -8,14 +8,9 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {SyncVote, SyncMessage} from "../IGovernance.sol";
 
-/**
- * @notice Interface for reading votes, total votes, and delegations from the FPS2 token.
- * Implemented by FPS2 (via AccumulatingVotesToken -> Governance).
- */
 interface IFPS2Votes {
     function votes(address holder) external view returns (uint256);
     function totalVotes() external view returns (uint256);
-    function delegates(address owner) external view returns (address);
 }
 
 /**
@@ -129,9 +124,9 @@ contract MainnetGovernance is CCIPGovernance, CCIPSender {
     function _buildFPS2SyncMessage(address[] calldata voters) private view returns (SyncMessage memory) {
         SyncVote[] memory syncVotes = new SyncVote[](voters.length);
         for (uint256 i = 0; i < voters.length; i++) {
-            syncVotes[i] = SyncVote(voters[i], VOTES.votes(voters[i]), VOTES.delegates(voters[i]));
+            syncVotes[i] = SyncVote(voters[i], votes(voters[i]), delegates[voters[i]]);
         }
-        return SyncMessage(syncVotes, VOTES.totalVotes());
+        return SyncMessage(syncVotes, totalVotes());
     }
 
 }

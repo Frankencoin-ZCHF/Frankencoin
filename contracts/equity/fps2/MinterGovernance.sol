@@ -51,12 +51,11 @@ abstract contract MinterGovernance is Governance {
     function suggestMinter(address _minter, uint256 _applicationPeriod, uint256 _applicationFee, string calldata _message) external {
         if (_applicationPeriod < MIN_APPLICATION_PERIOD) revert PeriodTooShort();
         if (_applicationFee < MIN_APPLICATION_FEE) revert FeeTooLow();
-        ZCHF.transferFrom(msg.sender, address(this), _applicationFee);
 
         // refill the reward pool to contain at least 1000 ZCHF for the MEV bots that will help enforce the application period
         uint256 rewardPoolSize = rewardPool();
-        uint256 rewardPoolRefill = rewardPoolSize > 1000 ether ? 0 : 1000 ether - rewardPoolSize; 
-
+        uint256 rewardPoolRefill = rewardPoolSize >= 1000 ether ? 0 : 1000 ether - rewardPoolSize; 
+        ZCHF.transferFrom(msg.sender, address(this), _applicationFee);
         ZCHF.suggestMinter(_minter, _applicationPeriod, _applicationFee - rewardPoolRefill, _message);
         announcements[_minter] = block.timestamp;
         emit MinterAnnounced(msg.sender, _minter, block.timestamp);
