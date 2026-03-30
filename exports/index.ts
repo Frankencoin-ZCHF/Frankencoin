@@ -33,6 +33,7 @@ export * from "./abis/MintingHubV2/MintingHubV2";
 export * from "./abis/MintingHubV2/PositionFactoryV2";
 export * from "./abis/MintingHubV2/PositionV2";
 export * from "./abis/MintingHubV2/PositionRollerV2";
+export * from "./abis/MintingHubV2/CloneHelper";
 
 export * from "./abis/rate/AbstractLeadrate";
 export * from "./abis/rate/BridgedLeadrate";
