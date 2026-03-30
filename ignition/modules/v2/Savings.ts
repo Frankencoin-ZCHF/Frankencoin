@@ -1,7 +1,7 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { getChildFromSeed } from "../../../helper/wallet";
 import { storeConstructorArgs } from "../../../helper/store.args";
-import { ADDRESS } from "../../../exports/address.mainnet.config";
+import { ADDRESS } from "../../../exports/address.config";
 import { mainnet } from "viem/chains";
 
 // deployer settings

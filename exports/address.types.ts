@@ -80,6 +80,7 @@ export type ChainAddressMainnet = {
   rollerV2: Address;
   mintingHubV2: Address;
   positionFactoryV2: Address;
+  cloneHelper: Address;
 
   // stablecoin swap bridges
   stablecoinBridgeXCHF: Address;
