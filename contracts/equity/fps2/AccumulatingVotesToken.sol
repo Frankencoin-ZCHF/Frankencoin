@@ -20,6 +20,9 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
     uint64 private totalVotesAnchorTime;
     mapping(address owner => uint64 timestamp) private voteAnchor;
 
+    event MutualDestruction(address indexed initiator, address indexed target, uint256 votesDestroyed);
+    event VotesCapped(address indexed holder, uint256 votesBefore, uint256 votesAfter);
+
     // ==================== Vote Tracking ====================
 
     constructor() ERC20(18) {
@@ -36,6 +39,7 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
             uint256 votesAfter = votes(holder);
             totalVotesAtAnchor = uint192(totalVotes() - (votesBefore - votesAfter));
             totalVotesAnchorTime = _anchorTime();
+            emit VotesCapped(holder, votesBefore, votesAfter);
         }
     }
 
@@ -89,11 +93,12 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
      * Allows a holder to sacrifice their own votes to destroy the votes of targets.
      * The caller's votes are reduced first, then used as a budget to reduce targets' votes.
      */
-    function kamikaze(address[] calldata targets, uint256 votesToDestroy) external {
+    function attack(address[] calldata targets, uint256 votesToDestroy) external {
         uint256 budget = _reduceVotes(msg.sender, votesToDestroy);
         uint256 destroyedVotes = 0;
         for (uint256 i = 0; i < targets.length && destroyedVotes < budget; i++) {
             destroyedVotes += _reduceVotes(targets[i], budget - destroyedVotes);
+            emit MutualDestruction(msg.sender, targets[i], destroyedVotes);
         }
         require(destroyedVotes > 0);
         totalVotesAtAnchor = uint192(totalVotes() - destroyedVotes - budget);

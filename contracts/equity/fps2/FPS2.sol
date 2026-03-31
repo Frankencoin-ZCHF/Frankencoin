@@ -31,6 +31,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
     event Wrapped(address who, uint amount);
     event Unwrapped(address who, uint amount);
+    event Shot(address target, uint256 votesDestroyed);
     
     error CannotWipeSelf();
     error Binding();
@@ -98,6 +99,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         targets[0] = target;
         uint256 votesToDestroy = FPS1.votes(target);
         FPS1.kamikaze(targets, votesToDestroy);
+        emit Shot(target, votesToDestroy);
     }
 
     function unwrap(uint256 amount) external {
