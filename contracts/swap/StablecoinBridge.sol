@@ -27,6 +27,11 @@ contract StablecoinBridge {
 
     mapping (address => uint256) public credits;
 
+    event Mint(address indexed target, uint256 amount);
+    event Burn(address indexed zchfHolder, uint256 amount);
+    event Credit(address indexed target, uint256 amount);
+    event Payout(address indexed target, uint256 amount);
+
     error Limit(uint256 amount, uint256 limit);
     error Expired(uint256 time, uint256 expiration);
     error UnsupportedToken(address token);
@@ -60,6 +65,7 @@ contract StablecoinBridge {
         zchf.mint(target, amount);
         minted += amount;
         if (minted > limit) revert Limit(amount, limit);
+        emit Mint(target, amount);
     }
 
     /**
@@ -87,6 +93,14 @@ contract StablecoinBridge {
     function burnAndCredit(address target, uint256 amount) external {
         _burn(msg.sender, amount);
         credits[target] += amount;
+        emit Credit(target, amount);
+    }
+
+    /**
+     * Function to check the credit balance of a target address.
+     */
+    function balanceOf(address account) external view returns (uint256) {
+        return credits[account];
     }
 
     /**
@@ -101,10 +115,12 @@ contract StablecoinBridge {
         uint256 amount = credits[target];
         credits[target] = 0;
         chf.transfer(target, amount);
+        emit Payout(target, amount);
     }
 
     function _burn(address zchfHolder, uint256 amount) internal {
         zchf.burnFrom(zchfHolder, amount);
         minted -= amount;
+        emit Burn(zchfHolder, amount);
     }
 }
