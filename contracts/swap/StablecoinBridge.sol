@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../erc20/IERC20.sol";
-import "../erc20/IERC677Receiver.sol";
 import "../stablecoin/IFrankencoin.sol";
 
 /**
@@ -11,6 +10,7 @@ import "../stablecoin/IFrankencoin.sol";
  * @author Frankencoin
  */
 contract StablecoinBridge {
+
     IERC20 public immutable chf; // the source stablecoin
     IFrankencoin public immutable zchf; // the Frankencoin
 
@@ -24,6 +24,8 @@ contract StablecoinBridge {
      */
     uint256 public immutable limit;
     uint256 public minted;
+
+    mapping (address => uint256) public credits;
 
     error Limit(uint256 amount, uint256 limit);
     error Expired(uint256 time, uint256 expiration);
@@ -64,19 +66,45 @@ contract StablecoinBridge {
      * @notice Convenience method for burnAndSend(msg.sender, amount)
      */
     function burn(uint256 amount) external {
-        _burn(msg.sender, msg.sender, amount);
+        _burn(msg.sender, amount);
+        chf.transfer(msg.sender, amount);
     }
 
     /**
      * @notice Burn the indicated amount of Frankencoin and send the same number of source coin to the caller.
      */
     function burnAndSend(address target, uint256 amount) external {
-        _burn(msg.sender, target, amount);
+        _burn(msg.sender, amount);
+        chf.transfer(target, amount);
     }
 
-    function _burn(address zchfHolder, address target, uint256 amount) internal {
-        zchf.burnFrom(zchfHolder, amount);
+    /**
+     * Burn the indicated amount of Frankencoin and credit the same amount to the target address.
+     * The target address can then call payoutCredit to receive the source coin.
+     * 
+     * This can be useful in case the source stablecoin has transfer fees or other transfer restrictions.
+     */
+    function burnAndCredit(address target, uint256 amount) external {
+        _burn(msg.sender, amount);
+        credits[target] += amount;
+    }
+
+    /**
+     * Pays out all the outstanding credit of the target address to the target address.
+     * 
+     * Anyone can trigger this for any target address. This is to cover the use case where the issuer has frozen
+     * the source coin in this contract but still allows withdrawals for specific addresses, in which case the issuer
+     * could unfreeze, trigger payouts to compliant users, and then freeze the balance again in a single transaction
+     * to satisfy the redemption rights of the beneficial owners according to the credit mapping.
+     */
+    function payoutCredit(address target) external {
+        uint256 amount = credits[target];
+        credits[target] = 0;
         chf.transfer(target, amount);
+    }
+
+    function _burn(address zchfHolder, uint256 amount) internal {
+        zchf.burnFrom(zchfHolder, amount);
         minted -= amount;
     }
 }
