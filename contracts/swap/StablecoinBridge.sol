@@ -20,6 +20,11 @@ contract StablecoinBridge {
     uint256 public immutable horizon;
 
     /**
+     * @notice The decimal difference between ZCHF and the source stablecoin.
+     */
+    uint256 public immutable decimalMultiplier;
+
+    /**
      * The maximum amount of outstanding converted source stablecoins.
      */
     uint256 public immutable limit;
@@ -36,10 +41,17 @@ contract StablecoinBridge {
     error Expired(uint256 time, uint256 expiration);
     error UnsupportedToken(address token);
 
+    /**
+     * Construct the swap bridge.
+     * 
+     * Other is the address of a trusted CHF stablecoin that we will allow minting against. It can have at most 18 decimals and 
+     * the number of decimals must be constant over time. The bridge will mint 1 Frankencoin for each unit of the source stablecoin.
+     */
     constructor(address other, address zchfAddress, uint256 limit_) {
         chf = IERC20(other);
         zchf = IFrankencoin(zchfAddress);
         horizon = block.timestamp + 52 weeks;
+        decimalMultiplier = 10 ** (zchf.decimals() - chf.decimals());
         limit = limit_;
         minted = 0;
     }
@@ -57,31 +69,33 @@ contract StablecoinBridge {
      */
     function mintTo(address target, uint256 amount) public {
         chf.transferFrom(msg.sender, address(this), amount);
-        _mint(target, amount);
+        _mint(target, amount * decimalMultiplier);
     }
 
-    function _mint(address target, uint256 amount) internal {
+    function _mint(address target, uint256 zchfAmount) internal {
         if (block.timestamp > horizon) revert Expired(block.timestamp, horizon);
-        zchf.mint(target, amount);
-        minted += amount;
-        if (minted > limit) revert Limit(amount, limit);
-        emit Mint(target, amount);
+        zchf.mint(target, zchfAmount);
+        minted += zchfAmount;
+        if (minted > limit) revert Limit(zchfAmount, limit);
+        emit Mint(target, zchfAmount);
     }
 
     /**
      * @notice Convenience method for burnAndSend(msg.sender, amount)
      */
-    function burn(uint256 amount) external {
-        _burn(msg.sender, amount);
-        chf.transfer(msg.sender, amount);
+    function burn(uint256 zchfAmount) external {
+        uint256 chfAmount = zchfAmount / decimalMultiplier;
+        _burn(msg.sender, chfAmount * decimalMultiplier);
+        chf.transfer(msg.sender, chfAmount);
     }
 
     /**
      * @notice Burn the indicated amount of Frankencoin and send the same number of source coin to the caller.
      */
-    function burnAndSend(address target, uint256 amount) external {
-        _burn(msg.sender, amount);
-        chf.transfer(target, amount);
+    function burnAndSend(address target, uint256 zchfAmount) external {
+        uint256 chfAmount = zchfAmount / decimalMultiplier;
+        _burn(msg.sender, chfAmount * decimalMultiplier);
+        chf.transfer(target, chfAmount);
     }
 
     /**
@@ -90,10 +104,11 @@ contract StablecoinBridge {
      * 
      * This can be useful in case the source stablecoin has transfer fees or other transfer restrictions.
      */
-    function burnAndCredit(address target, uint256 amount) external {
-        _burn(msg.sender, amount);
-        credits[target] += amount;
-        emit Credit(target, amount);
+    function burnAndCredit(address target, uint256 zchfAmount) external {
+        uint256 chfAmount = zchfAmount / decimalMultiplier;
+        _burn(msg.sender, chfAmount * decimalMultiplier);
+        credits[target] += chfAmount;
+        emit Credit(target, chfAmount);
     }
 
     /**
@@ -118,9 +133,9 @@ contract StablecoinBridge {
         emit Payout(target, amount);
     }
 
-    function _burn(address zchfHolder, uint256 amount) internal {
-        zchf.burnFrom(zchfHolder, amount);
-        minted -= amount;
-        emit Burn(zchfHolder, amount);
+    function _burn(address zchfHolder, uint256 zchfAmount) internal {
+        zchf.burnFrom(zchfHolder, zchfAmount);
+        minted -= zchfAmount;
+        emit Burn(zchfHolder, zchfAmount);
     }
 }
