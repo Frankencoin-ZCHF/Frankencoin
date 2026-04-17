@@ -8,7 +8,7 @@ import "../../utils/MathUtil.sol";
 /**
  * This contract adds time- and balance-based vote accumulation to the basic ERC20 functionality.
  * Addresses that reach a cap can be cut down to the cap by anyone.
- * This code is mostly copied from the Equity contract.
+ * This code is mostly copied from Equity.sol .
  */
 abstract contract AccumulatingVotesToken is ERC20, MathUtil {
 
@@ -37,10 +37,14 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
             uint256 votesBefore = votes(holder);
             voteAnchor[holder] = uint64(_anchorTime() - (HOLDING_DURATION_CAP << TIME_RESOLUTION_BITS));
             uint256 votesAfter = votes(holder);
-            totalVotesAtAnchor = uint192(totalVotes() - (votesBefore - votesAfter));
-            totalVotesAnchorTime = _anchorTime();
+            setTotalVotes(totalVotes() - (votesBefore - votesAfter));
             emit VotesCapped(holder, votesBefore, votesAfter);
         }
+    }
+
+    function setTotalVotes(uint256 amount) internal {
+        totalVotesAtAnchor = uint192(amount);
+        totalVotesAnchorTime = _anchorTime();
     }
 
     function _anchorTime() internal view returns (uint64) {
@@ -74,19 +78,16 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
     function _adjustTotalVotes(address from, uint256 amount, uint256 roundingLoss) internal {
         uint64 time = _anchorTime();
         uint256 lostVotes = from == address(0x0) ? 0 : (time - voteAnchor[from]) * amount;
-        totalVotesAtAnchor = uint192(totalVotes() - roundingLoss - lostVotes);
-        totalVotesAnchorTime = time;
+        setTotalVotes(totalVotes() - roundingLoss - lostVotes);
     }
 
     function creditVotes(address holder, uint256 additionalVotes) internal {
-        uint64 time = _anchorTime();
         uint256 recipientVotesBefore = votes(holder);
         uint256 balance = balanceOf(holder);
         voteAnchor[holder] = uint64(_anchorTime() - (recipientVotesBefore + additionalVotes) / balance);
         uint256 recipientVotesAfter = votes(holder); // calculate again to account for rounding
         uint256 voteIncrease = recipientVotesAfter - recipientVotesBefore;
-        totalVotesAtAnchor = uint192(totalVotes() + voteIncrease);
-        totalVotesAnchorTime = time;
+        setTotalVotes(totalVotes() + voteIncrease);
     }
 
     /**
@@ -101,8 +102,7 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
             emit MutualDestruction(msg.sender, targets[i], destroyedVotes);
         }
         require(destroyedVotes > 0);
-        totalVotesAtAnchor = uint192(totalVotes() - destroyedVotes - budget);
-        totalVotesAnchorTime = _anchorTime();
+        setTotalVotes(totalVotes() - destroyedVotes - budget);
     }
 
     function _reduceVotes(address target, uint256 amount) internal returns (uint256) {
