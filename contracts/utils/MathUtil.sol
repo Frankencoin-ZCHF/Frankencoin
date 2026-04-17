@@ -43,10 +43,9 @@ contract MathUtil {
         return _mulD18(_mulD18(_x, _x), _x);
     }
 
-    function _eightPower(uint256 _x) internal pure returns (uint256) {
+    function _power4(uint256 _x) internal pure returns (uint256) {
         uint256 x2 = _mulD18(_x, _x);
-        uint256 x4 = _mulD18(x2, x2);
-        return _mulD18(x4, x4);
+        return _mulD18(x2, x2);
     }
 
     function _min(uint256 a, uint256 b) internal pure returns (uint256) {

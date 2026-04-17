@@ -12,12 +12,12 @@ import "../../erc20/IERC4626.sol";
  * @title FPS2MintRedeem
  * @notice ERC-4626 tokenized vault around Frankencoin Pool Shares (FPS).
  * Users deposit ZCHF, which is invested into FPS via Equity. Redemptions apply a discount
- * based on an 8th-power curve that increases with recent redemption volume.
+ * based on a 4th-power curve that increases with recent redemption volume.
  * The spread (undiscounted portion) is returned to the Equity contract.
  */
 abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
-    uint256 public constant RECOVERY_PERIOD = 30 days;
+    uint256 public constant RECOVERY_PERIOD = 7 days;
 
     IEquity public immutable FPS1;
     IFrankencoin public immutable ZCHF;
@@ -260,7 +260,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Calculate the discount factor for a redemption using an 8th-power curve.
+     * @notice Calculate the discount factor for a redemption using a 4th-power curve.
      * The curve starts at 1 when no recent redemptions have occurred and approaches 0
      * as redemptions consume the pool. Uses a midpoint approximation for the average
      * discount across the redeemed range.
@@ -273,7 +273,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         uint256 total = currentSupply + recentRedemptions;
         uint256 leftMiddle = currentSupply - plannedRedemption / 2;
         uint256 factor = _divD18(leftMiddle, total);
-        return _eightPower(factor);
+        return _power4(factor);
     }
 
     /**
