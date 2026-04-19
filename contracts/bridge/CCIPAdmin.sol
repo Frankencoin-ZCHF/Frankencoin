@@ -57,7 +57,7 @@ contract CCIPAdmin {
     event ChainRemoved(uint64 id);
     event ChainAdded(ITokenPool.ChainUpdate config);
     event AdminTransferred(address newAdmin);
-    event RateLimit(uint64 remoteChain, RateLimiter.Config inboundConfigs, RateLimiter.Config outboundConfig);
+    event RateLimit(uint64 remoteChain, RateLimiter.Config outboundConfig, RateLimiter.Config inboundConfigs);
 
     modifier onlyQualified(address[] calldata helpers) {
         GOVERNANCE.checkQualified(msg.sender, helpers);
@@ -130,12 +130,12 @@ contract CCIPAdmin {
     ///         they can be applied quickly.
     /// @dev Requires the token pool to be set
     /// @param chain The chain to set the rate limits for
-    /// @param inbound The inbound rate limits
     /// @param outbound The outbound rate limits
+    /// @param inbound The inbound rate limits
     /// @param helpers Array of helper addresses for qualification check
-    function applyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external onlyQualified(helpers) tokenPoolSet {
-        tokenPool.setChainRateLimiterConfig(chain, inbound, outbound);
-        emit RateLimit(chain, inbound, outbound);
+    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external onlyQualified(helpers) tokenPoolSet {
+        tokenPool.setChainRateLimiterConfig(chain, outbound, inbound);
+        emit RateLimit(chain, outbound, inbound);
     }
     
     /// @notice Propose to add or remove remote chains

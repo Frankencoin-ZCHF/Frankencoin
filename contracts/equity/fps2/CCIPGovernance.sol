@@ -47,16 +47,16 @@ abstract contract CCIPGovernance is MinterGovernance {
         CCIP_ADMIN.proposeAdminTransfer(newAdmin, fps2AsHelper());
     }
 
-    function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external {
+    function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
         checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.applyRateLimit(chain, inbound, outbound, fps2AsHelper());
+        CCIP_ADMIN.applyRateLimit(chain, outbound, inbound, fps2AsHelper());
     }
 
-    function ccipApplyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external {
+    function ccipApplyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
         checkQualified(msg.sender, helpers);
         address[] memory asHelper = fps2AsHelper();
         for (uint256 i = 0; i < chains.length; i++) {
-            CCIP_ADMIN.applyRateLimit(chains[i], inbound, outbound, asHelper);
+            CCIP_ADMIN.applyRateLimit(chains[i], outbound, inbound, asHelper);
         }
     }
 
@@ -85,6 +85,6 @@ interface ICCIPAdmin {
     function proposeRemoveChain(uint64 chainId, address[] calldata helpers) external;
     function proposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external;
     function proposeAdminTransfer(address newAdmin, address[] calldata helpers) external;
-    function applyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external;
+    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external;
     function deny(bytes32 hash, address[] calldata helpers) external;
 }
