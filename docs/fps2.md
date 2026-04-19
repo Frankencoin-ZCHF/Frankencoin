@@ -1,6 +1,6 @@
 # Frankencoin Pool Shares II (FPS2)
 
-FPS2 wraps the existing Frankencoin Pool Share (FPS1) to form a "shareholder agreement" among participating holders. No one is forced to join, but doing so grants access to improved governance mechanics and a modern redemption mechanism. FPS2 follows the ERC-4626 tokenized vault standard, making it compatible with wallets and DeFi integrations that support it.
+FPS2 wraps the existing Frankencoin Pool Share (FPS1) to form a "shareholder agreement" among participating holders. No one is forced to join, but doing so grants access to improved governance mechanics and a revised redemption mechanism designed to prevent a "bank-run" in case of a large anticipated loss. FPS2 follows the ERC-4626 tokenized vault standard, making it compatible with wallets and DeFi integrations that support it.
 
 ## Governance
 
@@ -10,21 +10,17 @@ FPS2 lowers the veto threshold from 2% of all votes (FPS1) to 1%, making it easi
 
 Votes grow linearly with both the number of FPS2 held and the time they have been held. Specifically, an address holding *n* FPS2 for *t* seconds accumulates *n* &times; *t* votes. This rewards long-term commitment: a holder who has been in the system for a year has far more governance weight than someone who just arrived with the same number of shares.
 
+Votes can be delegated. But unlike in other protocols, Frankencoin delegations are additive: delegating your votes to someone does not reduce your own voting power, it simply allows the delegate to use your votes when exercising a veto. Delegation chains are supported (A delegates to B, B delegates to C -- C can use all three). Each address is only counted once, such that delegation cycles do not lead to infinite votes.
+
 To prevent lost or inactive addresses from accumulating votes indefinitely, anyone can cap a holder's effective holding duration at one year. This ensures that no address gains unbounded governance power simply by being forgotten.
-
-When FPS2 tokens are transferred, the recipient's vote anchor is adjusted so that their existing votes are preserved but the newly received tokens start accumulating from zero. This prevents vote manipulation through circular transfers.
-
-### Veto Rights
-
-Any holder (or group of holders via delegation) that controls at least 1% of total votes can veto a pending minter proposal. Delegation is additive: delegating your votes to someone does not reduce your own voting power, it simply allows the delegate to count your votes when exercising a veto. Indirect delegation chains are supported (A delegates to B, B delegates to C -- C can count both).
-
-Minters that were not proposed through the FPS2 governance contract can be vetoed by anyone, with a bounty of 10% of the reward pool paid to the caller. This creates an incentive for MEV bots to enforce the requirement that all minters go through the proper application process.
-
-### Vote Destruction
 
 FPS2 includes an `attack` function that allows a holder to sacrifice their own votes in order to destroy an equal number of votes belonging to other addresses. This is a defensive mechanism: if a hostile party accumulates votes, other holders can coordinate to neutralize the threat at a cost to themselves.
 
-When FPS2 is binding (see below), the contract can also `shoot` FPS1 holders who have not wrapped their shares, destroying their FPS1 votes entirely. This prevents outsiders from undermining FPS2 governance.
+### Veto Rights
+
+Any holder (or group of holders via delegation) that controls at least 1% of total votes can veto a pending minter proposal. Many current (and future) Frankencoin modules rely on this functionality and contain functions that can only be executed by those with veto power.
+
+FPS2 further introduces a function that allows anyone to veto minter proposals that have been proposed directly on the Frankencoin token contract. Anyone casting such a veto even gets a bounty, incentivizing bots to take immediate action whenever someone tries to use the legacy minter proposal mechanism.
 
 ## Issuance and Redemption
 
@@ -44,7 +40,7 @@ FPS2 can be redeemed for ZCHF at any time -- there is no 90-day holding requirem
 
 **How the discount works:**
 
-The contract tracks the volume of recent redemptions, weighted by recency. This counter decays linearly to zero over a 7-day recovery period. When someone redeems, the effective proceeds are:
+The contract tracks the volume of recent redemptions. This counter decays linearly to zero over a 7-day recovery period. When someone redeems, the effective proceeds are:
 
 > effective proceeds = raw FPS1 proceeds &times; discount factor
 
@@ -76,10 +72,10 @@ The discount mechanism converts a destructive bank run into a self-limiting proc
 
 FPS2 holds FPS1 tokens on behalf of its holders. Each FPS2 is backed 1:1 by an FPS1 token in the contract. The FPS1 voting power of the FPS2 contract is delegated to the governance contract, which exercises it on behalf of FPS2 holders.
 
-FPS2 becomes **binding** when the contract controls more than 50% of all FPS1 votes. Once binding:
+FPS2 becomes **binding** when the contract controls more than 50% of all FPS1 votes, i.e. when a sufficient number of FPS holders joined the new contract for a sufficient amount of time. Once binding:
 
-- Holders cannot unwrap their FPS2 back to FPS1 (they are committed to the agreement).
-- The contract can `shoot` FPS1 holders who remain outside the agreement, destroying their votes to prevent them from interfering with governance.
+- Holders cannot unwrap their FPS2 back to FPS1 any longer (they are committed to the agreement).
+- Anyone can use the `shoot` function to destroy the votes of FPS1 holders who remain outside the agreement, preventing them from taking part in the governance or redeeming their FPS1.
 - Holders can still redeem FPS2 for ZCHF at any time (subject to the discount), but they cannot extract the underlying FPS1 tokens.
 
 FPS2 can become unbinding again if enough FPS2 are redeemed or enough new FPS1 are minted outside the contract, pushing the vote share below 50%.

@@ -6,7 +6,8 @@ import {
   Equity,
   Frankencoin,
   FPS2,
-  MainnetFPS2Governance,
+  GovernanceFactory,
+  MainnetGovernance,
   StablecoinBridge,
   TestToken,
 } from "../typechain";
@@ -25,7 +26,7 @@ describe("FPS2 Tests", () => {
   let zchf: Frankencoin;
   let xchf: TestToken;
   let bridge: StablecoinBridge;
-  let fps2Gov: MainnetFPS2Governance;
+  let fps2Gov: MainnetGovernance;
 
   before(async () => {
     [owner, alice, bob] = await ethers.getSigners();
@@ -61,9 +62,14 @@ describe("FPS2 Tests", () => {
     await zchf.approve(await equity.getAddress(), floatToDec18(10_000));
     await equity.invest(floatToDec18(10_000), 0);
 
+    // Deploy GovernanceFactory first
+    const govFactoryFactory = await ethers.getContractFactory("GovernanceFactory");
+    const govFactory = await govFactoryFactory.deploy();
+
     // Deploy FPS2 with mock addresses for CCIP/leadrate (not tested here)
     const fps2Factory = await ethers.getContractFactory("FPS2");
     fps2 = await fps2Factory.deploy(
+      await govFactory.getAddress(),
       await zchf.getAddress(),
       await equity.getAddress(),
       ethers.ZeroAddress, // ccipAdmin
@@ -73,9 +79,9 @@ describe("FPS2 Tests", () => {
       ethers.ZeroAddress  // LINK token
     );
 
-    // Retrieve MainnetFPS2Governance address from equity's delegation
+    // Retrieve MainnetGovernance address from equity's delegation
     const fps2GovAddress = await equity.delegates(await fps2.getAddress());
-    fps2Gov = await ethers.getContractAt("MainnetFPS2Governance", fps2GovAddress);
+    fps2Gov = await ethers.getContractAt("MainnetGovernance", fps2GovAddress);
   });
 
   // ==================== Initialization ====================
@@ -470,19 +476,19 @@ describe("FPS2 Tests", () => {
       expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
     });
 
-    it("weightedRecentRedemptions should decay linearly over 30 days", async () => {
+    it("weightedRecentRedemptions should decay linearly over 7 days", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
       await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
       const recentFull = await fps2.weightedRecentRedemptions();
 
-      // After 15 days -> roughly half
-      await evm_increaseTime(15 * 86400);
+      // After 3.5 days -> roughly half
+      await evm_increaseTime(3.5 * 86400);
       const recentHalf = await fps2.weightedRecentRedemptions();
       expect(recentHalf).to.be.approximately(recentFull / 2n, recentFull / 50n);
 
-      // After 30 days total -> zero
-      await evm_increaseTime(15 * 86400);
+      // After 7 days total -> zero
+      await evm_increaseTime(3.5 * 86400);
       expect(await fps2.weightedRecentRedemptions()).to.equal(0);
     });
 
@@ -511,7 +517,7 @@ describe("FPS2 Tests", () => {
       expect(await fps2.weightedRecentRedemptions()).to.equal(0);
     });
 
-    it("should recover capacity after 30 days and sell at near-full price again", async () => {
+    it("should recover capacity after 7 days and sell at near-full price again", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // First sell (small amount)
@@ -519,8 +525,8 @@ describe("FPS2 Tests", () => {
       await fps2["redeem(address,uint256)"](owner.address, smallSell);
       expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
 
-      // Wait 30 days for full recovery
-      await evm_increaseTime(THIRTY_DAYS);
+      // Wait 7 days for full recovery
+      await evm_increaseTime(7 * 86400);
       expect(await fps2.weightedRecentRedemptions()).to.equal(0);
 
       // Second sell should get near-full price (no recent redemptions)
@@ -726,29 +732,29 @@ describe("FPS2 Tests", () => {
     });
 
     it("should allow delegating votes", async () => {
-      await fps2.connect(alice).delegateVoteTo(owner.address);
-      expect(await fps2.delegates(alice.address)).to.equal(owner.address);
+      await fps2Gov.connect(alice).delegateVoteTo(owner.address);
+      expect(await fps2Gov.delegates(alice.address)).to.equal(owner.address);
     });
 
     it("votesDelegated should include helper votes", async () => {
-      await fps2.connect(alice).delegateVoteTo(owner.address);
+      await fps2Gov.connect(alice).delegateVoteTo(owner.address);
       await evm_increaseTime(100);
 
-      const without = await fps2.votesDelegated(owner.address, []);
-      const withHelpers = await fps2.votesDelegated(owner.address, [alice.address]);
+      const without = await fps2Gov.votesDelegated(owner.address, []);
+      const withHelpers = await fps2Gov.votesDelegated(owner.address, [alice.address]);
       expect(withHelpers).to.be.greaterThan(without);
     });
 
-    it("checkQualified should pass for major holder (>= 2%)", async () => {
+    it("checkQualified should pass for major holder (>= 1%)", async () => {
       await evm_increaseTime(100);
-      await fps2.checkQualified(owner.address, []);
+      await fps2Gov.checkQualified(owner.address, []);
     });
 
     it("checkQualified should revert for non-holder", async () => {
       await evm_increaseTime(100);
       await expect(
-        fps2.checkQualified(bob.address, [])
-      ).to.be.revertedWithCustomError(fps2, "NotQualified");
+        fps2Gov.checkQualified(bob.address, [])
+      ).to.be.revertedWithCustomError(fps2Gov, "NotQualified");
     });
   });
 
@@ -942,7 +948,7 @@ describe("FPS2 Tests", () => {
       // Bob has no FPS2 votes
       await expect(
         fps2Gov.connect(bob).denyMinter(minter, [], "veto")
-      ).to.be.revertedWithCustomError(fps2, "NotQualified");
+      ).to.be.revertedWithCustomError(fps2Gov, "NotQualified");
     });
 
     it("denyMinter should succeed for qualified holder", async () => {
