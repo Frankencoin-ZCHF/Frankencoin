@@ -52,9 +52,25 @@ abstract contract CCIPGovernance is MinterGovernance {
         CCIP_ADMIN.applyRateLimit(chain, inbound, outbound, fps2AsHelper());
     }
 
+    function ccipApplyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external {
+        checkQualified(msg.sender, helpers);
+        address[] memory asHelper = fps2AsHelper();
+        for (uint256 i = 0; i < chains.length; i++) {
+            CCIP_ADMIN.applyRateLimit(chains[i], inbound, outbound, asHelper);
+        }
+    }
+
     function ccipDenyProposal(bytes32 hash, address[] calldata helpers) external {
         checkQualified(msg.sender, helpers);
         CCIP_ADMIN.deny(hash, fps2AsHelper());
+    }
+
+    function ccipDenyProposal(bytes32[] calldata hashes, address[] calldata helpers) external {
+        checkQualified(msg.sender, helpers);
+        address[] memory asHelper = fps2AsHelper();
+        for (uint256 i = 0; i < hashes.length; i++) {
+            CCIP_ADMIN.deny(hashes[i], asHelper);
+        }
     }
 
 }
