@@ -22,6 +22,21 @@ Any holder (or group of holders via delegation) that controls at least 1% of tot
 
 FPS2 further introduces a function that allows anyone to veto minter proposals that have been proposed directly on the Frankencoin token contract. Anyone casting such a veto even gets a bounty, incentivizing bots to take immediate action whenever someone tries to use the legacy minter proposal mechanism.
 
+### Cross-Chain Governance
+
+FPS2 governance extends the existing veto-based cross-chain model (see [ccg.md](./ccg.md)) to reach every chain on which Frankencoin is deployed. Before being able to exercise voting power on another chain, votes must be synchronized from mainnet.
+
+![FPS2 governance overview](./fps2governance.png)
+
+The bridged governance module for FPS2 (BridgedGovernance2.sol) has very similar functions than the mainnet governance of FPS2 (MainnetGovernance.sol). It has the same CCIP governance functions and the same minter governance to force new minter proposals through the longer application period. It differs with regard to position denying logic (there is no MintungHub on bridged chains) and interest rate governance as interest rates are synced using dedicated interest rate synchronization functions.
+
+Before votes can be used on other chains, two pre-conditions must be fulfilled:
+
+1. The FPS1 votes of the FPS2 contract must be synchronized to the target chain using the GovernanceSender.pushVotes function.
+2. The FPS2 votes of the user must be synchronized to the target chain using the MainnetGovernance.pushFPS2Votes function.
+
+Step 1 typically only need to be done once per target chain. Step 2 typically needs to be done once per user that wants to use their votes. From time to time, both might need to be refreshed.
+
 ## Issuance and Redemption
 
 ### Issuance
