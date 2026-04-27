@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.24;
 
 import {IERC20} from "../../../erc20/IERC20.sol";
 import {IFrankencoin} from "../../../stablecoin/IFrankencoin.sol";
@@ -48,7 +48,7 @@ interface IAmplifierCurve {
     // --- View ---
     function getMinimumCollateral(uint256 zchfAmount) external view returns (uint256);
 
-    function getMaximumMint() external view returns (uint256);
+    function getMaximumMint(uint256 collateralAmount) external view returns (uint256);
 
     function checkPrice() external view;
 

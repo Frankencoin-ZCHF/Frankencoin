@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.24;
 
 import {IFrankencoin, IERC20} from "../../stablecoin/IFrankencoin.sol";
 import {SafeERC20} from "../../erc20/SafeERC20.sol";
@@ -90,10 +90,19 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     /**
-     * Returns the remaining ZCHF that can be borrowed before the global limit is reached.
+     * Returns the maximum ZCHF that can be borrowed for a given collateral amount,
+     * capped by the remaining global limit.
+     *
+     * Inverse of getMinimumCollateral:
+     *   ZCHF is coin[0]: maxZchf = collateralAmount * PRICE_ANCHOR / 1e18
+     *   ZCHF is coin[1]: maxZchf = collateralAmount * 1e18 / PRICE_ANCHOR
+     *
+     * @param collateralAmount Amount of collateral the caller intends to deposit.
      */
-    function getMaximumMint() public view returns (uint256) {
-        return totalBorrowed >= LIMIT ? 0 : LIMIT - totalBorrowed;
+    function getMaximumMint(uint256 collateralAmount) public view returns (uint256) {
+        uint256 maxFromCollateral = ZCHF_INDEX == 0 ? (collateralAmount * PRICE_ANCHOR) / ONE : (collateralAmount * ONE) / PRICE_ANCHOR;
+        uint256 remaining = totalBorrowed >= LIMIT ? 0 : LIMIT - totalBorrowed;
+        return maxFromCollateral < remaining ? maxFromCollateral : remaining;
     }
 
     /**
@@ -182,5 +191,4 @@ contract AmplifierCurve is IAmplifierCurve {
         if (block.timestamp > EXPIRATION) revert AmplifierExpired();
         _;
     }
-
 }
