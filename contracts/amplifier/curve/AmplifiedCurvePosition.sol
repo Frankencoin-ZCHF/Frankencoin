@@ -54,19 +54,18 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * @param minLp            Minimum LP tokens to receive (slippage guard).
      */
     function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner {
-        IAmplifierCurve amp = AMP;
-        ITwocrypto pool = amp.CURVE_POOL();
-        IERC20 zchf = IERC20(address(amp.ZCHF()));
-        IERC20 collateral = amp.COLLATERAL();
+        ITwocrypto pool = AMP.CURVE_POOL();
+        IERC20 zchf = IERC20(address(AMP.ZCHF()));
+        IERC20 collateral = AMP.COLLATERAL();
 
         // Stage both tokens into this contract via the amplifier.
-        amp.borrowIntoPosition(owner, zchfAmount, collateralAmount);
+        AMP.borrowIntoPosition(owner, zchfAmount, collateralAmount);
 
         // Approve the pool to pull both tokens, then reset to 0 after.
         zchf.approve(address(pool), zchfAmount);
         collateral.approve(address(pool), collateralAmount);
 
-        uint256[2] memory amounts = _makeAmounts(amp.ZCHF_INDEX(), zchfAmount, collateralAmount);
+        uint256[2] memory amounts = _makeAmounts(AMP.ZCHF_INDEX(), zchfAmount, collateralAmount);
         uint256 lpReceived = pool.add_liquidity(amounts, minLp);
 
         zchf.approve(address(pool), 0);
