@@ -7,6 +7,7 @@ interface IAmplifiedCurvePosition {
     // --- Errors ---
     error AlreadyInitialized();
     error ZeroAmount();
+    error Reentered();
 
     // --- Events ---
     event Mint(uint256 zchfAmount, uint256 collateralAmount, uint256 lpReceived);

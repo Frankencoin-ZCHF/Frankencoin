@@ -30,11 +30,16 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     uint256 public borrowed;
     uint256 public lpBalance;
 
+    // 0 = unlocked (clone default), 1 = locked.
+    // Intentionally not initialised to 1 — clones don't run constructors.
+    uint256 private _locked;
+
     // Brick the bare implementation so it can never be initialized.
     // Clones do not run constructors, so their AMP starts at address(0) and
     // initialize() works normally on them.
     constructor() {
         AMP = IAmplifierCurve(address(1));
+        _locked = 1;
     }
 
     /**
@@ -57,7 +62,7 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * @param minLp            Minimum LP tokens to receive (slippage guard).
      * @return lpReceived      LP tokens received and credited to this position.
      */
-    function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner returns (uint256 lpReceived) {
+    function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner nonReentrant returns (uint256 lpReceived) {
         if (zchfAmount == 0 || collateralAmount == 0) revert ZeroAmount();
 
         ITwocrypto pool = AMP.CURVE_POOL();
@@ -96,7 +101,7 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * @param minAmounts Minimum [coin0, coin1] amounts to receive (slippage guard).
      * @return received  Actual token amounts delivered to the owner by the pool.
      */
-    function burn(uint256 lpAmount, uint256[2] calldata minAmounts) external onlyOwner returns (uint256[2] memory received) {
+    function burn(uint256 lpAmount, uint256[2] calldata minAmounts) external onlyOwner nonReentrant returns (uint256[2] memory received) {
         if (lpAmount == 0) revert ZeroAmount();
 
         received = AMP.CURVE_POOL().remove_liquidity(lpAmount, minAmounts, owner);
@@ -108,6 +113,13 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         lpBalance -= lpAmount;
 
         emit Burn(lpAmount, zchfRepay);
+    }
+
+    modifier nonReentrant() {
+        if (_locked == 1) revert Reentered();
+        _locked = 1;
+        _;
+        _locked = 0;
     }
 
     function _makeAmounts(uint256 zchfIndex, uint256 zchfAmt, uint256 collateralAmt) internal pure returns (uint256[2] memory amounts) {

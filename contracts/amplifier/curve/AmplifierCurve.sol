@@ -45,7 +45,6 @@ contract AmplifierCurve is IAmplifierCurve {
 
     uint256 public totalBorrowed;
     mapping(address => bool) public isPosition;
-    uint256 private _locked = 1;
 
     uint256 internal constant ONE = 1e18;
     uint256 internal constant TWENTY_PERCENT = ONE / 5;
@@ -118,7 +117,7 @@ contract AmplifierCurve is IAmplifierCurve {
      * @param zchfAmount       ZCHF to mint into the position.
      * @param collateralAmount Collateral to transfer from owner into the position.
      */
-    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired nonReentrant {
+    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired {
         checkPrice();
 
         uint256 required = getMinimumCollateral(zchfAmount);
@@ -143,7 +142,7 @@ contract AmplifierCurve is IAmplifierCurve {
      * @param owner      Address whose ZCHF is burned.
      * @param zchfAmount Amount to burn; computed by the position before calling this.
      */
-    function repay(address owner, uint256 zchfAmount) external onlyPosition nonReentrant {
+    function repay(address owner, uint256 zchfAmount) external onlyPosition {
         ZCHF.burnFrom(owner, zchfAmount);
         totalBorrowed = zchfAmount > totalBorrowed ? 0 : totalBorrowed - zchfAmount;
         emit Repaid(msg.sender, zchfAmount, totalBorrowed);
@@ -184,10 +183,4 @@ contract AmplifierCurve is IAmplifierCurve {
         _;
     }
 
-    modifier nonReentrant() {
-        if (_locked != 1) revert Reentered();
-        _locked = 2;
-        _;
-        _locked = 1;
-    }
 }

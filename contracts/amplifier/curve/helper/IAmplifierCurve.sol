@@ -9,7 +9,6 @@ interface IAmplifierCurve {
     // --- Errors ---
     error AccessDenied();
     error AmplifierExpired();
-    error Reentered();
     error CloneFailed();
     error ZCHFNotInPool();
     error InvalidDecimals();
