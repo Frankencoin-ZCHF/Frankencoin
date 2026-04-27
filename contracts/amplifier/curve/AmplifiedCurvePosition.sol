@@ -94,8 +94,7 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
 
         received = AMP.CURVE_POOL().remove_liquidity(lpAmount, minAmounts, owner);
 
-        uint256 zchfRepay = (borrowed * lpAmount) / lpBalance;
-        if (lpAmount == lpBalance) zchfRepay = borrowed;
+        uint256 zchfRepay = (lpAmount == lpBalance) ? borrowed : (borrowed * lpAmount + lpBalance - 1) / lpBalance;
 
         AMP.repay(owner, zchfRepay);
         borrowed -= zchfRepay;

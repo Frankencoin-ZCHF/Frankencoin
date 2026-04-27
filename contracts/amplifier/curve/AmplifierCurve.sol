@@ -41,6 +41,7 @@ contract AmplifierCurve is IAmplifierCurve {
 
     uint256 public totalBorrowed;
     mapping(address => bool) public isPosition;
+    uint256 private _locked = 1;
 
     uint256 internal constant ONE = 1e18;
     uint256 internal constant TWENTY_PERCENT = ONE / 5;
@@ -57,18 +58,23 @@ contract AmplifierCurve is IAmplifierCurve {
         EXPIRATION = expiration;
         LIMIT = borrowingLimit;
 
+        // pool token config
         address coin0 = CURVE_POOL.coins(0);
         address coin1 = CURVE_POOL.coins(1);
         require(coin0 == zchf_ || coin1 == zchf_, "ZCHF not in pool");
 
+        // pool index config
         ZCHF_INDEX = coin0 == zchf_ ? 0 : 1;
         COLLATERAL = IERC20(coin0 == zchf_ ? coin1 : coin0);
 
+        // token 18 decimals config
         require(ZCHF.decimals() == 18);
         require(COLLATERAL.decimals() == 18);
 
+        // snapshot pool price
         PRICE_ANCHOR = CURVE_POOL.price_oracle();
 
+        // deploy implementation
         POSITION_IMPLEMENTATION = address(new AmplifiedCurvePosition());
     }
 
@@ -106,20 +112,24 @@ contract AmplifierCurve is IAmplifierCurve {
      * @param zchfAmount       ZCHF to mint into the position.
      * @param collateralAmount Collateral to pull from the owner into the position.
      */
-    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired {
+    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired nonReentrant {
+        // verify price threshold
         checkPrice();
 
+        // verify collateral amount
         uint256 required = getMinimumCollateral(zchfAmount);
         if (collateralAmount < required) revert InsufficientCollateral(required, collateralAmount);
 
+        // verify minting limit
         uint256 newTotal = totalBorrowed + zchfAmount;
         if (newTotal > LIMIT) revert LimitExceeded(newTotal, LIMIT);
         totalBorrowed = newTotal;
 
+        // provide tokens to position
         COLLATERAL.safeTransferFrom(owner, msg.sender, collateralAmount);
         ZCHF.mint(msg.sender, zchfAmount);
 
-        emit Borrowed(zchfAmount, newTotal);
+        emit Borrowed(msg.sender, zchfAmount, newTotal);
     }
 
     /**
@@ -129,10 +139,10 @@ contract AmplifierCurve is IAmplifierCurve {
      * @param owner      Address whose ZCHF will be burned.
      * @param zchfAmount Amount to burn; calculated by the position before calling this.
      */
-    function repay(address owner, uint256 zchfAmount) external onlyPosition {
+    function repay(address owner, uint256 zchfAmount) external onlyPosition nonReentrant {
         ZCHF.burnFrom(owner, zchfAmount);
         totalBorrowed -= zchfAmount;
-        emit Repaid(zchfAmount, totalBorrowed);
+        emit Repaid(msg.sender, zchfAmount, totalBorrowed);
     }
 
     /**
@@ -143,7 +153,7 @@ contract AmplifierCurve is IAmplifierCurve {
         position = _clone(POSITION_IMPLEMENTATION);
         AmplifiedCurvePosition(position).initialize(IAmplifierCurve(this), msg.sender);
         isPosition[position] = true;
-        emit AmplifiedPositionCreated(position);
+        emit AmplifiedPositionCreated(position, msg.sender);
     }
 
     // EIP-1167 minimal proxy, identical to PositionFactory._createClone.
@@ -167,5 +177,12 @@ contract AmplifierCurve is IAmplifierCurve {
     modifier notExpired() {
         if (block.timestamp > EXPIRATION) revert AmplifierExpired();
         _;
+    }
+
+    modifier nonReentrant() {
+        require(_locked == 1);
+        _locked = 2;
+        _;
+        _locked = 1;
     }
 }
