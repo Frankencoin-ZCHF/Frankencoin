@@ -39,7 +39,8 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * Adds liquidity to the Curve pool using borrowed ZCHF and owner-supplied collateral.
      *
      * The amplifier stages both tokens into this contract. The owner must have approved
-     * this contract to spend `collateralAmount` of the collateral token beforehand.
+     * the AmplifierCurve contract to spend `collateralAmount` of the collateral token beforehand,
+     * because it is the amplifier that calls transferFrom on the collateral token.
      *
      * @param zchfAmount       ZCHF to borrow and add to the pool.
      * @param collateralAmount Collateral to pull from the owner and add to the pool.
