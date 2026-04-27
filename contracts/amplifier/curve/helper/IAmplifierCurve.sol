@@ -38,6 +38,6 @@ interface IAmplifierCurve {
 
     // --- Mutating ---
     function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external;
-    function repay(address owner, uint256 borrowed, uint256 burnedLP, uint256 totalLP) external returns (uint256 zchfBurned);
+    function repay(address owner, uint256 zchfAmount) external;
     function createAmplifiedPosition() external returns (address position);
 }

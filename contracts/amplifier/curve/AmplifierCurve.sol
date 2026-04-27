@@ -123,20 +123,16 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     /**
-     * Proportionally burns borrowed ZCHF from the owner when liquidity is removed.
-     * The owner must have approved the amplifier to burn the owed amount before calling burn().
+     * Burns the specified amount of ZCHF from the owner. Called by a position during burn().
+     * No explicit approval is required — Frankencoin grants registered minters unlimited allowance.
      *
-     * @param owner    Address holding the ZCHF to burn.
-     * @param borrowed Total ZCHF borrowed by the position.
-     * @param burnedLP LP tokens being returned in this transaction.
-     * @param totalLP  Total LP tokens held by the position before this burn.
-     * @return zchfBurned Amount of ZCHF burned.
+     * @param owner      Address whose ZCHF will be burned.
+     * @param zchfAmount Amount to burn; calculated by the position before calling this.
      */
-    function repay(address owner, uint256 borrowed, uint256 burnedLP, uint256 totalLP) external onlyPosition returns (uint256 zchfBurned) {
-        zchfBurned = (borrowed * burnedLP) / totalLP;
-        ZCHF.burnFrom(owner, zchfBurned);
-        totalBorrowed -= zchfBurned;
-        emit Repaid(zchfBurned, totalBorrowed);
+    function repay(address owner, uint256 zchfAmount) external onlyPosition {
+        ZCHF.burnFrom(owner, zchfAmount);
+        totalBorrowed -= zchfAmount;
+        emit Repaid(zchfAmount, totalBorrowed);
     }
 
     /**

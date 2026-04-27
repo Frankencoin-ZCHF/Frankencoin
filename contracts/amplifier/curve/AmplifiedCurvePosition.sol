@@ -53,7 +53,9 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * @param collateralAmount Collateral to pull from the owner and add to the pool.
      * @param minLp            Minimum LP tokens to receive (slippage guard).
      */
-    function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner {
+    function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner returns (uint256 lpReceived) {
+        if (zchfAmount == 0 || collateralAmount == 0) revert ZeroAmount();
+
         ITwocrypto pool = AMP.CURVE_POOL();
         IERC20 zchf = IERC20(address(AMP.ZCHF()));
         IERC20 collateral = AMP.COLLATERAL();
@@ -66,7 +68,7 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         collateral.approve(address(pool), collateralAmount);
 
         uint256[2] memory amounts = _makeAmounts(AMP.ZCHF_INDEX(), zchfAmount, collateralAmount);
-        uint256 lpReceived = pool.add_liquidity(amounts, minLp);
+        lpReceived = pool.add_liquidity(amounts, minLp);
 
         zchf.approve(address(pool), 0);
         collateral.approve(address(pool), 0);
@@ -88,15 +90,18 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
      * @return received  Actual token amounts received by the owner.
      */
     function burn(uint256 lpAmount, uint256[2] calldata minAmounts) external onlyOwner returns (uint256[2] memory received) {
-        IAmplifierCurve amp = AMP;
+        if (lpAmount == 0) revert ZeroAmount();
 
-        received = amp.CURVE_POOL().remove_liquidity(lpAmount, minAmounts, owner);
+        received = AMP.CURVE_POOL().remove_liquidity(lpAmount, minAmounts, owner);
 
-        uint256 zchfRepaid = amp.repay(owner, borrowed, lpAmount, lpBalance);
-        borrowed -= zchfRepaid;
+        uint256 zchfRepay = (borrowed * lpAmount) / lpBalance;
+        if (lpAmount == lpBalance) zchfRepay = borrowed;
+
+        AMP.repay(owner, zchfRepay);
+        borrowed -= zchfRepay;
         lpBalance -= lpAmount;
 
-        emit Burn(lpAmount, zchfRepaid);
+        emit Burn(lpAmount, zchfRepay);
     }
 
     function _makeAmounts(uint256 zchfIndex, uint256 zchfAmt, uint256 collateralAmt) internal pure returns (uint256[2] memory amounts) {
