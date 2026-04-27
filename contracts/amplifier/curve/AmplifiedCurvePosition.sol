@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "../../erc20/IERC20.sol";
-import {IFrankencoin} from "../../stablecoin/IFrankencoin.sol";
 import {Ownable} from "../../utils/Ownable.sol";
 import {ITwocrypto} from "./helper/ITwocrypto.sol";
 import {IAmplifierCurve} from "./helper/IAmplifierCurve.sol";
@@ -11,13 +10,19 @@ import {IAmplifiedCurvePosition} from "./helper/IAmplifiedCurvePosition.sol";
 /**
  * @title AmplifiedCurvePosition
  *
- * Implementation contract for amplified Curve positions. Each user gets an EIP-1167 clone
- * of this contract deployed by AmplifierCurve, keeping per-user deployment cost minimal.
+ * Per-user position contract for the AmplifierCurve system, deployed as an EIP-1167 clone.
+ * Holds LP tokens on behalf of the owner and manages the borrow/repay lifecycle with the
+ * parent AmplifierCurve.
  *
- * On mint: pulls ZCHF + collateral from the amplifier into this contract, then calls
- *          add_liquidity on the Curve pool. LP tokens are held here.
- * On burn: calls remove_liquidity (tokens go directly to the owner), then repays the
- *          proportional borrowed ZCHF via the amplifier.
+ * Mint flow:
+ *   1. Owner calls mint() — debt state is updated first (CEI).
+ *   2. AmplifierCurve.borrowIntoPosition() stages ZCHF + collateral in this contract.
+ *   3. This contract approves and calls pool.add_liquidity(); LP tokens are held here.
+ *
+ * Burn flow:
+ *   1. Owner calls burn() — pool returns tokens directly to the owner.
+ *   2. Proportional ZCHF debt is burned from the owner via AmplifierCurve.repay().
+ *   3. Debt and LP balance are decremented.
  */
 contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     IAmplifierCurve public AMP;
@@ -34,7 +39,6 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
 
     /**
      * One-shot initializer called by AmplifierCurve immediately after cloning.
-     * Guards against re-initialization by checking AMP is unset.
      */
     function initialize(IAmplifierCurve amp, address positionOwner) external {
         if (address(AMP) != address(0)) revert AlreadyInitialized();
@@ -45,13 +49,13 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     /**
      * Adds liquidity to the Curve pool using borrowed ZCHF and owner-supplied collateral.
      *
-     * The amplifier stages both tokens into this contract. The owner must have approved
-     * the AmplifierCurve contract to spend `collateralAmount` of the collateral token beforehand,
-     * because it is the amplifier that calls transferFrom on the collateral token.
+     * The owner must approve AmplifierCurve (not this contract) to spend `collateralAmount`
+     * of the collateral token, because the amplifier executes the transferFrom.
      *
      * @param zchfAmount       ZCHF to borrow and add to the pool.
-     * @param collateralAmount Collateral to pull from the owner and add to the pool.
+     * @param collateralAmount Collateral to pull from the owner into the pool.
      * @param minLp            Minimum LP tokens to receive (slippage guard).
+     * @return lpReceived      LP tokens received and credited to this position.
      */
     function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external onlyOwner returns (uint256 lpReceived) {
         if (zchfAmount == 0 || collateralAmount == 0) revert ZeroAmount();
@@ -60,10 +64,11 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         IERC20 zchf = IERC20(address(AMP.ZCHF()));
         IERC20 collateral = AMP.COLLATERAL();
 
-        // Stage both tokens into this contract via the amplifier.
+        // Update debt before any external call (CEI).
+        borrowed += zchfAmount;
+
         AMP.borrowIntoPosition(owner, zchfAmount, collateralAmount);
 
-        // Approve the pool to pull both tokens, then reset to 0 after.
         zchf.approve(address(pool), zchfAmount);
         collateral.approve(address(pool), collateralAmount);
 
@@ -73,7 +78,6 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         zchf.approve(address(pool), 0);
         collateral.approve(address(pool), 0);
 
-        borrowed += zchfAmount;
         lpBalance += lpReceived;
 
         emit Mint(zchfAmount, collateralAmount, lpReceived);
@@ -82,12 +86,15 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     /**
      * Removes liquidity from the Curve pool and repays the proportional borrowed ZCHF.
      *
-     * Tokens are delivered directly to the owner by the pool. No explicit ZCHF approval
-     * is needed — Frankencoin grants registered minters unlimited allowance on all accounts.
+     * Tokens are sent directly to the owner by the pool. No explicit ZCHF approval is needed —
+     * Frankencoin grants registered minters unlimited allowance on all accounts.
+     *
+     * Repayment uses ceiling division so partial burns always reduce debt at least proportionally,
+     * preventing LP extraction without corresponding debt repayment.
      *
      * @param lpAmount   LP tokens to burn.
-     * @param minAmounts Minimum [zchf, collateral] token amounts to receive (slippage guard).
-     * @return received  Actual token amounts received by the owner.
+     * @param minAmounts Minimum [coin0, coin1] amounts to receive (slippage guard).
+     * @return received  Actual token amounts delivered to the owner by the pool.
      */
     function burn(uint256 lpAmount, uint256[2] calldata minAmounts) external onlyOwner returns (uint256[2] memory received) {
         if (lpAmount == 0) revert ZeroAmount();

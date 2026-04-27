@@ -9,6 +9,12 @@ interface IAmplifierCurve {
     // --- Errors ---
     error AccessDenied();
     error AmplifierExpired();
+    error Reentered();
+    error CloneFailed();
+    error ZCHFNotInPool();
+    error InvalidDecimals();
+    error InvalidExpiration();
+    error InvalidLimit();
     error LimitExceeded(uint256 newValue, uint256 limit);
     error PriceDeviatedTooMuch(uint256 current, uint256 anchor);
     error InsufficientCollateral(uint256 required, uint256 provided);
@@ -43,12 +49,15 @@ interface IAmplifierCurve {
     // --- View ---
     function getMinimumCollateral(uint256 zchfAmount) external view returns (uint256);
 
+    function getMaximumMint() external view returns (uint256);
+
     function checkPrice() external view;
 
-    // --- Mutating ---
+    // --- Position-only (not for direct calls) ---
     function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external;
 
     function repay(address owner, uint256 zchfAmount) external;
 
+    // --- Public ---
     function createAmplifiedPosition() external returns (address position);
 }

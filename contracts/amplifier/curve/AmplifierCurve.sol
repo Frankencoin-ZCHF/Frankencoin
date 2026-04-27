@@ -11,14 +11,18 @@ import {AmplifiedCurvePosition} from "./AmplifiedCurvePosition.sol";
  * @title AmplifierCurve
  *
  * Factory and registered minter for amplified Curve TwoCrypto positions. Amplified positions
- * are positions where the ZCHF half of the pair is borrowed from the Frankencoin protocol and
- * only the collateral token is provided by the owner, halving the capital cost of liquidity
- * provisioning.
+ * are positions where the ZCHF half of the trading pair is borrowed from the Frankencoin
+ * protocol and only the collateral token is provided by the owner, halving the capital cost
+ * of liquidity provisioning.
  *
- * The pool's oracle price at mint time must remain within 20% of the price recorded at deployment.
+ * The pool's oracle price at mint time must remain within 20% of the price recorded at
+ * deployment. Each user position is an EIP-1167 minimal proxy clone of a shared
+ * AmplifiedCurvePosition implementation, keeping per-position deployment cost minimal.
  *
- * Each user position is an EIP-1167 minimal proxy clone of a shared AmplifiedCurvePosition
- * implementation, keeping per-user deployment cost minimal.
+ * Security properties:
+ *  - borrowIntoPosition and repay are nonReentrant to prevent pool callback exploits.
+ *  - The borrow limit (LIMIT) caps total protocol exposure.
+ *  - Positions are tracked in an internal mapping; no Frankencoin position registry is used.
  */
 contract AmplifierCurve is IAmplifierCurve {
     using SafeERC20 for IERC20;
@@ -27,16 +31,16 @@ contract AmplifierCurve is IAmplifierCurve {
     IFrankencoin public immutable ZCHF;
     IERC20 public immutable COLLATERAL;
 
-    // Index of ZCHF in the Curve pool (0 or 1); collateral occupies the other index.
+    /// @dev Index of ZCHF in the pool (0 or 1); collateral occupies the other slot.
     uint256 public immutable ZCHF_INDEX;
 
-    // price_oracle() at deployment: price of coin[1] in coin[0] terms, 18 decimals.
+    /// @dev price_oracle() snapshot at deployment: coin[1] price in coin[0] terms, 18 decimals.
     uint256 public immutable PRICE_ANCHOR;
 
     uint40 public immutable EXPIRATION;
     uint256 public immutable LIMIT;
 
-    // Shared implementation that every clone delegates to.
+    /// @dev Shared logic contract that every clone delegates to.
     address public immutable POSITION_IMPLEMENTATION;
 
     uint256 public totalBorrowed;
@@ -47,54 +51,54 @@ contract AmplifierCurve is IAmplifierCurve {
     uint256 internal constant TWENTY_PERCENT = ONE / 5;
 
     /**
-     * @param curvePool_     Address of the Curve TwoCrypto pool.
-     * @param zchf_          Address of Frankencoin (ZCHF).
-     * @param expiration     Unix timestamp after which no new borrows are allowed.
-     * @param borrowingLimit Maximum total ZCHF that can be borrowed across all positions.
+     * @param curvePool_     Curve TwoCrypto pool address. Must contain ZCHF as one of its coins.
+     * @param zchf_          Frankencoin (ZCHF) address.
+     * @param expiration     Unix timestamp after which no new borrows are allowed. Must be future.
+     * @param borrowingLimit Maximum total ZCHF that may be borrowed across all positions.
      */
     constructor(address curvePool_, address zchf_, uint40 expiration, uint256 borrowingLimit) {
+        if (expiration <= block.timestamp) revert InvalidExpiration();
+        if (borrowingLimit == 0) revert InvalidLimit();
+
         CURVE_POOL = ITwocrypto(curvePool_);
         ZCHF = IFrankencoin(zchf_);
         EXPIRATION = expiration;
         LIMIT = borrowingLimit;
 
-        // pool token config
         address coin0 = CURVE_POOL.coins(0);
         address coin1 = CURVE_POOL.coins(1);
-        require(coin0 == zchf_ || coin1 == zchf_, "ZCHF not in pool");
+        if (coin0 != zchf_ && coin1 != zchf_) revert ZCHFNotInPool();
 
-        // pool index config
         ZCHF_INDEX = coin0 == zchf_ ? 0 : 1;
         COLLATERAL = IERC20(coin0 == zchf_ ? coin1 : coin0);
 
-        // token 18 decimals config
-        require(ZCHF.decimals() == 18);
-        require(COLLATERAL.decimals() == 18);
+        if (ZCHF.decimals() != 18) revert InvalidDecimals();
+        if (COLLATERAL.decimals() != 18) revert InvalidDecimals();
 
-        // snapshot pool price
         PRICE_ANCHOR = CURVE_POOL.price_oracle();
-
-        // deploy implementation
         POSITION_IMPLEMENTATION = address(new AmplifiedCurvePosition());
     }
 
     /**
-     * Returns the minimum collateral required to borrow `zchfAmount`, computed at the price anchor.
+     * Returns the minimum collateral required to borrow `zchfAmount`, at the deployment price anchor.
      *
-     * price_oracle() is the price of coin[1] in coin[0] terms (18 decimals).
-     *   ZCHF is coin[0]: 1 collateral = PRICE_ANCHOR ZCHF  →  minCollateral = zchfAmount / PRICE_ANCHOR
-     *   ZCHF is coin[1]: 1 ZCHF = PRICE_ANCHOR collateral  →  minCollateral = zchfAmount * PRICE_ANCHOR / 1e18
+     * price_oracle() is the price of coin[1] in coin[0] terms (18 decimals):
+     *   ZCHF is coin[0]: minCollateral = zchfAmount * 1e18 / PRICE_ANCHOR
+     *   ZCHF is coin[1]: minCollateral = zchfAmount * PRICE_ANCHOR / 1e18
      */
     function getMinimumCollateral(uint256 zchfAmount) public view returns (uint256) {
-        if (ZCHF_INDEX == 0) {
-            return (zchfAmount * ONE) / PRICE_ANCHOR;
-        } else {
-            return (zchfAmount * PRICE_ANCHOR) / ONE;
-        }
+        return ZCHF_INDEX == 0 ? (zchfAmount * ONE) / PRICE_ANCHOR : (zchfAmount * PRICE_ANCHOR) / ONE;
     }
 
     /**
-     * Reverts if the current pool oracle price has deviated more than 20% from the deployment anchor.
+     * Returns the remaining ZCHF that can be borrowed before the global limit is reached.
+     */
+    function getMaximumMint() public view returns (uint256) {
+        return totalBorrowed >= LIMIT ? 0 : LIMIT - totalBorrowed;
+    }
+
+    /**
+     * Reverts if the current pool oracle price has deviated more than 20% from PRICE_ANCHOR.
      */
     function checkPrice() public view {
         uint256 current = CURVE_POOL.price_oracle();
@@ -105,27 +109,25 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     /**
-     * Called by a position during mint. Validates all constraints, then stages both tokens
-     * inside the calling position contract so it can call add_liquidity on the pool.
+     * Called by a registered position during mint. Validates constraints then stages both tokens
+     * in the calling position contract so it can call add_liquidity on the Curve pool.
+     *
+     * Not intended for direct calls — enforced by onlyPosition.
      *
      * @param owner            Position owner; collateral is pulled from this address.
      * @param zchfAmount       ZCHF to mint into the position.
-     * @param collateralAmount Collateral to pull from the owner into the position.
+     * @param collateralAmount Collateral to transfer from owner into the position.
      */
     function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired nonReentrant {
-        // verify price threshold
         checkPrice();
 
-        // verify collateral amount
         uint256 required = getMinimumCollateral(zchfAmount);
         if (collateralAmount < required) revert InsufficientCollateral(required, collateralAmount);
 
-        // verify minting limit
         uint256 newTotal = totalBorrowed + zchfAmount;
         if (newTotal > LIMIT) revert LimitExceeded(newTotal, LIMIT);
         totalBorrowed = newTotal;
 
-        // provide tokens to position
         COLLATERAL.safeTransferFrom(owner, msg.sender, collateralAmount);
         ZCHF.mint(msg.sender, zchfAmount);
 
@@ -133,21 +135,23 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     /**
-     * Burns the specified amount of ZCHF from the owner. Called by a position during burn().
-     * No explicit approval is required — Frankencoin grants registered minters unlimited allowance.
+     * Burns ZCHF from the owner on behalf of a registered position during burn().
+     * Frankencoin grants registered minters unlimited allowance, so no explicit approval is needed.
      *
-     * @param owner      Address whose ZCHF will be burned.
-     * @param zchfAmount Amount to burn; calculated by the position before calling this.
+     * Not intended for direct calls — enforced by onlyPosition.
+     *
+     * @param owner      Address whose ZCHF is burned.
+     * @param zchfAmount Amount to burn; computed by the position before calling this.
      */
     function repay(address owner, uint256 zchfAmount) external onlyPosition nonReentrant {
         ZCHF.burnFrom(owner, zchfAmount);
-        totalBorrowed -= zchfAmount;
+        totalBorrowed = zchfAmount > totalBorrowed ? 0 : totalBorrowed - zchfAmount;
         emit Repaid(msg.sender, zchfAmount, totalBorrowed);
     }
 
     /**
-     * Deploys a minimal proxy clone of the shared position implementation and registers it
-     * with the Frankencoin protocol. The caller becomes the position owner.
+     * Deploys a minimal proxy clone of POSITION_IMPLEMENTATION, initialises it,
+     * and registers it in the local isPosition mapping. The caller becomes the position owner.
      */
     function createAmplifiedPosition() external notExpired returns (address position) {
         position = _clone(POSITION_IMPLEMENTATION);
@@ -156,7 +160,7 @@ contract AmplifierCurve is IAmplifierCurve {
         emit AmplifiedPositionCreated(position, msg.sender);
     }
 
-    // EIP-1167 minimal proxy, identical to PositionFactory._createClone.
+    /// @dev EIP-1167 minimal proxy deploy. Identical to PositionFactory._createClone.
     function _clone(address target) internal returns (address result) {
         bytes20 targetBytes = bytes20(target);
         assembly {
@@ -164,9 +168,10 @@ contract AmplifierCurve is IAmplifierCurve {
             mstore(clone, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
             mstore(add(clone, 0x14), targetBytes)
             mstore(add(clone, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            mstore(0x40, add(clone, 0x37))
             result := create(0, clone, 0x37)
         }
-        require(result != address(0));
+        if (result == address(0)) revert CloneFailed();
     }
 
     modifier onlyPosition() {
@@ -180,7 +185,7 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     modifier nonReentrant() {
-        require(_locked == 1);
+        if (_locked != 1) revert Reentered();
         _locked = 2;
         _;
         _locked = 1;
