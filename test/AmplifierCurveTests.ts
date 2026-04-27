@@ -299,7 +299,7 @@ describe("AmplifierCurve", function () {
       const min = await amplifier.getMinimumCollateral(ZCHF_TO_BORROW);
       await collateral
         .connect(alice)
-        .approve(await position.getAddress(), min - 1n);
+        .approve(await amplifier.getAddress(), min - 1n);
       await expect(
         position.connect(alice).mint(ZCHF_TO_BORROW, min - 1n, 0n)
       ).to.be.revertedWithCustomError(amplifier, "InsufficientCollateral");
@@ -308,7 +308,7 @@ describe("AmplifierCurve", function () {
     it("emits Mint and Borrowed on a successful call", async function () {
       await collateral
         .connect(alice)
-        .approve(await position.getAddress(), COLLATERAL_AMOUNT);
+        .approve(await amplifier.getAddress(), COLLATERAL_AMOUNT);
       await expect(
         position.connect(alice).mint(ZCHF_TO_BORROW, COLLATERAL_AMOUNT, 0n)
       )
@@ -441,7 +441,7 @@ describe("AmplifierCurve", function () {
     it("mint reverts with AmplifierExpired", async function () {
       await collateral
         .connect(alice)
-        .approve(await expiredPos.getAddress(), COLLATERAL_AMOUNT);
+        .approve(await expiredAmp.getAddress(), COLLATERAL_AMOUNT);
       await expect(
         expiredPos.connect(alice).mint(ZCHF_TO_BORROW, COLLATERAL_AMOUNT, 0n)
       ).to.be.revertedWithCustomError(expiredAmp, "AmplifierExpired");
@@ -487,7 +487,7 @@ describe("AmplifierCurve", function () {
       // Trying to borrow 1000 ZCHF against a 1 ZCHF limit
       await collateral
         .connect(alice)
-        .approve(await limitedPos.getAddress(), COLLATERAL_AMOUNT);
+        .approve(await limitedAmp.getAddress(), COLLATERAL_AMOUNT);
       await expect(
         limitedPos.connect(alice).mint(ZCHF_TO_BORROW, COLLATERAL_AMOUNT, 0n)
       ).to.be.revertedWithCustomError(limitedAmp, "LimitExceeded");
