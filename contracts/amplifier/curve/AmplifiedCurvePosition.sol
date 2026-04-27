@@ -25,6 +25,13 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     uint256 public borrowed;
     uint256 public lpBalance;
 
+    // Brick the bare implementation so it can never be initialized.
+    // Clones do not run constructors, so their AMP starts at address(0) and
+    // initialize() works normally on them.
+    constructor() {
+        AMP = IAmplifierCurve(address(1));
+    }
+
     /**
      * One-shot initializer called by AmplifierCurve immediately after cloning.
      * Guards against re-initialization by checking AMP is unset.
@@ -55,12 +62,15 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         // Stage both tokens into this contract via the amplifier.
         amp.borrowIntoPosition(owner, zchfAmount, collateralAmount);
 
-        // Approve the pool to pull both tokens for add_liquidity.
+        // Approve the pool to pull both tokens, then reset to 0 after.
         zchf.approve(address(pool), zchfAmount);
         collateral.approve(address(pool), collateralAmount);
 
         uint256[2] memory amounts = _makeAmounts(amp.ZCHF_INDEX(), zchfAmount, collateralAmount);
         uint256 lpReceived = pool.add_liquidity(amounts, minLp);
+
+        zchf.approve(address(pool), 0);
+        collateral.approve(address(pool), 0);
 
         borrowed += zchfAmount;
         lpBalance += lpReceived;
@@ -71,8 +81,8 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     /**
      * Removes liquidity from the Curve pool and repays the proportional borrowed ZCHF.
      *
-     * Tokens are delivered directly to the owner by the pool. The owner must have approved
-     * the amplifier to burn the proportional ZCHF from their address before calling this.
+     * Tokens are delivered directly to the owner by the pool. No explicit ZCHF approval
+     * is needed — Frankencoin grants registered minters unlimited allowance on all accounts.
      *
      * @param lpAmount   LP tokens to burn.
      * @param minAmounts Minimum [zchf, collateral] token amounts to receive (slippage guard).

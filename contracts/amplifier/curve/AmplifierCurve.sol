@@ -40,6 +40,7 @@ contract AmplifierCurve is IAmplifierCurve {
     address public immutable POSITION_IMPLEMENTATION;
 
     uint256 public totalBorrowed;
+    mapping(address => bool) public isPosition;
 
     uint256 internal constant ONE = 1e18;
     uint256 internal constant TWENTY_PERCENT = ONE / 5;
@@ -105,20 +106,20 @@ contract AmplifierCurve is IAmplifierCurve {
      * @param zchfAmount       ZCHF to mint into the position.
      * @param collateralAmount Collateral to pull from the owner into the position.
      */
-    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition {
-        if (block.timestamp > EXPIRATION) revert AmplifierExpired();
+    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external onlyPosition notExpired {
         checkPrice();
 
         uint256 required = getMinimumCollateral(zchfAmount);
         if (collateralAmount < required) revert InsufficientCollateral(required, collateralAmount);
 
+        uint256 newTotal = totalBorrowed + zchfAmount;
+        if (newTotal > LIMIT) revert LimitExceeded(newTotal, LIMIT);
+        totalBorrowed = newTotal;
+
         COLLATERAL.safeTransferFrom(owner, msg.sender, collateralAmount);
         ZCHF.mint(msg.sender, zchfAmount);
 
-        totalBorrowed += zchfAmount;
-        if (totalBorrowed > LIMIT) revert LimitExceeded(totalBorrowed, LIMIT);
-
-        emit Borrowed(zchfAmount, totalBorrowed);
+        emit Borrowed(zchfAmount, newTotal);
     }
 
     /**
@@ -142,10 +143,10 @@ contract AmplifierCurve is IAmplifierCurve {
      * Deploys a minimal proxy clone of the shared position implementation and registers it
      * with the Frankencoin protocol. The caller becomes the position owner.
      */
-    function createAmplifiedPosition() external returns (address position) {
+    function createAmplifiedPosition() external notExpired returns (address position) {
         position = _clone(POSITION_IMPLEMENTATION);
         AmplifiedCurvePosition(position).initialize(IAmplifierCurve(this), msg.sender);
-        ZCHF.registerPosition(position);
+        isPosition[position] = true;
         emit AmplifiedPositionCreated(position);
     }
 
@@ -163,7 +164,12 @@ contract AmplifierCurve is IAmplifierCurve {
     }
 
     modifier onlyPosition() {
-        if (ZCHF.getPositionParent(msg.sender) != address(this)) revert AccessDenied();
+        if (!isPosition[msg.sender]) revert AccessDenied();
+        _;
+    }
+
+    modifier notExpired() {
+        if (block.timestamp > EXPIRATION) revert AmplifierExpired();
         _;
     }
 }

@@ -30,6 +30,7 @@ interface IAmplifierCurve {
 
     // --- State ---
     function totalBorrowed() external view returns (uint256);
+    function isPosition(address position) external view returns (bool);
 
     // --- View ---
     function getMinimumCollateral(uint256 zchfAmount) external view returns (uint256);
