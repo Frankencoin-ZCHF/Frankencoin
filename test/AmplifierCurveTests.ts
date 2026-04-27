@@ -220,7 +220,8 @@ describe("AmplifierCurve", function () {
     });
 
     it("clone is tracked in the amplifier's isPosition mapping", async function () {
-      expect(await amplifier.isPosition(await position.getAddress())).to.be.true;
+      expect(await amplifier.isPosition(await position.getAddress())).to.be
+        .true;
     });
 
     it("clone.owner is the caller", async function () {
@@ -384,14 +385,7 @@ describe("AmplifierCurve", function () {
 
     it("repay reverts for non-position callers", async function () {
       await expect(
-        amplifier
-          .connect(alice)
-          .repay(
-            alice.address,
-            ethers.parseEther("1"),
-            ethers.parseEther("1"),
-            ethers.parseEther("1")
-          )
+        amplifier.connect(alice).repay(alice.address, ethers.parseEther("1"))
       ).to.be.revertedWithCustomError(amplifier, "AccessDenied");
     });
   });
