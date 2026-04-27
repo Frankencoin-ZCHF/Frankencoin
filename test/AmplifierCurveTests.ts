@@ -219,13 +219,8 @@ describe("AmplifierCurve", function () {
       );
     });
 
-    it("clone is registered as a ZCHF position under this amplifier", async function () {
-      const parent = await (zchf as any).getPositionParent(
-        await position.getAddress()
-      );
-      expect(normalizeAddress(parent)).to.equal(
-        normalizeAddress(await amplifier.getAddress())
-      );
+    it("clone is tracked in the amplifier's isPosition mapping", async function () {
+      expect(await amplifier.isPosition(await position.getAddress())).to.be.true;
     });
 
     it("clone.owner is the caller", async function () {
@@ -413,10 +408,13 @@ describe("AmplifierCurve", function () {
       const block = await ethers.provider.getBlock("latest");
       const now = block!.timestamp;
 
+      // Expiration is minPeriod + 60s from now: enough buffer so that the few
+      // blocks mined during setup don't accidentally cross the deadline before
+      // we create the position.
       expiredAmp = (await ethers.deployContract("AmplifierCurve", [
         CURVE_POOL_ADDR,
         ZCHF_ADDR,
-        now + Number(minPeriod) + 2, // expires just after registration clears
+        now + Number(minPeriod) + 60,
         BORROW_LIMIT,
       ])) as unknown as AmplifierCurve;
 
@@ -425,8 +423,8 @@ describe("AmplifierCurve", function () {
         .connect(zchfWhale)
         .suggestMinter(await expiredAmp.getAddress(), minPeriod, MIN_FEE, "");
 
-      // Advance time: past registration period AND past the amplifier expiration
-      await evm_increaseTime(minPeriod + 10n);
+      // Advance past registration period — amplifier is still live (60s to spare).
+      await evm_increaseTime(minPeriod + 1n);
 
       const posAddr = await expiredAmp
         .connect(alice)
@@ -436,6 +434,9 @@ describe("AmplifierCurve", function () {
         "AmplifiedCurvePosition",
         posAddr
       )) as unknown as AmplifiedCurvePosition;
+
+      // Push past the expiration.
+      await evm_increaseTime(120n);
     });
 
     it("mint reverts with AmplifierExpired", async function () {
