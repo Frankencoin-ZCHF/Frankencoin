@@ -16,7 +16,7 @@
 
 | Finding | Status |
 |---------|--------|
-| M-01 | Partially mitigated — full-exit guard added |
+| M-01 | Fixed — ceiling division prevents LP extraction without debt repayment |
 | L-02 | Fixed — `ZeroAmount` error added to `mint()` and `burn()` |
 | Notes (amp cache) | Stale — local cache was removed in refactor |
 
@@ -28,7 +28,7 @@
 |----------|-------|------|
 | Critical | 0 | 0 |
 | High     | 1 | 1 |
-| Medium   | 3 | 3 |
+| Medium   | 3 | 2 |
 | Low      | 2 | 1 |
 | Info     | 4 | 4 |
 
@@ -64,30 +64,20 @@ Alternatively add a `nonReentrant` guard from a trusted library.
 
 ---
 
-### [M-01] Partial burn precision loss — full-exit case mitigated, intermediate burns still truncate  *(Medium — Partially mitigated)*
+### [M-01] Partial burn precision loss  *(Medium — Fixed)*
 
-**Location:** `AmplifiedCurvePosition.sol:93–95`
+**Fixed in:** `AmplifiedCurvePosition.sol:97–98`
 
-**Description:**
-The proportional repayment calculation moved from `AmplifierCurve.repay()` to `AmplifiedCurvePosition.burn()` as part of the `repay` simplification:
-
-```solidity
-uint256 zchfRepay = (borrowed * lpAmount) / lpBalance;
-if (lpAmount == lpBalance) zchfRepay = borrowed;   // ← full-exit guard added
-```
-
-The full-exit guard (`lpAmount == lpBalance → zchfRepay = borrowed`) correctly resolves the previously reported stranded-debt case where the final burn could leave non-zero `borrowed` with `lpBalance = 0`.
-
-**Remaining risk:** Intermediate partial burns still use integer division, which truncates down. Across many small partial burns, rounding accumulates such that `borrowed` decreases more slowly than `lpBalance`. Extreme example: `borrowed = 1 wei`, `lpBalance = 1000` — burning 1 LP at a time yields `zchfRepay = 0` for the first 999 burns. The final burn resolves it correctly (`1 * 1 / 1 = 1`), but all intermediate burns are no-ops on the debt side. The position owner gets LP value back without incrementally reducing debt.
-
-**Recommendation:**
-Round up rather than down for partial burns:
+Ceiling division is now used for the proportional repayment calculation:
 
 ```solidity
-zchfRepay = lpAmount == lpBalance
-    ? borrowed
-    : (borrowed * lpAmount + lpBalance - 1) / lpBalance;  // ceiling division
+uint256 zchfRepay = (borrowed * lpAmount + lpBalance - 1) / lpBalance;
+if (lpAmount == lpBalance) zchfRepay = borrowed;
 ```
+
+Rounding up ensures every partial burn repays at least the fair share of debt, so LP tokens can never be extracted without incrementally reducing `borrowed`. The full-exit guard (`lpAmount == lpBalance`) is redundant with ceiling division (which naturally evaluates to `borrowed` in that case) but kept for clarity.
+
+**Proof:** `ceil(borrowed * lpAmount / lpBalance) ≤ borrowed` always holds since `lpAmount ≤ lpBalance`, so `zchfRepay` can never exceed the remaining debt.
 
 ---
 
