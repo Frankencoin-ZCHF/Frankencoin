@@ -7,7 +7,7 @@
 - `contracts/stablecoin/Frankencoin.sol` (reserve mechanics, mint path)
 
 **Commit:** c4341f5 → updated at current HEAD
-**Focus:** Price deviation, walk-away incentives, reserve exposure, oracle manipulation
+**Focus:** Price deviation, walk-away incentives, oracle manipulation
 
 ---
 
@@ -22,21 +22,10 @@ All findings in this report remain **open**. Subsequent code changes (simplified
 | Severity | Count |
 |----------|-------|
 | Critical | 1 |
-| High     | 2 |
+| High     | 1 |
 | Medium   | 3 |
 | Low      | 2 |
 | Info     | 2 |
-
----
-
-## Context: How the Reserve Is Exposed
-
-The amplifier calls `ZCHF.mint(position, amount)` — the raw mint with **no reserve requirement** and **no fee**. Compare this to all other Frankencoin positions, which use `mintWithReserve(target, amount, reservePPM, feesPPM)` which:
-
-1. Deposits a fraction (`reservePPM`) into the equity reserve as a loss buffer
-2. Charges a one-time fee (`feesPPM`) as income to the protocol
-
-The amplifier pays neither. Every ZCHF it mints is 100% unbacked by the reserve, and the protocol earns nothing for the risk it takes on.
 
 ---
 
@@ -47,7 +36,7 @@ The amplifier pays neither. Every ZCHF it mints is 100% unbacked by the reserve,
 **Location:** `AmplifierCurve.sol`, `AmplifiedCurvePosition.sol`
 
 **Description:**
-`burn()` is `onlyOwner`. No keeper, oracle, or governance function can force an underwater position to close. If a position owner walks away, the borrowed ZCHF remains minted forever with no backing and no path to recovery. Since the amplifier used `ZCHF.mint()` with no reserve, there is no reserve buffer to absorb the loss either.
+`burn()` is `onlyOwner`. No keeper, oracle, or governance function can force an underwater position to close. If a position owner walks away, the borrowed ZCHF remains minted forever with no backing and no path to recovery.
 
 **Walk-away scenario:**
 1. Owner borrows 100,000 ZCHF, deposits ~100,000 crvUSD at anchor price.
@@ -78,26 +67,9 @@ At minimum, add a `coverLoss` call path so that protocol equity can absorb orpha
 
 ---
 
-### [H-01] Zero reserve ratio — amplifier bears no cost for protocol risk  *(High)*
+### [H-01] Minimum collateral check provides no safety margin for IL or price drift  *(High)*
 
-**Location:** `AmplifierCurve.sol:120` (`ZCHF.mint`)
-
-**Description:**
-`ZCHF.mint(msg.sender, zchfAmount)` mints with `reservePPM = 0` and `feesPPM = 0`. This differs from every other Frankencoin minter. Consequences:
-
-- **No loss buffer:** When a position walks away, `minterReserve` is not decremented (it was never incremented). The equity contract absorbs the full loss directly from pool share holders.
-- **No protocol income:** The protocol takes on open-ended credit risk in exchange for zero fee revenue. The risk/reward is entirely asymmetric — the amplifier captures the LP fee yield, the protocol absorbs the tail risk.
-
-For reference, `StablecoinBridge` also uses raw `mint()`, but it operates 1:1 with a trusted stablecoin and has a hard expiration — the risk profile is entirely different.
-
-**Recommendation:**
-Use `mintWithReserve` with a non-zero `reservePPM` (e.g. 100,000 = 10%) to build a reserve buffer commensurate with the tail risk. Set a non-zero `feesPPM` to align protocol incentives.
-
----
-
-### [H-02] Minimum collateral check provides no safety margin for IL or price drift  *(High)*
-
-**Location:** `AmplifierCurve.sol:82–87` (`getMinimumCollateral`)
+**Location:** `AmplifierCurve.sol:89` (`getMinimumCollateral`)
 
 **Description:**
 The collateral requirement is 1:1 value at the current oracle price — exactly the break-even point. There is zero margin for:
@@ -198,5 +170,5 @@ Compute and enforce a sensible minimum on-chain: e.g. require `minLp >= pool.cal
 **`burn()` is callable on public burn path**
 `Frankencoin.burn(uint256)` is publicly callable by anyone holding ZCHF. This means a third party *can* voluntarily burn ZCHF to reduce unbacked supply (e.g. a whitehacker or the protocol team). This is a useful escape hatch but not a substitute for a liquidation mechanism.
 
-**LIMIT should be calibrated against the reserve**
-Given zero reserve ratio, a sound rule of thumb: `LIMIT` should not exceed the current Frankencoin equity reserve. If the reserve is 500,000 ZCHF, `LIMIT` should not exceed 500,000 ZCHF so that a total walk-away event does not wipe out all equity holders.
+**LIMIT should be calibrated conservatively**
+`LIMIT` caps the maximum unbacked ZCHF if all positions walk away. It should be sized relative to the protocol's capacity to absorb loss — not set to the maximum technically allowed.
