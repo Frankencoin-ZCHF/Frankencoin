@@ -7,6 +7,8 @@ import {IFrankencoinFlashloan} from './IFrankencoinFlashloan.sol';
 contract MockFlashloanRecipient is IFrankencoinFlashloanCallback {
 	IFrankencoinFlashloan public immutable flashloan;
 
+	error NotFlashloan(address caller);
+
 	event FlashloanReceived(address indexed caller, uint256 amount, bytes data);
 
 	constructor(address _flashloan) {
@@ -18,7 +20,7 @@ contract MockFlashloanRecipient is IFrankencoinFlashloanCallback {
 	}
 
 	function onFrankencoinFlashloan(uint256 amount, bytes calldata data) external override {
-		require(msg.sender == address(flashloan), 'unauthorized');
+		if (msg.sender != address(flashloan)) revert NotFlashloan(msg.sender);
 		emit FlashloanReceived(msg.sender, amount, data);
 		// FrankencoinFlashloan burns via minter privilege — no approval needed.
 	}

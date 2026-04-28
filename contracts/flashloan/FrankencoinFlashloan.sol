@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-import {IFrankencoin} from "../stablecoin/IFrankencoin.sol";
+import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
 import {IFrankencoinFlashloanCallback} from "./IFrankencoinFlashloanCallback.sol";
 
 /**
@@ -18,18 +18,18 @@ import {IFrankencoinFlashloanCallback} from "./IFrankencoinFlashloanCallback.sol
  *  3. zchf.burnFrom(recipient, amount) — destroy the same amount, restoring supply.
  */
 contract FrankencoinFlashloan is ReentrancyGuard {
-    IFrankencoin public immutable zchf;
+    IBasicFrankencoin public immutable zchf;
 
     error InvalidAmount();
 
     event Flashloan(address indexed recipient, uint256 amount);
 
     constructor(address _zchf) {
-        zchf = IFrankencoin(_zchf);
+        zchf = IBasicFrankencoin(_zchf);
     }
 
     function flashloan(uint256 amount, bytes calldata data) external nonReentrant {
-        if (amount == 0 || amount > zchf.minterReserve()) revert InvalidAmount();
+        if (amount == 0) revert InvalidAmount();
 
         address recipient = msg.sender;
 
