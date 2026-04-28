@@ -367,21 +367,22 @@ describe("ModuleRegistry", function () {
     });
 
     it("reverts NotActive for moduleTransfer when caller is not a registered module", async function () {
-      await expect(registry.connect(bob).moduleTransfer(owner.address, AMOUNT))
+      await expect(registry.connect(bob).moduleTransfer(owner.address, bob.address, AMOUNT))
         .to.be.revertedWithCustomError(registry, "NotActive");
     });
 
-    it("active module can moduleTransfer — moves ZCHF held by the registry to target", async function () {
-      // Fund the registry with ZCHF via moduleMint so it has a balance to transfer
-      await registry.connect(alice).moduleMint(await registry.getAddress(), AMOUNT);
+    it("active module can moduleTransfer — moves ZCHF from source to target without approval (minter infinite allowance)", async function () {
+      // Mint ZCHF to owner so it has a balance to be transferred from
+      await registry.connect(alice).moduleMint(owner.address, AMOUNT);
 
-      const registryBalBefore = await zchf.balanceOf(await registry.getAddress());
-      const ownerBalBefore    = await zchf.balanceOf(owner.address);
+      const ownerBalBefore = await zchf.balanceOf(owner.address);
+      const bobBalBefore   = await zchf.balanceOf(bob.address);
 
-      await registry.connect(alice).moduleTransfer(owner.address, AMOUNT);
+      // Module transfers from owner → bob without owner approving the registry
+      await registry.connect(alice).moduleTransfer(owner.address, bob.address, AMOUNT);
 
-      expect(await zchf.balanceOf(await registry.getAddress())).to.equal(registryBalBefore - AMOUNT);
-      expect(await zchf.balanceOf(owner.address)).to.equal(ownerBalBefore + AMOUNT);
+      expect(await zchf.balanceOf(owner.address)).to.equal(ownerBalBefore - AMOUNT);
+      expect(await zchf.balanceOf(bob.address)).to.equal(bobBalBefore + AMOUNT);
     });
   });
 

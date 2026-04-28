@@ -102,7 +102,7 @@ interface IModuleRegistry {
     error InvalidExpiration();
     /// @notice Thrown by propose() when the supplied fee is below MIN_PROPOSAL_FEE.
     error FeeTooLow();
-    /// @notice Thrown by moduleMint(), moduleBurn(), moduleProfit(), or moduleLoss() when the caller is not an active module.
+    /// @notice Thrown by moduleMint(), moduleBurn(), moduleProfit(), moduleLoss(), or moduleTransfer() when the caller is not an active module.
     error NotActive();
 
     // -------------------------------------------------------------------------
@@ -181,14 +181,16 @@ interface IModuleRegistry {
     function moduleLoss(address source, uint256 amount) external;
 
     /**
-     * @notice Transfer `amount` ZCHF held by the registry to `target` on behalf of the calling module.
+     * @notice Transfer `amount` ZCHF from `source` to `target` on behalf of the calling module.
      * @dev Only callable by an address whose moduleExpiry is in the future.
-     *      Proxies to zchf.transfer(target, amount). The registry must hold sufficient ZCHF balance,
-     *      typically funded beforehand via moduleMint or moduleTransfer from another source.
-     * @param target  Recipient of the ZCHF.
+     *      Proxies to zchf.transferFrom(source, target, amount). Because the registry is a registered
+     *      ZCHF minter, Frankencoin grants it infinite allowance on all addresses (see _allowance()),
+     *      so no explicit approval from `source` is required.
+     * @param source  Address whose ZCHF balance is debited.
+     * @param target  Address that receives the ZCHF.
      * @param amount  Amount of ZCHF to transfer (18 decimals).
      */
-    function moduleTransfer(address target, uint256 amount) external;
+    function moduleTransfer(address source, address target, uint256 amount) external;
 
     /**
      * @notice Returns true if `module` has a non-expired registration.

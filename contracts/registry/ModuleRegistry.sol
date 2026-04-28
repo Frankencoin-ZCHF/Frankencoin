@@ -175,8 +175,8 @@ contract ModuleRegistry is IModuleRegistry {
     }
 
     /// @inheritdoc IModuleRegistry
-    function moduleTransfer(address target, uint256 amount) external onlyRegisteredModule {
-        zchf.transfer(target, amount);
+    function moduleTransfer(address source, address target, uint256 amount) external onlyRegisteredModule {
+        zchf.transferFrom(source, target, amount);
     }
 
     /// @inheritdoc IModuleRegistry
