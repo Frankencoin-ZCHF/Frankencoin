@@ -32,7 +32,6 @@ import "./IModule.sol";
  *      by the deployer via zchf.suggestMinter() after deployment.
  */
 contract ModuleRegistry is IModuleRegistry {
-
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -173,5 +172,20 @@ contract ModuleRegistry is IModuleRegistry {
     /// @inheritdoc IModuleRegistry
     function moduleBurn(address owner, uint256 amount) external onlyRegisteredModule {
         zchf.burnFrom(owner, amount);
+    }
+
+    /// @inheritdoc IModuleRegistry
+    function moduleTransfer(address target, uint256 amount) external onlyRegisteredModule {
+        zchf.transfer(target, amount);
+    }
+
+    /// @inheritdoc IModuleRegistry
+    function moduleProfit(address source, uint256 amount) external onlyRegisteredModule {
+        zchf.collectProfits(source, amount);
+    }
+
+    /// @inheritdoc IModuleRegistry
+    function moduleLoss(address source, uint256 amount) external onlyRegisteredModule {
+        zchf.coverLoss(source, amount);
     }
 }

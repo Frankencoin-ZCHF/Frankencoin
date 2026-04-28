@@ -330,6 +330,61 @@ describe("ModuleRegistry", function () {
     });
   });
 
+  // ── Reserve proxy ─────────────────────────────────────────────────────────
+  // alice.address is the active module; alice (signer) calls moduleProfit/moduleLoss
+
+  describe("moduleProfit() and moduleLoss()", function () {
+    const AMOUNT = ethers.parseEther("100");
+
+    it("reverts NotActive for a caller that is not a registered module", async function () {
+      await expect(registry.connect(bob).moduleProfit(owner.address, AMOUNT))
+        .to.be.revertedWithCustomError(registry, "NotActive");
+      await expect(registry.connect(bob).moduleLoss(owner.address, AMOUNT))
+        .to.be.revertedWithCustomError(registry, "NotActive");
+    });
+
+    it("active module can moduleProfit — moves ZCHF from source to reserve", async function () {
+      // Give owner some ZCHF to forward as profit
+      await registry.connect(alice).moduleMint(owner.address, AMOUNT);
+
+      const ownerBalBefore   = await zchf.balanceOf(owner.address);
+      const reserveBalBefore = await zchf.balanceOf(await equity.getAddress());
+
+      await registry.connect(alice).moduleProfit(owner.address, AMOUNT);
+
+      expect(await zchf.balanceOf(owner.address)).to.equal(ownerBalBefore - AMOUNT);
+      expect(await zchf.balanceOf(await equity.getAddress())).to.be.gte(reserveBalBefore + AMOUNT);
+    });
+
+    it("active module can moduleLoss — moves ZCHF from reserve to source", async function () {
+      const bobBalBefore = await zchf.balanceOf(bob.address);
+
+      await registry.connect(alice).moduleLoss(bob.address, AMOUNT);
+
+      expect(await zchf.balanceOf(bob.address)).to.equal(bobBalBefore + AMOUNT);
+      // Reserve may be topped up by minting if equity was insufficient;
+      // just verify the recipient received the full amount.
+    });
+
+    it("reverts NotActive for moduleTransfer when caller is not a registered module", async function () {
+      await expect(registry.connect(bob).moduleTransfer(owner.address, AMOUNT))
+        .to.be.revertedWithCustomError(registry, "NotActive");
+    });
+
+    it("active module can moduleTransfer — moves ZCHF held by the registry to target", async function () {
+      // Fund the registry with ZCHF via moduleMint so it has a balance to transfer
+      await registry.connect(alice).moduleMint(await registry.getAddress(), AMOUNT);
+
+      const registryBalBefore = await zchf.balanceOf(await registry.getAddress());
+      const ownerBalBefore    = await zchf.balanceOf(owner.address);
+
+      await registry.connect(alice).moduleTransfer(owner.address, AMOUNT);
+
+      expect(await zchf.balanceOf(await registry.getAddress())).to.equal(registryBalBefore - AMOUNT);
+      expect(await zchf.balanceOf(owner.address)).to.equal(ownerBalBefore + AMOUNT);
+    });
+  });
+
   // ── Extension ─────────────────────────────────────────────────────────────
 
   describe("propose() — extension", function () {

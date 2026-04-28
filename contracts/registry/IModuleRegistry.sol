@@ -102,7 +102,7 @@ interface IModuleRegistry {
     error InvalidExpiration();
     /// @notice Thrown by propose() when the supplied fee is below MIN_PROPOSAL_FEE.
     error FeeTooLow();
-    /// @notice Thrown by moduleMint() or moduleBurn() when the caller is not an active module.
+    /// @notice Thrown by moduleMint(), moduleBurn(), moduleProfit(), or moduleLoss() when the caller is not an active module.
     error NotActive();
 
     // -------------------------------------------------------------------------
@@ -159,6 +159,36 @@ interface IModuleRegistry {
      * @param amount  Amount of ZCHF to burn (18 decimals).
      */
     function moduleBurn(address owner, uint256 amount) external;
+
+    /**
+     * @notice Collect `amount` ZCHF from `source` into the reserve as profit on behalf of the calling module.
+     * @dev Only callable by an address whose moduleExpiry is in the future.
+     *      Proxies to zchf.collectProfits(source, amount). The registry must be a registered
+     *      ZCHF minter for this to succeed.
+     * @param source  Address whose ZCHF is transferred to the reserve.
+     * @param amount  Amount of ZCHF to collect (18 decimals).
+     */
+    function moduleProfit(address source, uint256 amount) external;
+
+    /**
+     * @notice Cover `amount` ZCHF loss from the reserve, sending it to `source`, on behalf of the calling module.
+     * @dev Only callable by an address whose moduleExpiry is in the future.
+     *      Proxies to zchf.coverLoss(source, amount). The registry must be a registered
+     *      ZCHF minter for this to succeed.
+     * @param source  Address that receives the ZCHF loss coverage.
+     * @param amount  Amount of ZCHF to cover (18 decimals).
+     */
+    function moduleLoss(address source, uint256 amount) external;
+
+    /**
+     * @notice Transfer `amount` ZCHF held by the registry to `target` on behalf of the calling module.
+     * @dev Only callable by an address whose moduleExpiry is in the future.
+     *      Proxies to zchf.transfer(target, amount). The registry must hold sufficient ZCHF balance,
+     *      typically funded beforehand via moduleMint or moduleTransfer from another source.
+     * @param target  Recipient of the ZCHF.
+     * @param amount  Amount of ZCHF to transfer (18 decimals).
+     */
+    function moduleTransfer(address target, uint256 amount) external;
 
     /**
      * @notice Returns true if `module` has a non-expired registration.
