@@ -40,6 +40,9 @@ contract ModuleRegistry is IModuleRegistry {
     /// @notice Duration of the veto window within which FPS holders may revoke a proposal.
     uint256 public constant VETO_PERIOD = 30 days;
 
+    /// @notice Maximum lifetime that can be requested for any single proposal (New or Extension).
+    uint256 public constant MAX_MODULE_LIFETIME = 100 * 365 days;
+
     /// @notice Minimum ZCHF deposit required to submit any proposal.
     uint96 public constant MIN_PROPOSAL_FEE = 1000 * 10 ** 18;
 
@@ -52,7 +55,7 @@ contract ModuleRegistry is IModuleRegistry {
 
     /// @notice Maps a module address to its authorization expiry timestamp.
     ///         0 means the module has never been registered or has been retired.
-    mapping(address => uint256) public moduleExpiry;
+    mapping(address => uint64) public moduleExpiry;
 
     /// @notice Pending proposals indexed by module address.
     ///         An entry exists only while a proposal is awaiting revocation or acceptance.
@@ -113,15 +116,17 @@ contract ModuleRegistry is IModuleRegistry {
         if (fee < MIN_PROPOSAL_FEE) revert FeeTooLow();
 
         uint64 activateAt = uint64(block.timestamp + VETO_PERIOD);
-        uint64 currentExpiry = uint64(moduleExpiry[module]);
+        uint64 maxExpiry = uint64(block.timestamp + MAX_MODULE_LIFETIME);
+        uint64 currentExpiry = moduleExpiry[module];
         ProposalCategory category;
 
         if (currentExpiry == 0 || block.timestamp >= currentExpiry) {
             // New or re-proposal for an expired module.
-            if (expiration <= activateAt) revert InvalidExpiration();
+            if (expiration <= activateAt || expiration > maxExpiry) revert InvalidExpiration();
             category = ProposalCategory.New;
         } else if (expiration > currentExpiry) {
             // Extend the TTL of an active module.
+            if (expiration > maxExpiry) revert InvalidExpiration();
             category = ProposalCategory.Extension;
         } else {
             // Early retirement: override expiration to now + VETO_PERIOD so the module
