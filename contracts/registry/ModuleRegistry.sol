@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../stablecoin/IBasicFrankencoin.sol";
-import "./IModuleRegistry.sol";
-import "./IModule.sol";
+import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
+import {IModuleRegistry} from "./IModuleRegistry.sol";
+import {IModule} from "./IModule.sol";
 
 /**
  * @title ModuleRegistry
