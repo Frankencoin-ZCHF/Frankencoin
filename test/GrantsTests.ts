@@ -204,6 +204,34 @@ describe("Grants", function () {
         grants.connect(alice).propose(0, PROPOSAL_FEE, tooSoon, recipient.address, STREAM_AMT, STREAM_PRD, "")
       ).to.be.revertedWithCustomError(grants, "InvalidExpiration");
     });
+
+    it("reverts RegistrationExpiringSoon when module registration expires within the veto window", async function () {
+      // Retire the Grants module so its expiry becomes now + VETO_PERIOD, then try to propose
+      const grantsAddr = await grants.getAddress();
+      const currentExpiry = await registry.moduleExpiry(grantsAddr);
+
+      // Submit a retirement proposal for Grants in the registry (expiry < currentExpiry → Retirement)
+      await zchf.connect(alice).approve(await registry.getAddress(), PROPOSAL_FEE);
+      await registry.connect(alice).propose(grantsAddr, PROPOSAL_FEE, 1n, "retire grants");
+      await evm_increaseTime(THIRTY_DAYS + 1n);
+      await registry.connect(bob).accept(grantsAddr);
+
+      // Grants module expiry is now in the past — any propose() must revert
+      const block = await ethers.provider.getBlock("latest");
+      const exp   = BigInt(block!.timestamp) + THIRTY_DAYS + 365n * DAY;
+      await zchf.connect(alice).approve(await grants.getAddress(), PROPOSAL_FEE);
+      await expect(
+        grants.connect(alice).propose(0, PROPOSAL_FEE, exp, recipient.address, STREAM_AMT, STREAM_PRD, "")
+      ).to.be.revertedWithCustomError(grants, "RegistrationExpiringSoon");
+
+      // Re-register Grants so subsequent tests pass
+      const block2      = await ethers.provider.getBlock("latest");
+      const renewExpiry = BigInt(block2!.timestamp) + THIRTY_DAYS + 3650n * DAY;
+      await zchf.connect(alice).approve(await registry.getAddress(), PROPOSAL_FEE);
+      await registry.connect(alice).propose(grantsAddr, PROPOSAL_FEE, renewExpiry, "renew grants");
+      await evm_increaseTime(THIRTY_DAYS + 1n);
+      await registry.connect(bob).accept(grantsAddr);
+    });
   });
 
   // ── Revoke path ───────────────────────────────────────────────────────────

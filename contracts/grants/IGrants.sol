@@ -160,6 +160,9 @@ interface IGrants {
     error NothingToStream();
     /// @notice Thrown by propose(Stop) when the target grant does not exist or is already expired.
     error GrantNotActive();
+    /// @notice Thrown by propose() when the Grants module registration expires within the veto window,
+    ///         which would prevent FPS holders from revoking the proposal before the module goes inactive.
+    error RegistrationExpiringSoon();
 
     // -------------------------------------------------------------------------
     // Functions

@@ -114,6 +114,8 @@ contract Grants is IGrants {
         ProposalType ptype;
         uint64 grantExpiry;
 
+        if (registry.moduleExpiry(address(this)) <= activateAt) revert RegistrationExpiringSoon();
+
         if (grantId == 0) {
             // New grant: validate parameters and assign a fresh ID.
             if (recipient == address(0) || streamAmount == 0 || streamPeriod == 0) revert InvalidParameters();
