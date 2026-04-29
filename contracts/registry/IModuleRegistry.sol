@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "../stablecoin/IBasicFrankencoin.sol";
+
 /**
  * @title IModuleRegistry
  * @notice Interface for the ModuleRegistry — a governance-gated minting proxy that manages
@@ -198,4 +200,9 @@ interface IModuleRegistry {
      * @return True when moduleExpiry[module] > block.timestamp.
      */
     function isActive(address module) external view returns (bool);
+
+    /**
+     * @notice Returns the Frankencoin contract this registry proxies minting through.
+     */
+    function zchf() external view returns (IBasicFrankencoin);
 }
