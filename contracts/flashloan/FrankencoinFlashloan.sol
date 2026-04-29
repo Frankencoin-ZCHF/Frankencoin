@@ -2,30 +2,33 @@
 pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
-import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
+import {IModuleRegistry, IBasicFrankencoin} from "../registry/IModuleRegistry.sol";
 import {IFrankencoinFlashloanCallback} from "./IFrankencoinFlashloanCallback.sol";
 
 /**
  * @title FrankencoinFlashloan
- * @notice Native-minter ZCHF flash-loan provider.
+ * @notice Native-minter ZCHF flash-loan provider backed by the ModuleRegistry.
  *
- * Must be registered as a minter via IBasicFrankencoin.suggestMinter before use.
+ * Must be registered as an active module in the ModuleRegistry before use.
+ * Mint and burn are proxied through the registry (moduleMint / moduleBurn),
+ * so this contract requires no direct ZCHF minter status.
  *
  * Flow per loan:
- *  1. zchf.mint(recipient, amount) — create ZCHF for the duration of the transaction.
+ *  1. registry.moduleMint(recipient, amount) — create ZCHF for the duration of the tx.
  *  2. Invoke recipient.onFrankencoinFlashloan(amount, data).
- *  3. zchf.burnFrom(recipient, amount) — destroy the same amount, restoring supply.
+ *  3. registry.moduleBurn(recipient, amount) — destroy the same amount, restoring supply.
  */
 contract FrankencoinFlashloan is ReentrancyGuard {
+    IModuleRegistry public immutable registry;
     IBasicFrankencoin public immutable zchf;
 
     error InvalidAmount();
 
     event Flashloan(address indexed recipient, uint256 amount);
 
-    constructor(address _zchf) {
-        zchf = IBasicFrankencoin(_zchf);
+    constructor(IModuleRegistry registry_) {
+        registry = registry_;
+        zchf = registry_.zchf();
     }
 
     function flashloan(uint256 amount, bytes calldata data) external nonReentrant {
@@ -33,9 +36,9 @@ contract FrankencoinFlashloan is ReentrancyGuard {
 
         address recipient = msg.sender;
 
-        zchf.mint(recipient, amount);
+        registry.moduleMint(recipient, amount);
         IFrankencoinFlashloanCallback(recipient).onFrankencoinFlashloan(amount, data);
-        zchf.burnFrom(recipient, amount);
+        registry.moduleBurn(recipient, amount);
 
         emit Flashloan(recipient, amount);
     }
