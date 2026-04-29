@@ -202,6 +202,13 @@ interface IModuleRegistry {
     function isActive(address module) external view returns (bool);
 
     /**
+     * @notice Returns the timestamp at which `module`'s registration expires.
+     * @dev Returns 0 if the module has never been registered or has been retired.
+     * @param module The address to check.
+     */
+    function moduleExpiry(address module) external view returns (uint64);
+
+    /**
      * @notice Returns the Frankencoin contract this registry proxies minting through.
      */
     function zchf() external view returns (IBasicFrankencoin);
