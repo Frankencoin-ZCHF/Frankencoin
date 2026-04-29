@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../stablecoin/IBasicFrankencoin.sol";
+import "../registry/IModuleRegistry.sol";
 import "./IGrants.sol";
 
 /**
  * @title Grants
  * @notice Governance-gated decentralized compensation streamer for recurring ZCHF grant payments.
  *
- * @dev The Grants contract is itself a ZCHF minter. Accepted grants draw ZCHF from the reserve
- *      via zchf.coverLoss() on each settlement, forwarding it directly to the recipient.
+ * @dev The Grants contract operates as a module inside the ModuleRegistry. It does not hold
+ *      direct ZCHF minter status; all minter-privilege calls (coverLoss, collectProfits) are
+ *      routed through the registry via moduleLoss / moduleProfit.
  *
  *      Governance flow:
  *        1. Anyone calls propose(), paying a ZCHF deposit (>= MIN_PROPOSAL_FEE).
@@ -27,9 +28,9 @@ import "./IGrants.sol";
  *      Once a grant is active, anyone calls stream() to settle all elapsed complete periods.
  *      Elapsed time is capped at grant.expiry so final periods remain claimable after expiry.
  *
- *      This contract must be registered as a minter on the Frankencoin contract before
- *      coverLoss and collectProfits will work. Registration is handled by the deployer via
- *      zchf.suggestMinter() after deployment.
+ *      This contract must be registered as an active module in the ModuleRegistry before
+ *      stream() and revoke() will work. Registration goes through the registry's own
+ *      propose → accept governance flow.
  */
 contract Grants is IGrants {
 
@@ -50,7 +51,10 @@ contract Grants is IGrants {
     // State
     // -------------------------------------------------------------------------
 
-    /// @notice The Frankencoin contract used for coverLoss, collectProfits, and governance checks.
+    /// @notice The ModuleRegistry this contract is registered in; routes all minter-privilege calls.
+    IModuleRegistry public immutable registry;
+
+    /// @notice The Frankencoin contract, derived from the registry.
     IBasicFrankencoin public immutable zchf;
 
     /// @notice The next grant ID to assign on a New proposal. Starts at 1; 0 is the sentinel for New.
@@ -83,9 +87,10 @@ contract Grants is IGrants {
     // Constructor
     // -------------------------------------------------------------------------
 
-    /// @param zchf_ Address of the Frankencoin (ZCHF) contract.
-    constructor(IBasicFrankencoin zchf_) {
-        zchf = zchf_;
+    /// @param registry_ The ModuleRegistry that this Grants contract will be registered in.
+    constructor(IModuleRegistry registry_) {
+        registry = registry_;
+        zchf     = registry_.zchf();
     }
 
     // -------------------------------------------------------------------------
@@ -153,7 +158,7 @@ contract Grants is IGrants {
         zchf.reserve().checkQualified(msg.sender, helpers);
         uint96 fee = proposals[grantId].fee;
         delete proposals[grantId];
-        zchf.collectProfits(address(this), fee);
+        registry.moduleProfit(address(this), fee);
         emit GrantRevoked(grantId, msg.sender, message);
     }
 
@@ -202,7 +207,7 @@ contract Grants is IGrants {
         g.settlements      += 1;
 
         uint256 amount = uint256(periods) * uint256(g.streamAmount);
-        zchf.coverLoss(g.recipient, amount);
+        registry.moduleLoss(g.recipient, amount);
 
         emit GrantStreamed(grantId, g.recipient, amount, periods);
     }

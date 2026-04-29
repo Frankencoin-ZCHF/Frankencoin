@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "../registry/IModuleRegistry.sol";
+
 /**
  * @title IGrants
  * @notice Interface for the Grants contract — a governance-gated decentralized compensation
@@ -16,9 +18,13 @@ pragma solidity ^0.8.0;
  *   (stop: grantId > 0)
  *
  *   Active grants: anyone calls stream() to settle accumulated complete periods.
- *   ZCHF flows from the reserve (via coverLoss) directly to the recipient.
+ *   ZCHF flows from the reserve via registry.moduleLoss() directly to the recipient.
  *   Periods are counted up to min(block.timestamp, grant.expiry) so final periods
  *   remain claimable after a grant is stopped or expires naturally.
+ *
+ *   The Grants contract must be registered as an active module in the ModuleRegistry.
+ *   It does not need to be a direct ZCHF minter; all minter-privilege calls are
+ *   proxied through the registry.
  */
 interface IGrants {
 
@@ -224,4 +230,9 @@ interface IGrants {
      * @param grantId The grant ID to query.
      */
     function isActive(uint256 grantId) external view returns (bool);
+
+    /**
+     * @notice Returns the ModuleRegistry this contract routes minter-privilege calls through.
+     */
+    function registry() external view returns (IModuleRegistry);
 }

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Equity, Frankencoin, Grants } from "../typechain";
+import { Equity, Frankencoin, Grants, ModuleRegistry } from "../typechain";
 import { evm_increaseTime } from "./helper";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
@@ -41,9 +41,10 @@ describe("Grants", function () {
   let recipient: HardhatEthersSigner; // grant recipient
   let whale:     HardhatEthersSigner; // impersonated ZCHF whale; also invests FPS
 
-  let zchf:   Frankencoin;
-  let equity: Equity;
-  let grants: Grants;
+  let zchf:     Frankencoin;
+  let equity:   Equity;
+  let registry: ModuleRegistry;
+  let grants:   Grants;
 
   // ── Global fork setup ──────────────────────────────────────────────────────
 
@@ -84,20 +85,35 @@ describe("Grants", function () {
     // Advance 730 days so the whale's fresh FPS accumulates sufficient votes
     await evm_increaseTime(730n * DAY);
 
-    grants = await ethers.deployContract("Grants", [ZCHF_ADDR]);
-
     const minFee    = await zchf.MIN_FEE();
     const minPeriod = await zchf.MIN_APPLICATION_PERIOD();
+
+    // Deploy ModuleRegistry and register it as the sole ZCHF minter
+    registry = await ethers.deployContract("ModuleRegistry", [ZCHF_ADDR]);
     await zchf.connect(alice).suggestMinter(
-      await grants.getAddress(), minPeriod, minFee, "Grants"
+      await registry.getAddress(), minPeriod, minFee, "ModuleRegistry"
     );
     await evm_increaseTime(minPeriod + 1n);
 
+    // Deploy Grants pointing at the registry (not directly at ZCHF)
+    grants = await ethers.deployContract("Grants", [await registry.getAddress()]);
+
+    // Propose and accept Grants as a module inside the registry
+    const block         = await ethers.provider.getBlock("latest");
+    const grantsExpiry  = BigInt(block!.timestamp) + THIRTY_DAYS + 3650n * DAY; // 10-year module TTL
+    await zchf.connect(alice).approve(await registry.getAddress(), PROPOSAL_FEE);
+    await registry.connect(alice).propose(
+      await grants.getAddress(), PROPOSAL_FEE, grantsExpiry, "Grants module"
+    );
+    await evm_increaseTime(THIRTY_DAYS + 1n);
+    await registry.connect(bob).accept(await grants.getAddress());
+
     console.log("\n=== Grants fork setup ===");
-    console.log("Block  :", FORK_BLOCK);
-    console.log("Grants :", await grants.getAddress());
-    console.log("ZCHF   :", ZCHF_ADDR);
-    console.log("Equity :", await equity.getAddress());
+    console.log("Block    :", FORK_BLOCK);
+    console.log("Registry :", await registry.getAddress());
+    console.log("Grants   :", await grants.getAddress());
+    console.log("ZCHF     :", ZCHF_ADDR);
+    console.log("Equity   :", await equity.getAddress());
     console.log("Whale FPS:", ethers.formatEther(await equity.balanceOf(ZCHF_WHALE)));
   });
 
@@ -108,7 +124,11 @@ describe("Grants", function () {
   // ── Constructor ───────────────────────────────────────────────────────────
 
   describe("constructor", function () {
-    it("zchf reference is correct", async function () {
+    it("registry reference is correct", async function () {
+      expect(await grants.registry()).to.equal(await registry.getAddress());
+    });
+
+    it("zchf is derived from the registry", async function () {
       expect(await grants.zchf()).to.equal(ZCHF_ADDR);
     });
 
@@ -124,8 +144,12 @@ describe("Grants", function () {
       expect(await grants.nextGrantId()).to.equal(1n);
     });
 
-    it("grants contract is a registered ZCHF minter", async function () {
-      expect(await zchf.isMinter(await grants.getAddress())).to.be.true;
+    it("grants contract is an active module in the registry", async function () {
+      expect(await registry.isActive(await grants.getAddress())).to.be.true;
+    });
+
+    it("grants contract is NOT a direct ZCHF minter", async function () {
+      expect(await zchf.isMinter(await grants.getAddress())).to.be.false;
     });
 
     it("no grant is active on deployment", async function () {
