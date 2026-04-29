@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IBasicFrankencoin} from "../stablecoin/IBasicFrankencoin.sol";
 import {IModuleRegistry} from "../registry/IModuleRegistry.sol";
 
 /**
@@ -221,7 +222,8 @@ interface IGrants {
      * @dev Permissionless — anyone may call on behalf of any grant.
      *      Elapsed time is capped at grant.expiry so periods that accrued before a grant stopped
      *      remain claimable even after block.timestamp exceeds expiry.
-     *      Calls zchf.coverLoss to pull ZCHF from the reserve directly to the recipient.
+     *      Calls registry.moduleLoss() to pull ZCHF from the reserve via the ModuleRegistry
+     *      and forward it directly to the recipient.
      *      Reverts NothingToStream if no complete period has elapsed since latestSettlement
      *      (up to expiry).
      * @param grantId The grant ID to stream.
@@ -238,4 +240,9 @@ interface IGrants {
      * @notice Returns the ModuleRegistry this contract routes minter-privilege calls through.
      */
     function registry() external view returns (IModuleRegistry);
+
+    /**
+     * @notice Returns the Frankencoin contract, derived from the registry.
+     */
+    function zchf() external view returns (IBasicFrankencoin);
 }
