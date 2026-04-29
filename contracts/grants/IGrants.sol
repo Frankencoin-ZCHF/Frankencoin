@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../registry/IModuleRegistry.sol";
+import {IModuleRegistry} from "../registry/IModuleRegistry.sol";
 
 /**
  * @title IGrants

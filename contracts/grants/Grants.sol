@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../registry/IModuleRegistry.sol";
-import "./IGrants.sol";
+import {IModuleRegistry, IBasicFrankencoin} from "../registry/IModuleRegistry.sol";
+import {IGrants} from "./IGrants.sol";
 
 /**
  * @title Grants
@@ -33,7 +33,6 @@ import "./IGrants.sol";
  *      propose → accept governance flow.
  */
 contract Grants is IGrants {
-
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -90,7 +89,7 @@ contract Grants is IGrants {
     /// @param registry_ The ModuleRegistry that this Grants contract will be registered in.
     constructor(IModuleRegistry registry_) {
         registry = registry_;
-        zchf     = registry_.zchf();
+        zchf = registry_.zchf();
     }
 
     // -------------------------------------------------------------------------
@@ -108,15 +107,7 @@ contract Grants is IGrants {
     // -------------------------------------------------------------------------
 
     /// @inheritdoc IGrants
-    function propose(
-        uint256 grantId,
-        uint96  fee,
-        uint64  expiry,
-        address recipient,
-        uint96  streamAmount,
-        uint64  streamPeriod,
-        string calldata message
-    ) external override {
+    function propose(uint256 grantId, uint96 fee, uint64 expiry, address recipient, uint96 streamAmount, uint64 streamPeriod, string calldata message) external override {
         if (fee < MIN_PROPOSAL_FEE) revert FeeTooLow();
 
         uint64 activateAt = uint64(block.timestamp + VETO_PERIOD);
@@ -128,20 +119,20 @@ contract Grants is IGrants {
             if (recipient == address(0) || streamAmount == 0 || streamPeriod == 0) revert InvalidParameters();
             if (expiry <= activateAt || expiry > uint64(block.timestamp + MAX_GRANT_LIFETIME)) revert InvalidExpiration();
 
-            grantId     = nextGrantId++;
+            grantId = nextGrantId++;
             grantExpiry = expiry;
-            ptype       = ProposalType.New;
+            ptype = ProposalType.New;
 
             proposals[grantId] = Proposal(msg.sender, fee, recipient, streamAmount, streamPeriod, activateAt, grantExpiry, ptype);
         } else {
             // Stop: target grant must be active; no pending proposal may exist.
-            if (!isActive(grantId))                revert GrantNotActive();
+            if (!isActive(grantId)) revert GrantNotActive();
             if (proposals[grantId].activateAt != 0) revert AlreadyProposed();
 
             // Override expiry to now + VETO_PERIOD so the grant stops predictably exactly one
             // veto window after submission, giving a wind-down window for final settlements.
             grantExpiry = activateAt;
-            ptype       = ProposalType.Stop;
+            ptype = ProposalType.Stop;
 
             proposals[grantId] = Proposal(msg.sender, fee, address(0), 0, 0, activateAt, grantExpiry, ptype);
         }
@@ -151,9 +142,7 @@ contract Grants is IGrants {
     }
 
     /// @inheritdoc IGrants
-    function revoke(uint256 grantId, address[] calldata helpers, string calldata message)
-        external override proposal(grantId, true)
-    {
+    function revoke(uint256 grantId, address[] calldata helpers, string calldata message) external override proposal(grantId, true) {
         if (block.timestamp >= proposals[grantId].activateAt) revert VetoPeriodOver();
         zchf.reserve().checkQualified(msg.sender, helpers);
         uint96 fee = proposals[grantId].fee;
@@ -169,14 +158,7 @@ contract Grants is IGrants {
         delete proposals[grantId];
 
         if (p.ptype == ProposalType.New) {
-            grants[grantId] = Grant({
-                recipient:        p.recipient,
-                streamAmount:     p.streamAmount,
-                streamPeriod:     p.streamPeriod,
-                latestSettlement: uint64(block.timestamp),
-                expiry:           p.grantExpiry,
-                settlements:      0
-            });
+            grants[grantId] = Grant({recipient: p.recipient, streamAmount: p.streamAmount, streamPeriod: p.streamPeriod, latestSettlement: uint64(block.timestamp), expiry: p.grantExpiry, settlements: 0});
         } else {
             // Stop: set expiry to grantExpiry (== activateAt, already past or equal to now).
             // Any periods that accrued before this point remain claimable via stream().
@@ -204,7 +186,7 @@ contract Grants is IGrants {
         if (periods == 0) revert NothingToStream();
 
         g.latestSettlement += periods * g.streamPeriod;
-        g.settlements      += 1;
+        g.settlements += 1;
 
         uint256 amount = uint256(periods) * uint256(g.streamAmount);
         registry.moduleLoss(g.recipient, amount);
