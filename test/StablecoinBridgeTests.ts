@@ -67,6 +67,16 @@ describe("StablecoinBridge", () => {
     it("should set decimalMultiplier correctly for 6-decimal token", async () => {
       expect(await bridge6.decimalMultiplier()).to.equal(10n ** 12n);
     });
+
+    it("should revert when source token has more decimals than ZCHF", async () => {
+      const tokenFactory = await ethers.getContractFactory("TestToken");
+      const xchf24 = await tokenFactory.deploy("CryptoFranc24", "XCHF24", 24);
+      const bridgeFactory = await ethers.getContractFactory("StablecoinBridge");
+      // 18 - 24 underflows in the constructor, triggering a Solidity 0.8 arithmetic panic
+      await expect(
+        bridgeFactory.deploy(await xchf24.getAddress(), await zchf.getAddress(), LIMIT)
+      ).to.be.revertedWithPanic(0x11);
+    });
   });
 
   describe("same decimals (18)", () => {
@@ -248,20 +258,95 @@ describe("StablecoinBridge", () => {
     });
   });
 
+  describe("permissioning", () => {
+    it("payoutCredit: anyone can trigger payout for a credited address", async () => {
+      // alice (unrelated to the credit holder) calls payoutCredit on bob's behalf;
+      // the source tokens must land on bob regardless of who paid the gas.
+      const sourceAmount = 100n * 10n ** 6n;
+      const zchfAmount = ethers.parseEther("100");
+
+      await xchf6.mint(owner.address, sourceAmount);
+      await xchf6.approve(bridge6Addr, sourceAmount);
+      await bridge6.mint(sourceAmount);
+      await bridge6.burnAndCredit(bob.address, zchfAmount);
+      expect(await bridge6.credits(bob.address)).to.equal(sourceAmount);
+
+      const tx = bridge6.connect(alice).payoutCredit(bob.address);
+      await expect(tx).to.changeTokenBalance(xchf6, bob, sourceAmount);
+      await expect(tx).to.emit(bridge6, "Payout").withArgs(bob.address, sourceAmount);
+      expect(await bridge6.credits(bob.address)).to.equal(0);
+    });
+  });
+
+  describe("credit accumulation", () => {
+    it("burnAndCredit: should add to existing credit balance", async () => {
+      const sourceAmount = 200n * 10n ** 6n;
+
+      // two separate burnAndCredit calls in source-token base units
+      const firstSource = 70n * 10n ** 6n;
+      const secondSource = 130n * 10n ** 6n;
+      const firstZchf = firstSource * 10n ** 12n;
+      const secondZchf = secondSource * 10n ** 12n;
+
+      await xchf6.mint(owner.address, sourceAmount);
+      await xchf6.approve(bridge6Addr, sourceAmount);
+      await bridge6.mint(sourceAmount);
+
+      const before = await bridge6.credits(bob.address);
+      await bridge6.burnAndCredit(bob.address, firstZchf);
+      await bridge6.burnAndCredit(bob.address, secondZchf);
+      expect(await bridge6.credits(bob.address)).to.equal(before + firstSource + secondSource);
+
+      // payout drains the full accumulated balance in a single call
+      const total = before + firstSource + secondSource;
+      await expect(bridge6.payoutCredit(bob.address))
+        .to.emit(bridge6, "Payout")
+        .withArgs(bob.address, total);
+      expect(await bridge6.credits(bob.address)).to.equal(0);
+    });
+  });
+
+  describe("sub-unit burn (6 -> 18)", () => {
+    it("burn: zchfAmount below decimalMultiplier is a silent no-op", async () => {
+      // Below one source-token unit there is nothing to redeem. The bridge rounds chfAmount
+      // to zero and burns zero ZCHF. Asserting this fixes the behavior so a future change
+      // away from "round down" is caught explicitly.
+      const subUnit = 10n ** 12n - 1n;
+      const mintedBefore = await bridge6.minted();
+      const tx = bridge6.burn(subUnit);
+      await expect(tx).to.changeTokenBalance(zchf, owner, 0);
+      await expect(tx).to.changeTokenBalance(xchf6, owner, 0);
+      expect(await bridge6.minted()).to.equal(mintedBefore);
+    });
+
+    it("burnAndCredit: sub-unit amount adds nothing to the credit", async () => {
+      const subUnit = 10n ** 12n - 1n;
+      const before = await bridge6.credits(alice.address);
+      const mintedBefore = await bridge6.minted();
+      await bridge6.burnAndCredit(alice.address, subUnit);
+      expect(await bridge6.credits(alice.address)).to.equal(before);
+      expect(await bridge6.minted()).to.equal(mintedBefore);
+    });
+  });
+
   describe("limit enforcement", () => {
-    it("should revert when minting exceeds limit", async () => {
+    it("should revert with (zchfAmount, limit) when minting exceeds limit", async () => {
       const overLimit = LIMIT + 1n;
       const sourceAmount6 = overLimit / 10n ** 12n + 1n; // enough to exceed in 6 decimals
+      const zchfAmount = sourceAmount6 * 10n ** 12n;
       await xchf6.mint(owner.address, sourceAmount6);
       await xchf6.approve(bridge6Addr, sourceAmount6);
-      await expect(bridge6.mint(sourceAmount6)).to.be.revertedWithCustomError(
-        bridge6,
-        "Limit"
-      );
+      await expect(bridge6.mint(sourceAmount6))
+        .to.be.revertedWithCustomError(bridge6, "Limit")
+        .withArgs(zchfAmount, LIMIT);
     });
   });
 
   describe("expiration", () => {
+    // After this block all subsequent tests run with the clock advanced past horizon.
+    // Tests that need a fresh bridge (see "minted accounting") deploy after this point
+    // and get a new horizon relative to the advanced timestamp.
+
     it("should revert minting after horizon", async () => {
       await evm_increaseTime(53 * 7 * 24 * 60 * 60); // 53 weeks
       const amount = 100n * 10n ** 6n;
@@ -271,6 +356,40 @@ describe("StablecoinBridge", () => {
         bridge6,
         "Expired"
       );
+    });
+
+    // The horizon is intentionally one-sided: redemptions of already-minted ZCHF must
+    // remain possible after expiration so holders are never trapped.
+    it("burn: should still work after horizon", async () => {
+      const zchfAmount = ethers.parseEther("10");
+      const expectedChf = 10n * 10n ** 6n;
+      const tx = bridge6.burn(zchfAmount);
+      await expect(tx).to.changeTokenBalance(zchf, owner, -zchfAmount);
+      await expect(tx).to.changeTokenBalance(xchf6, owner, expectedChf);
+    });
+
+    it("burnAndSend: should still work after horizon", async () => {
+      const zchfAmount = ethers.parseEther("5");
+      const expectedChf = 5n * 10n ** 6n;
+      const tx = bridge6.burnAndSend(alice.address, zchfAmount);
+      await expect(tx).to.changeTokenBalance(zchf, owner, -zchfAmount);
+      await expect(tx).to.changeTokenBalance(xchf6, alice, expectedChf);
+    });
+
+    it("burnAndCredit: should still work after horizon", async () => {
+      const zchfAmount = ethers.parseEther("3");
+      const expectedChf = 3n * 10n ** 6n;
+      const before = await bridge6.credits(alice.address);
+      await bridge6.burnAndCredit(alice.address, zchfAmount);
+      expect(await bridge6.credits(alice.address)).to.equal(before + expectedChf);
+    });
+
+    it("payoutCredit: should still work after horizon", async () => {
+      const credited = await bridge6.credits(alice.address);
+      expect(credited).to.be.greaterThan(0n);
+      const tx = bridge6.payoutCredit(alice.address);
+      await expect(tx).to.changeTokenBalance(xchf6, alice, credited);
+      expect(await bridge6.credits(alice.address)).to.equal(0);
     });
   });
 

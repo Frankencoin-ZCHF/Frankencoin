@@ -39,7 +39,6 @@ contract StablecoinBridge {
 
     error Limit(uint256 amount, uint256 limit);
     error Expired(uint256 time, uint256 expiration);
-    error UnsupportedToken(address token);
 
     /**
      * Construct the swap bridge.
