@@ -41,6 +41,8 @@ export const ADDRESS: ChainAddressMap = {
     xchfToken: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
     stablecoinBridgeVCHF: "0x3b71ba73299f925a837836160c3e1fec74340403",
     vchfToken: "0x79d4f0232A66c4c91b89c76362016A1707CFBF4f",
+    stablecoinBridgeCHFAU: "0x3e445ff4ddDf0ff8aE7458c9746eD80bD664F6C1",
+    chfauToken: "0xBD4DfC058eb95b8De5ceAF39966A1a70F5556F78",
 
     // multi chain support
     transferReference: "0xf98c221661F51578f5E5236B189a493E2a8a1916",
