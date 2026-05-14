@@ -4,17 +4,15 @@ pragma solidity ^0.8.0;
 
 import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
-import "./MainnetGovernance.sol";
+import "../IGovernance.sol";
 import "../IEquity.sol";
-import "./GovernanceFactory.sol";
-import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
 /**
  * @title FPS2
- * 
+ *
  * Wraps the Frankencoin Pool Share to alter the governance dynamics of the Frankencoin system. Think of this
  * contract as a "shareholder agreement" for FPS token holders. No one is forced to join, but it makes sense to join.
- *  
+ *
  * The most important features are:
  * - Reduce the veto power threshold from 2% in FPS1 to 1% in FPS2
  * - Increase minter proposal fee to 5000 ZCHF and minimum application period of 90 days
@@ -27,32 +25,20 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
-    MainnetGovernance public immutable MAINNET_GOVERNANCE;
+    IGovernance public immutable MAINNET_GOVERNANCE;
 
     event Wrapped(address who, uint amount);
     event Unwrapped(address who, uint amount);
     event Shot(address target, uint256 votesDestroyed);
-    
+
     error CannotWipeSelf();
     error Binding();
     error NotBinding();
 
-    constructor(
-        GovernanceFactory factory,
-        IFrankencoin zchf_,
-        IGovernance fps1_,
-        ICCIPAdmin ccipAdmin_,
-        ILeadrateProposal borrow,
-        ILeadrateProposal savings,
-        IRouterClient router_,
-        address linkToken_
-    )
-        AccumulatingVotesToken()
-        FPS2MintRedeem(zchf_)
-    {
-        address mintGov = factory.deployMainnet(address(this), zchf_, ccipAdmin_, borrow, savings, router_, linkToken_);
-        fps1_.delegateVoteTo(mintGov);
-        MAINNET_GOVERNANCE = MainnetGovernance(mintGov);
+    constructor(IGovernanceFactory factory, IGovernance fps1Gov, IFrankencoin zchf_) AccumulatingVotesToken() FPS2MintRedeem(zchf_) {
+        (address votes, address helper) = factory.deploy(address(this));
+        fps1Gov.delegateVoteTo(helper);
+        MAINNET_GOVERNANCE = IGovernance(votes);
     }
 
     function name() external pure override returns (string memory) {
@@ -80,7 +66,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
     /**
      * This contract is binding and there is no escape any more once more than half of all votes are controlled by this contract.
-     * 
+     *
      * Note that FPS2 could become "unbinding" again in case a lot of FPS2 are redeemed or FPS1 minted.
      */
     function isBinding() public view returns (bool) {
@@ -90,7 +76,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     /**
      * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
      * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all votes are controlled by this contract.
-     * 
+     *
      * @param target           the FPS1 holder whose votes to destroy
      */
     function shoot(address target) external {
@@ -134,10 +120,13 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         uint256 fps2Supply = totalSupply();
         if (fps1Balance > fps2Supply) {
             // redeem excess FPS from the old equity
-            uint256 proceeds = FPS1.redeem(address(this), fps1Balance - fps2Supply); 
+            uint256 proceeds = FPS1.redeem(address(this), fps1Balance - fps2Supply);
             // return ZCHF to equity contract
             ZCHF.transfer(address(FPS1), proceeds);
         }
     }
+}
 
+interface IGovernanceFactory {
+    function deploy(address fps2mainnet) external returns (address votes, address helper);
 }

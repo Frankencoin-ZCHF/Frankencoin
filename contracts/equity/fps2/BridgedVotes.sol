@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-import "./CCIPGovernance.sol";
 import "../Governance.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
@@ -11,24 +10,10 @@ import {SyncVote, SyncMessage} from "../IGovernance.sol";
 /**
  * @notice Bridged-chain FPS2 governance. Receives FPS2 holder votes from mainnet via CCIP
  * and acts as the IGovernance oracle for FPS2-level qualification checks on the bridged chain.
- *
- * This contract serves a dual role:
- * 1. It extends CCIPGovernance, providing minter suggestion/veto and CCIP admin governance.
- * 2. It extends Governance, storing received FPS2 votes and delegations so that
- *    checkQualified works locally based on bridged data.
- *
- * The FPS2 reference in MinterGovernance points to address(this), so all checkQualified
- * calls resolve to the bridged vote data stored here.
- *
- * For this contract to exercise governance on the bridged Frankencoin, someone must sync
- * the FPS1 voting power of the FPS2 contract (on mainnet) to the BridgedGovernance on
- * this chain, including the delegation to this contract's address. Since this contract
- * should be deployed at the same address as the MainnetFPS2Governance (via a factory),
- * the synced delegation is automatically valid.
  */
-contract BridgedGovernance2 is CCIPGovernance, CCIPReceiver {
+contract BridgedVotes is Governance, CCIPReceiver {
 
-    uint64 public immutable MAINNET_CHAIN_SELECTOR;
+    uint64 public constant MAINNET_CHAIN_SELECTOR = 5009297550715157269;
 
     mapping(address => uint256) private _fps2Votes;
     uint256 private _fps2TotalVotes;
@@ -39,17 +24,8 @@ contract BridgedGovernance2 is CCIPGovernance, CCIPReceiver {
     error InvalidSender();
 
     constructor(
-        address mainnetFPS2_,
-        IFrankencoin zchf_,
-        ICCIPAdmin ccipAdmin_,
-        address router_,
-        uint64 mainnetChainSelector_
-    ) CCIPGovernance(
-        mainnetFPS2_,
-        zchf_,
-        ccipAdmin_
+        address router_
     ) CCIPReceiver(router_) {
-        MAINNET_CHAIN_SELECTOR = mainnetChainSelector_;
     }
 
     // ==================== Governance overrides (bridged FPS2 votes) ====================

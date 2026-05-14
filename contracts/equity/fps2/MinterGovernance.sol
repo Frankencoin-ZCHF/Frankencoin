@@ -2,13 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "../../stablecoin/IFrankencoin.sol";
-import "../Governance.sol";
+import "../IGovernance.sol";
+import "../../minting/IPosition.sol";
+import "./GovernanceModule.sol";
 
 /**
  * @title MinterGovernance
  * @dev Module to govern adding new minting modules to Frankencoin
  */
-abstract contract MinterGovernance is Governance {
+contract MinterGovernance is GovernanceModule {
     
     // --- Constants ---
     uint256 public constant MIN_APPLICATION_FEE = 5000 ether;
@@ -21,7 +23,6 @@ abstract contract MinterGovernance is Governance {
 
     // --- References to other contracts ---
     IFrankencoin public immutable ZCHF;
-    address private immutable MAINNET_FPS2;
     
     event MinterAnnounced(address indexed who, address indexed minter, uint256 timestamp);
     event Rewarded(address indexed caller, uint256 amount, address token);
@@ -34,9 +35,9 @@ abstract contract MinterGovernance is Governance {
      * Instantiate this contract with references to the Frankencoin and FPS2 governance contracts.
      * Caller must make sure that fps2 delegates to this contract, so that qualified FPS2 holders can use the denyMinter function.
      */
-    constructor(IFrankencoin zchf_, address mainnetFPS2Address_) {
+    constructor(IFrankencoin zchf_, IGovernance fps1Gov, IGovernance fps2Gov, address delegate, address helper) GovernanceModule(fps2Gov, helper) {
         ZCHF = zchf_;
-        MAINNET_FPS2 = mainnetFPS2Address_;
+        fps1Gov.delegateVoteTo(delegate);
     }
 
     // ==================== Minter Suggestion & Veto ====================
@@ -90,7 +91,7 @@ abstract contract MinterGovernance is Governance {
     function denyUnannouncedMinter(address minter) external {
         if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();
         uint256 reward = checkReward(minter);
-        ZCHF.denyMinter(minter, fps2AsHelper(), "Minters must be suggested through the FPS2 contract");
+        ZCHF.denyMinter(minter, defaultHelper(), "FPS2");
         ZCHF.transfer(msg.sender, reward); // reward the caller with 10% of the reward pool for helping to enforce the announcement requirement
         emit Rewarded(msg.sender, reward, address(ZCHF));
     }
@@ -100,14 +101,21 @@ abstract contract MinterGovernance is Governance {
      * No reward is paid out in this case. If you want a reward, call denyUnannouncedMinter instead.
      */
     function denyMinter(address minter, address[] calldata helpers, string calldata message) external {
-        checkQualified(msg.sender, helpers);
-        ZCHF.denyMinter(minter, fps2AsHelper(), message);
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        ZCHF.denyMinter(minter, defaultHelper(), message);
     }
 
-    function fps2AsHelper() internal view returns (address[] memory) {
-        address[] memory helper = new address[](1);
-        helper[0] = address(MAINNET_FPS2);
-        return helper;
+    // ==================== Position governance ====================
+
+    /**
+     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders.
+     * @param position  The position contract to deny
+     * @param helpers   FPS2 holders who delegate their votes to the caller
+     * @param message   Reason for the denial
+     */
+    function denyPosition(address position, address[] calldata helpers, string calldata message) external {
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        IPosition(position).deny(defaultHelper(), message);
     }
 
 }

@@ -10,64 +10,59 @@ import {ITokenPool} from "../../bridge/ITokenPool.sol";
 import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol";
 
 /**
- * @notice Base governance contract for FPS2 equity, used on all chains.
- * Provides position denial, CCIP admin governance, and minter suggestion/veto (via MinterGovernance).
- * Veto power requires 1% of the votes. (2% in earlier versions, namely FPS1 governance)
- *
- * Extended by MainnetFPS2Governance (leadrate proposals + vote syncing) on mainnet
- * and BridgedFPS2Governance (vote reception) on bridged chains.
+ * Allows qualified FPS2 holders to participate CCIP governance like qualified FPS1 holders.
  */
-abstract contract CCIPGovernance is MinterGovernance {
+contract CCIPGovernance is GovernanceModule {
 
     ICCIPAdmin public immutable CCIP_ADMIN;
 
-    constructor(address mainnetFPS2_, IFrankencoin zchf_, ICCIPAdmin ccipAdmin_) MinterGovernance(zchf_, mainnetFPS2_) {
+    constructor(IGovernance gov, address mainnetFPS2_, ICCIPAdmin ccipAdmin_) GovernanceModule(gov, mainnetFPS2_) {
         CCIP_ADMIN = ccipAdmin_;
     }
 
     // ==================== CCIPAdmin governance ====================
 
     function ccipProposeRemotePoolUpdate(ICCIPAdmin.RemotePoolUpdate memory update, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeRemotePoolUpdate(update, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeRemotePoolUpdate(update, defaultHelper());
     }
 
     function ccipProposeRemoveChain(uint64 chainId, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeRemoveChain(chainId, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeRemoveChain(chainId, defaultHelper());
     }
 
     function ccipProposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeAddChain(config, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeAddChain(config, defaultHelper());
     }
 
     function ccipProposeAdminTransfer(address newAdmin, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.proposeAdminTransfer(newAdmin, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.proposeAdminTransfer(newAdmin, defaultHelper());
     }
 
     function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.applyRateLimit(chain, outbound, inbound, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.applyRateLimit(chain, outbound, inbound, defaultHelper());
     }
 
     function ccipApplyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        address[] memory asHelper = fps2AsHelper();
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        address[] memory asHelper = defaultHelper();
         for (uint256 i = 0; i < chains.length; i++) {
             CCIP_ADMIN.applyRateLimit(chains[i], outbound, inbound, asHelper);
         }
     }
 
     function ccipDenyProposal(bytes32 hash, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        CCIP_ADMIN.deny(hash, fps2AsHelper());
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        CCIP_ADMIN.deny(hash, defaultHelper());
     }
 
     function ccipDenyProposal(bytes32[] calldata hashes, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        address[] memory asHelper = fps2AsHelper();
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        address[] memory asHelper = defaultHelper();
         for (uint256 i = 0; i < hashes.length; i++) {
             CCIP_ADMIN.deny(hashes[i], asHelper);
         }

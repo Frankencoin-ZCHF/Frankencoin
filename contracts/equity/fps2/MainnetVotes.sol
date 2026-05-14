@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./CCIPGovernance.sol";
+import "../Governance.sol";
 import {CCIPSender} from "../../bridge/CCIPSender.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
@@ -14,29 +14,21 @@ interface IFPS2Votes {
 }
 
 /**
- * @notice Mainnet-only FPS2 governance. Adds leadrate proposals and CCIP vote syncing
- * to push FPS2 holder votes to bridged chains.
+ * Mainnet FPS2 vote registry and CCIP sender to sync votes and delegates to other chains.
  */
-contract MainnetGovernance is CCIPGovernance, CCIPSender {
+contract MainnetVotes is Governance, CCIPSender {
 
     IFPS2Votes public immutable VOTES;
-    ILeadrateProposal public immutable BORROWING_LEADRATE;
-    ILeadrateProposal public immutable SAVINGS_LEADRATE;
+
+    address private constant LINK_TOKEN = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
 
     event FPS2VotesSynced(uint64 indexed chain, address receiver, address[] syncedVoters);
 
     constructor(
         address fps2_,
-        IFrankencoin zchf_,
-        ICCIPAdmin ccipAdmin_,
-        ILeadrateProposal borrowingLeadrate_,
-        ILeadrateProposal savingsLeadrate_,
-        IRouterClient router_,
-        address linkToken_
-    ) CCIPGovernance(fps2_, zchf_, ccipAdmin_) CCIPSender(router_, linkToken_) {
+        IRouterClient router_
+    ) CCIPSender(router_, LINK_TOKEN) {
         VOTES = IFPS2Votes(fps2_);
-        BORROWING_LEADRATE = borrowingLeadrate_;
-        SAVINGS_LEADRATE = savingsLeadrate_;
     }
 
     /**
@@ -52,43 +44,6 @@ contract MainnetGovernance is CCIPGovernance, CCIPSender {
     function totalVotes() public override view returns (uint256) {
         return VOTES.totalVotes();
     }
-
-    // ==================== Position governance ====================
-
-    /**
-     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders.
-     * @param position  The position contract to deny
-     * @param helpers   FPS2 holders who delegate their votes to the caller
-     * @param message   Reason for the denial
-     */
-    function denyPosition(address position, address[] calldata helpers, string calldata message) external {
-        checkQualified(msg.sender, helpers);
-        IPosition(position).deny(fps2AsHelper(), message);
-    }
-
-    // ==================== Leadrate proposals (mainnet only) ====================
-
-    /**
-     * @notice Propose a borrowing rate change on behalf of qualified FPS2 holders.
-     * @param newRatePPM    The proposed new rate in parts per million
-     * @param helpers       FPS2 holders who delegate their votes to the caller
-     */
-    function proposeBorrowingRate(uint24 newRatePPM, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        BORROWING_LEADRATE.proposeChange(newRatePPM, fps2AsHelper());
-    }
-
-    /**
-     * @notice Propose a savings rate change on behalf of qualified FPS2 holders.
-     * @param newRatePPM    The proposed new rate in parts per million
-     * @param helpers       FPS2 holders who delegate their votes to the caller
-     */
-    function proposeSavingsRate(uint24 newRatePPM, address[] calldata helpers) external {
-        checkQualified(msg.sender, helpers);
-        SAVINGS_LEADRATE.proposeChange(newRatePPM, fps2AsHelper());
-    }
-
-    // ==================== FPS2 vote syncing ====================
 
     /**
      * @notice Sync FPS2 holder votes and delegations to a bridged chain.
@@ -129,8 +84,4 @@ contract MainnetGovernance is CCIPGovernance, CCIPSender {
         return SyncMessage(syncVotes, totalVotes());
     }
 
-}
-
-interface ILeadrateProposal {
-    function proposeChange(uint24 newRatePPM_, address[] calldata helpers) external;
 }

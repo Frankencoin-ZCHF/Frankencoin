@@ -10,7 +10,8 @@
       "Bash(npm ls zksync-web3)",
       "Bash(node_modules/.bin/hardhat test test/FPS2Tests.ts)",
       "Bash(npx hardhat test test/FPS2Tests.ts)",
-      "Bash(npx hardhat test test/FPS2Tests.ts --grep \"path independence\")"
+      "Bash(npx hardhat test test/FPS2Tests.ts --grep \"path independence\")",
+      "Bash(ls c:\\\\\\\\Users\\\\\\\\luziu\\\\\\\\Documents\\\\\\\\GitHub\\\\\\\\Frankencoin/artifacts/contracts/equity/fps2/)"
     ]
   }
 }
