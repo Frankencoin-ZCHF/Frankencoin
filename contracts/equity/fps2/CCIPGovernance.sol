@@ -12,7 +12,7 @@ import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Rat
 /**
  * Allows qualified FPS2 holders to participate CCIP governance like qualified FPS1 holders.
  */
-contract CCIPGovernance is GovernanceModule {
+contract CCIPGovernance is GovernanceModule, ICCIPAdmin {
 
     ICCIPAdmin public immutable CCIP_ADMIN;
 

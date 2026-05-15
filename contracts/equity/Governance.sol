@@ -78,7 +78,8 @@ abstract contract Governance is IGovernance {
      */
     function checkQualified(address sender, address[] calldata helpers) public view override {
         uint256 _votes = votesDelegated(sender, helpers);
-        if (_votes * 10000 < QUORUM * totalVotes()) revert NotQualified();
+        // Switching to "<=" with FPS2 from "<" to ensure that no one is qualified when total votes are zero
+        if (_votes * 10000 <= QUORUM * totalVotes()) revert NotQualified();
     }
 
     error NotQualified();
