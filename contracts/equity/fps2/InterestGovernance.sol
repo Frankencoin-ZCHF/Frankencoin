@@ -29,8 +29,7 @@ contract InterestGovernance is GovernanceModule {
      * @param newRatePPM    The proposed new rate in parts per million
      * @param helpers       FPS2 holders who delegate their votes to the caller
      */
-    function proposeBorrowingRate(uint24 newRatePPM, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeBorrowingRate(uint24 newRatePPM, address[] calldata helpers) external onlyQualified(helpers) {
         BORROWING_LEADRATE.proposeChange(newRatePPM, defaultHelper());
     }
 
@@ -39,8 +38,7 @@ contract InterestGovernance is GovernanceModule {
      * @param newRatePPM    The proposed new rate in parts per million
      * @param helpers       FPS2 holders who delegate their votes to the caller
      */
-    function proposeSavingsRate(uint24 newRatePPM, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeSavingsRate(uint24 newRatePPM, address[] calldata helpers) external onlyQualified(helpers) {
         SAVINGS_LEADRATE.proposeChange(newRatePPM, defaultHelper());
     }
 

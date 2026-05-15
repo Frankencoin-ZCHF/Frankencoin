@@ -22,46 +22,38 @@ contract CCIPGovernance is GovernanceModule {
 
     // ==================== CCIPAdmin governance ====================
 
-    function ccipProposeRemotePoolUpdate(ICCIPAdmin.RemotePoolUpdate memory update, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeRemotePoolUpdate(ICCIPAdmin.RemotePoolUpdate memory update, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.proposeRemotePoolUpdate(update, defaultHelper());
     }
 
-    function ccipProposeRemoveChain(uint64 chainId, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeRemoveChain(uint64 chainId, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.proposeRemoveChain(chainId, defaultHelper());
     }
 
-    function ccipProposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.proposeAddChain(config, defaultHelper());
     }
 
-    function ccipProposeAdminTransfer(address newAdmin, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function proposeAdminTransfer(address newAdmin, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.proposeAdminTransfer(newAdmin, defaultHelper());
     }
 
-    function ccipApplyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.applyRateLimit(chain, outbound, inbound, defaultHelper());
     }
 
-    function ccipApplyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function applyRateLimit(uint64[] calldata chains, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external onlyQualified(helpers) {
         address[] memory asHelper = defaultHelper();
         for (uint256 i = 0; i < chains.length; i++) {
             CCIP_ADMIN.applyRateLimit(chains[i], outbound, inbound, asHelper);
         }
     }
 
-    function ccipDenyProposal(bytes32 hash, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function deny(bytes32 hash, address[] calldata helpers) external onlyQualified(helpers) {
         CCIP_ADMIN.deny(hash, defaultHelper());
     }
 
-    function ccipDenyProposal(bytes32[] calldata hashes, address[] calldata helpers) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function deny(bytes32[] calldata hashes, address[] calldata helpers) external onlyQualified(helpers) {
         address[] memory asHelper = defaultHelper();
         for (uint256 i = 0; i < hashes.length; i++) {
             CCIP_ADMIN.deny(hashes[i], asHelper);

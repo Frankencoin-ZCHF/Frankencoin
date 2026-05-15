@@ -100,8 +100,7 @@ contract MinterGovernance is GovernanceModule {
      * Allows qualified FPS2 holders to deny a minter, regardless of whether it was announced or not.
      * No reward is paid out in this case. If you want a reward, call denyUnannouncedMinter instead.
      */
-    function denyMinter(address minter, address[] calldata helpers, string calldata message) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function denyMinter(address minter, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
         ZCHF.denyMinter(minter, defaultHelper(), message);
     }
 
@@ -113,8 +112,7 @@ contract MinterGovernance is GovernanceModule {
      * @param helpers   FPS2 holders who delegate their votes to the caller
      * @param message   Reason for the denial
      */
-    function denyPosition(address position, address[] calldata helpers, string calldata message) external {
-        GOVERNANCE.checkQualified(msg.sender, helpers);
+    function denyPosition(address position, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
         IPosition(position).deny(defaultHelper(), message);
     }
 

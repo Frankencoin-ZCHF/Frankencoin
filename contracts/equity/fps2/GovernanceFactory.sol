@@ -19,7 +19,7 @@ import "./InterestGovernance.sol";
  * 1. Deploy GovernanceFactory on mainnet
  * 2. Deploy FPS2 on mainnet, this automatically also deploys the governance contracts
  * 3. Deploy GovernanceFactory on all bridged chains and call deploy(fps2mainnet)
- * 4. Push FPS1 votes and delegations from mainnet to all bridged chains using GovernanceSender.syncVotes.
+ * 4. Push FPS1 votes and delegations from mainnet to all bridged chains using GovernanceSender.pushVotes.
  *    The following voters must be pushed:
  *     - Mainnet FPS2 address
  *     - Mainnet InterestGovernance address
@@ -33,7 +33,7 @@ contract GovernanceFactory {
 
     error InnerFactoryDeploymentFailed();
 
-    function deploy(address fps2mainnet) external returns (address governance) {
+    function deploy(address fps2mainnet) external returns (address votes, address helper) {
         address inner = innerFactoryAddress();
         if (inner.code.length == 0) {
             (bool ok, ) = ARACHNID_DEPLOYER.call(abi.encodePacked(INNER_SALT, type(InnerFactory).creationCode));
@@ -67,8 +67,18 @@ contract InnerFactory {
     IFrankencoin public constant L2_FRANKENCOIN = IFrankencoin(0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553);
     ITokenPoolStub public constant TOKEN_POOL = ITokenPoolStub(0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743);
 
+    IGovernance public governance;
+    
+    error AlreadyDeployed();
+
     function deploy(address fps2mainnet) external returns (address votes, address helper) {
-        IGovernance governance = createGovernance(fps2mainnet);
+        /**
+         * We must only allow for one-time use. Without this guard, an attacker could call deploy(attackeraddress)
+         * on L2 chains to gain eternal veto power through the baked-in delegations in the FPS2 constructor.
+         */
+        if (governance != IGovernance(address(0))) revert AlreadyDeployed();
+        
+        governance = createGovernance(fps2mainnet);
         if (block.chainid == 1) {
             CCIPGovernance ccipGov = new CCIPGovernance(governance, fps2mainnet, MAINNET_TOKEN_POOL.owner());
             MinterGovernance minterGov = new MinterGovernance(MAINNET_ZCHF, MAINNET_FPS1, governance, address(ccipGov), fps2mainnet);
