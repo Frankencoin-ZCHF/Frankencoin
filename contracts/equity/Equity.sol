@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "./Governance.sol";
 import "../stablecoin/Frankencoin.sol";
 import "../utils/MathUtil.sol";
-import "../erc20/IERC677Receiver.sol";
 
 /**
  * @title Equity

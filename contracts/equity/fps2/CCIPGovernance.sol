@@ -9,6 +9,21 @@ import "../../minting/IPosition.sol";
 import {ITokenPool} from "../../bridge/ITokenPool.sol";
 import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol";
 
+
+interface ICCIPAdmin {
+    struct RemotePoolUpdate {
+        bool add;
+        uint64 chain;
+        bytes poolAddress;
+    }
+    function proposeRemotePoolUpdate(RemotePoolUpdate memory update, address[] calldata helpers) external;
+    function proposeRemoveChain(uint64 chainId, address[] calldata helpers) external;
+    function proposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external;
+    function proposeAdminTransfer(address newAdmin, address[] calldata helpers) external;
+    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external;
+    function deny(bytes32 hash, address[] calldata helpers) external;
+}
+
 /**
  * Allows qualified FPS2 holders to participate CCIP governance like qualified FPS1 holders.
  */
@@ -60,18 +75,4 @@ contract CCIPGovernance is GovernanceModule, ICCIPAdmin {
         }
     }
 
-}
-
-interface ICCIPAdmin {
-    struct RemotePoolUpdate {
-        bool add;
-        uint64 chain;
-        bytes poolAddress;
-    }
-    function proposeRemotePoolUpdate(RemotePoolUpdate memory update, address[] calldata helpers) external;
-    function proposeRemoveChain(uint64 chainId, address[] calldata helpers) external;
-    function proposeAddChain(ITokenPool.ChainUpdate calldata config, address[] calldata helpers) external;
-    function proposeAdminTransfer(address newAdmin, address[] calldata helpers) external;
-    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external;
-    function deny(bytes32 hash, address[] calldata helpers) external;
 }

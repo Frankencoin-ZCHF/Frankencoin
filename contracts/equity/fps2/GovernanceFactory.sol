@@ -24,7 +24,8 @@ import "./InterestGovernance.sol";
  *     - Mainnet FPS2 address
  *     - Mainnet InterestGovernance address
  *     - Mainnet MinterGovernance address
- * 5. Later: push FPS1 votes to all bridged chains once FPS1 has reached veto power
+ * 5. Later, anyone: push FPS1 votes to all bridged chains once FPS2 has reached veto power in FPS1
+ * 6. Later, users: push FPS2 votes to all bridged chains in order to make use of FPS2 veto power
  */
 contract GovernanceFactory {
 
@@ -59,12 +60,13 @@ contract GovernanceFactory {
 contract InnerFactory {
 
     IFrankencoin public constant MAINNET_ZCHF = IFrankencoin(0xB58E61C3098d85632Df34EecfB899A1Ed80921cB);
-    IGovernance public constant MAINNET_FPS1 = IGovernance(0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2);
+    IGovernance public constant MAINNET_FPS1_VOTES = IGovernance(0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2);
     ILeadrateProposal public constant MAINNET_BORROWING_LEADRATE = ILeadrateProposal(0x3BF301B0e2003E75A3e86AB82bD1EFF6A9dFB2aE);
     ILeadrateProposal public constant MAINNET_SAVINGS_LEADRATE = ILeadrateProposal(0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38);
     ITokenPoolStub public constant MAINNET_TOKEN_POOL = ITokenPoolStub(0x9359cd75549DaE00Cdd8D22297BC9B13FbBe4B79);
     
     IFrankencoin public constant L2_FRANKENCOIN = IFrankencoin(0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553);
+    IGovernance public constant L2_FPS1_VOTES = IGovernance(0x4fF458f3Aa2c5cd970891909d72CF029939313ab);
     ITokenPoolStub public constant TOKEN_POOL = ITokenPoolStub(0x7CBac118B3F299f8BE1C3DBA66368D96B37D7743);
 
     IGovernance public governance;
@@ -81,11 +83,12 @@ contract InnerFactory {
         governance = createGovernance(fps2mainnet);
         if (block.chainid == 1) {
             CCIPGovernance ccipGov = new CCIPGovernance(governance, fps2mainnet, MAINNET_TOKEN_POOL.owner());
-            MinterGovernance minterGov = new MinterGovernance(MAINNET_ZCHF, MAINNET_FPS1, governance, address(ccipGov), fps2mainnet);
-            InterestGovernance interestGov = new InterestGovernance(MAINNET_FPS1, governance, fps2mainnet, MAINNET_BORROWING_LEADRATE, MAINNET_SAVINGS_LEADRATE, address(minterGov));
+            MinterGovernance minterGov = new MinterGovernance(MAINNET_ZCHF, MAINNET_FPS1_VOTES, governance, address(ccipGov), fps2mainnet);
+            InterestGovernance interestGov = new InterestGovernance(MAINNET_FPS1_VOTES, governance, fps2mainnet, MAINNET_BORROWING_LEADRATE, MAINNET_SAVINGS_LEADRATE, address(minterGov));
             return (address(governance), address(interestGov));
         } else {
             CCIPGovernance ccipGov = new CCIPGovernance(governance, fps2mainnet, TOKEN_POOL.owner());
+            MinterGovernance minterGov = new MinterGovernance(L2_FRANKENCOIN, L2_FPS1_VOTES, governance, address(ccipGov), fps2mainnet);
             return (address(governance), address(0));
         }
     }

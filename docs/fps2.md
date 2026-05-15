@@ -2,19 +2,34 @@
 
 FPS2 wraps the existing Frankencoin Pool Share (FPS1) to form a "shareholder agreement" among participating holders. No one is forced to join, but doing so grants access to improved governance mechanics and a revised redemption mechanism designed to prevent a "bank-run" in case of a large anticipated loss. FPS2 follows the ERC-4626 tokenized vault standard, making it compatible with wallets and DeFi integrations that support it.
 
+## Contracts
+
+| Contract | Description | Notable Dependencies |
+|---|---|---|
+| `FPS2` | Frankencoin Pool Shares II. Wraps FPS1 with revised governance and redemption mechanics. | `AccumulatingVotesToken`, `FPS2MintRedeem` |
+| `AccumulatingVotesToken` | Extends ERC20 with a time-based vote accumulation logic, mostly copied from Equity | `ERC20` |
+| `FPS2MintRedeem` | Logic to wrap FPS1 into FPS2, mint FPS2 from ZCHF, and redeem FPS2 into ZCHF with temporary price declines on large sales to discourage 'bank runs'. | `ERC20`, `IERC4626`, `Equity` (FPS1) |
+| `GovernanceFactory` | Only used during first time deployment. | `MainnetVotes`, `BridgedVotes`, `CCIPGovernance`, `MinterGovernance`, `InterestGovernance` |
+| `MainnetVotes` | Delegation logic and qualification check for FPS2 on mainnet. Also contains CCIP sync functions to L2s. | `Governance`, `CCIPSender`, `FPS2` |
+| `BridgedVotes` | Delegation logic and qualification check for FPS2 on L2s. Also contains CCIP reception functions. | `Governance`, `CCIPReceiver` |
+| `GovernanceModule` | Base module to enable FPS2 holders to perform legacy (FPS1) governance actions. | `MainnetVotes` / `BridgedVotes`  |
+| `CCIPGovernance` | Lets qualified FPS2 holders exercise CCIP governance. On all chains. | `GovernanceModule`, `CCIPAdmin` |
+| `MinterGovernance` | Lets qualified FPS2 holders suggest and veto minters; enforces a new 90-day application period. On all chains. | `GovernanceModule`, `Frankencoin`, `IPosition` |
+| `InterestGovernance` | Lets qualified FPS2 holders adjust FPS1-based interest rates. Mainnet only and synced separately. | `GovernanceModule`, `Savings` |
+
 ## Governance
 
-FPS2 lowers the veto threshold from 2% of all votes (FPS1) to 1%, making it easier for a minority of holders to block harmful minter proposals. Additionally, the minimum minter application fee is raised to 5,000 ZCHF and the minimum application period to 90 days, giving holders more time and raising the cost of frivolous proposals.
+FPS2 lowers the veto threshold from 2% of all votes (FPS1) to 1%, making it easier for a minority of holders to block harmful minter proposals. Additionally, the minimum application period is increased to 60 days, giving ZCHF holders more time to react to proposals they disagree with and enforcing more stability.
 
 ### Vote Accumulation
 
-Votes grow linearly with both the number of FPS2 held and the time they have been held. Specifically, an address holding *n* FPS2 for *t* seconds accumulates *n* &times; *t* votes. This rewards long-term commitment: a holder who has been in the system for a year has far more governance weight than someone who just arrived with the same number of shares.
+Like previously with FPS1, votes grow linearly with both the number of FPS2 held and the time they have been held. Specifically, an address holding *n* FPS2 for *t* seconds accumulates *n* &times; *t* votes. This rewards long-term commitment: a holder who has been in the system for a year has far more governance weight than someone who just arrived with the same number of shares.
 
-Votes can be delegated. But unlike in other protocols, Frankencoin delegations are additive: delegating your votes to someone does not reduce your own voting power, it simply allows the delegate to use your votes when exercising a veto. Delegation chains are supported (A delegates to B, B delegates to C -- C can use all three). Each address is only counted once, such that delegation cycles do not lead to infinite votes.
+Like previously with FPS1, votes can be delegated in a non-rivalrous way. Unlike in other protocols, Frankencoin delegations are not subtractive: delegating your votes to someone does not reduce your own voting power, it simply allows the delegate to use your votes when casting a veto. Delegation chains are supported (A delegates to B, B delegates to C -- C can use all three). Each address is only counted once, such that delegation cycles do not lead to infinite votes.
 
-To prevent lost or inactive addresses from accumulating votes indefinitely, anyone can cap a holder's effective holding duration at one year. This ensures that no address gains unbounded governance power simply by being forgotten.
+To prevent lost or inactive addresses from accumulating votes indefinitely, anyone can cap a holder's effective holding duration at one year. This ensures that no forgotten address gains unbounded governance power.
 
-FPS2 includes an `attack` function that allows a holder to sacrifice their own votes in order to destroy an equal number of votes belonging to other addresses. This is a defensive mechanism: if a hostile party accumulates votes, other holders can coordinate to neutralize the threat at a cost to themselves.
+Like FPS1, FPS2 includes an `attack` function that allows a holder to sacrifice their own votes in order to destroy an equal number of votes belonging to other addresses. This is a defensive mechanism: if a hostile party accumulates votes, other holders can altruistically coordinate to neutralize the threat at a cost to themselves.
 
 ### Veto Rights
 
@@ -28,12 +43,12 @@ FPS2 governance extends the existing veto-based cross-chain model (see [ccg.md](
 
 ![FPS2 governance overview](./fps2governance.png)
 
-The bridged governance module for FPS2 (BridgedGovernance2.sol) has very similar functions than the mainnet governance of FPS2 (MainnetGovernance.sol). It has the same CCIP governance functions and the same minter governance to force new minter proposals through the longer application period. It differs with regard to position denying logic (there is no MintungHub on bridged chains) and interest rate governance as interest rates are synced using dedicated interest rate synchronization functions.
+The items "Bridged Governance 2" and "Mainnet Governance 2" actually consist of multiple smart contract that act in concert. The MainnetVotes and the BridgedVotes contracts keep the vote count including delegations and have functions for cross-chain synchronization. The CCIPGovernance, MinterGovernance and InterestGovernance contract allow FPS2 holders to exercise governance functions designed for FPS1 holders
 
 Before votes can be used on other chains, two pre-conditions must be fulfilled:
 
 1. The FPS1 votes of the FPS2 contract must be synchronized to the target chain using the GovernanceSender.pushVotes function.
-2. The FPS2 votes of the user must be synchronized to the target chain using the MainnetGovernance.pushFPS2Votes function.
+2. The FPS2 votes of the user must be synchronized to the target chain using the MainnetVotes.pushFPS2Votes function.
 
 Step 1 typically only need to be done once per target chain. Step 2 typically needs to be done once per user that wants to use their votes. From time to time, both might need to be refreshed.
 

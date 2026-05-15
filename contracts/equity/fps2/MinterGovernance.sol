@@ -13,10 +13,10 @@ import "./GovernanceModule.sol";
 contract MinterGovernance is GovernanceModule {
     
     // --- Constants ---
-    uint256 public constant MIN_APPLICATION_FEE = 5000 ether;
+    uint256 public constant MIN_APPLICATION_FEE = 1000 ether;
 
     // --- Constants ---
-    uint256 public constant MIN_APPLICATION_PERIOD = 90 days;
+    uint256 public constant MIN_APPLICATION_PERIOD = 60 days;
     
     // --- Announcement tracking for minters ---
     mapping(address minter => uint256 timestamp) public announcements;
@@ -107,7 +107,7 @@ contract MinterGovernance is GovernanceModule {
     // ==================== Position governance ====================
 
     /**
-     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders.
+     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders. In practice only relevant on mainnet.
      * @param position  The position contract to deny
      * @param helpers   FPS2 holders who delegate their votes to the caller
      * @param message   Reason for the denial

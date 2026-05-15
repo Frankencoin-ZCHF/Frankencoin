@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../erc20/IERC20.sol";
-import "../erc20/IERC677Receiver.sol";
 import "../stablecoin/IFrankencoin.sol";
 
 /**
