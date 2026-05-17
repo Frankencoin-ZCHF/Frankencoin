@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "./ICCIPAdmin.sol";
 import {IGovernance} from "../equity/IGovernance.sol";
 import {ITokenPool} from "./ITokenPool.sol";
 import {TokenAdminRegistry} from "@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol";
@@ -19,12 +20,7 @@ import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/src/v0.8/ccip
  * For example, any qualified users can at any time adjust the rate limit of the bridge. But the other, less time-critical
  * functions are exercised in two steps, a proposal and a delayed actual execution if no veto has been cast in the meantime.
  */
-contract CCIPAdmin {
-    struct RemotePoolUpdate {
-        bool add; // true if adding, false if removing
-        uint64 chain;
-        bytes poolAddress;
-    }
+contract CCIPAdmin is ICCIPAdmin {
 
     uint64 public constant DAY = 24 * 60 * 60;
 

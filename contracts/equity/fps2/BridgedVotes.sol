@@ -23,9 +23,7 @@ contract BridgedVotes is Governance, CCIPReceiver {
     error InvalidSourceChain();
     error InvalidSender();
 
-    constructor(
-        address router_
-    ) CCIPReceiver(router_) {
+    constructor(address router_) CCIPReceiver(router_) {
     }
 
     // ==================== Governance overrides (bridged FPS2 votes) ====================

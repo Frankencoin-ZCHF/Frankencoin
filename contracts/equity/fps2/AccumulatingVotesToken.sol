@@ -93,6 +93,8 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
     /**
      * Allows a holder to sacrifice their own votes to destroy the votes of targets.
      * The caller's votes are reduced first, then used as a budget to reduce targets' votes.
+     * 
+     * This function is previously called "kamikaze" in FPS1 / Equity.
      */
     function attack(address[] calldata targets, uint256 votesToDestroy) external {
         uint256 budget = _reduceVotes(msg.sender, votesToDestroy);
