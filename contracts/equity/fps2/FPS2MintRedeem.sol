@@ -9,21 +9,26 @@ import "../../erc20/ERC20.sol";
 import "../../erc20/IERC4626.sol";
 
 /**
- * @title FPS2MintRedeem
- * @notice ERC-4626 tokenized vault around Frankencoin Pool Shares (FPS).
- * Users deposit ZCHF, which is invested into FPS via Equity. Redemptions apply a discount
- * based on a 4th-power curve that increases with recent redemption volume.
- * The spread (undiscounted portion) is returned to the Equity contract.
+ * Equips the FPS2 token with minting and redemption functionality that is compatible with the ERC-4626 standard.
+ * 
+ * While FPS2 wraps FPS1 tokens, minting and redemption is done directly in ZCHF, making this effectively a ZCHF vault token.
+ * 
+ * To discourage large-scale redemptions, the redemption price drops fast on redemptions, leading to a potentially large spread.
+ * 
+ * This spread is closed linearly over the course of a week. For large redemptions, it is recommended to spread the redemptions into
+ * tranches that are executed over a longer period of time.
  */
 abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
+     // How long it takes for the price to fully recover (linearly) after a redemption
     uint256 public constant RECOVERY_PERIOD = 7 days;
 
     IEquity public immutable FPS1;
     IFrankencoin public immutable ZCHF;
 
-    // --- Spread mechanism (tracks net redemption volume in FPS shares) ---
+    // The time-weighted amount that was recently redeemed
     uint192 public recentlyRedeemed;
+    // The timestamp of the last redemption and the time recentlyRedeemed was last recalculated.
     uint64 public redemptionAnchor;
 
     constructor(IFrankencoin zchf_) {
@@ -38,20 +43,31 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return address(ZCHF);
     }
 
+    /**
+     * Total assets that can potentially be redeemed over time, disregarding the redemption discount.
+     */
     function totalAssets() public view returns (uint256) {
-        return FPS1.calculateProceeds(totalSupply());
+        return FPS1.calculateProceeds(FPS1.balanceOf(address(this)));
     }
 
+    /**
+     * The value of the given amount of shares based on the marginal issuance price, without slippage.
+     */
     function convertToShares(uint256 assets) public view returns (uint256) {
         return _divD18(assets, ask());
     }
 
+    /**
+     * The price of the given amount of assets based on the marginal redemption price, without slippage.
+     */
     function convertToAssets(uint256 shares) public view returns (uint256) {
         return _mulD18(shares, bid());
     }
 
     /**
-     * @notice The investment price of one FPS2 in ZCHF, equal to the underlying FPS price.
+     * The marginal price when buying FPS2 with ZCHF.
+     * 
+     * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
     function ask() public view returns (uint256) {
         return FPS1.price();
@@ -59,6 +75,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * @notice The marginal redemption price of one FPS2 in ZCHF, reflecting the current discount.
+     * 
+     * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
     function bid() public view returns (uint256) {
         uint256 recent = weightedRecentRedemptions();
@@ -67,24 +85,30 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     // ==================== Deposit & Mint ====================
 
+    /**
+     * There is no limit for how much can be deposited.
+     */
     function maxDeposit(address) public pure returns (uint256) {
         return type(uint256).max;
     }
 
+    /**
+     * Exact amount that an investor gets from depositing ZCHF, including fees and slippage.
+     */
     function previewDeposit(uint256 assets) public view returns (uint256) {
         return FPS1.calculateShares(assets);
     }
 
     /**
-     * @notice Deposit ZCHF and receive FPS2 shares. The ZCHF is invested into Equity (FPS1)
-     * at the unaltered price.
+     * Deposit ZCHF and receive FPS2 shares. In the background, FPS1 are bought and wrapped.
      */
     function deposit(uint256 assets, address receiver) public returns (uint256 shares) {
         return _deposit(receiver, assets);
     }
 
     /**
-     * @notice Deposit ZCHF to receive FPS2 tokens with slippage protection.
+     * Deposit ZCHF to receive FPS2 tokens with frontrunning protection.
+     * 
      * @param amount          ZCHF to invest
      * @param expectedShares  Minimum FPS2 shares expected
      * @return The number of FPS2 shares minted
@@ -104,6 +128,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return shares;
     }
 
+    /**
+     * There is no hard limit for the number of FPS2.
+     */
     function maxMint(address) public pure returns (uint256) {
         return type(uint256).max;
     }

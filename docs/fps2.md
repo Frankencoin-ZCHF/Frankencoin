@@ -43,7 +43,7 @@ FPS2 governance extends the existing veto-based cross-chain model (see [ccg.md](
 
 ![FPS2 governance overview](./fps2governance.png)
 
-The items "Bridged Governance 2" and "Mainnet Governance 2" actually consist of multiple smart contract that act in concert. The MainnetVotes and the BridgedVotes contracts keep the vote count including delegations and have functions for cross-chain synchronization. The CCIPGovernance, MinterGovernance and InterestGovernance contract allow FPS2 holders to exercise governance functions designed for FPS1 holders
+The editable original of this diagram can be found [here](https://docs.google.com/presentation/d/16biuIMfSLLX5Yli9H3nk3dFmIiiX62zwsQaWhXInR1M/edit?usp=sharing). The MainnetVotes and the BridgedVotes contracts keep the vote count including delegations and have functions for cross-chain synchronization. The CCIPGovernance, MinterGovernance and InterestGovernance contract allow FPS2 holders to exercise governance functions designed for FPS1 holders
 
 Before votes can be used on other chains, two pre-conditions must be fulfilled:
 
@@ -92,11 +92,9 @@ In practice, this means:
 
 Consider 10,000 FPS2 in circulation backed by 4,000,000 ZCHF in equity (FPS price: 1,200 ZCHF). An imminent loss of 1,000,000 ZCHF is about to hit the protocol. Without the FPS2 mechanism, rational holders would race to redeem before the loss materializes.
 
-**Without FPS2 (plain FPS1):** The cubic pricing curve in FPS1 means early redeemers extract disproportionate value. In equilibrium, nearly all holders redeem (9,900 out of 10,000), draining essentially all equity. When the 1,000,000 loss hits, the system is insolvent. A 25% loss destroys the entire reserve.
+**Without FPS2 (plain FPS1):** The cubic pricing curve in FPS1 means early redeemers extract disproportionate value. In equilibrium, nearly all holders redeem (9,900 out of 10,000), draining essentially all equity. Because after the first million was withdrawn from the contract, the loss is still imminent and it still makes sense to sell even more. Once the 1,000,000 loss hits, the system is insolvent. The only escape is a sufficent number of FPS holders that believe in the long term value of the project and that agree to hold on to their FPS despite the imminent loss in order to save the system.
 
-**With FPS2 (4th-power discount):** The discount ramps up with each redemption, making it progressively less attractive to exit. In equilibrium, only about 900 holders redeem (9%), extracting 838,000 ZCHF at an average price of 931 ZCHF per share. The remaining 9,100 holders absorb the 1,000,000 loss with 2,162,000 ZCHF of equity left, resulting in a post-loss price of 713 ZCHF. This is 21% below the fair post-loss price of 900, but the system remains solvent and functional.
-
-The discount mechanism converts a destructive bank run into a self-limiting process: early sellers get a reasonable price, but each redemption makes the next one less attractive until holding becomes the rational choice.
+**With FPS2 (4th-power discount):** The discount ramps up with each redemption, making it progressively less attractive to exit. In equilibrium, only about 900 holders redeem (9%), extracting 838,000 ZCHF at an average price of 931 ZCHF per share. The remaining 9,100 holders absorb the 1,000,000 loss with 2,162,000 ZCHF of equity left, resulting in a post-loss price of 713 ZCHF. The discount mechanism converts a destructive bank run into a self-limiting process: early sellers still can get out at a high price, but each redemption makes the next one less attractive until holding becomes the rational choice.
 
 ## Relation to FPS1
 
@@ -109,5 +107,3 @@ FPS2 becomes **binding** when the contract controls more than 50% of all FPS1 vo
 - Holders can still redeem FPS2 for ZCHF at any time (subject to the discount), but they cannot extract the underlying FPS1 tokens.
 
 FPS2 can become unbinding again if enough FPS2 are redeemed or enough new FPS1 are minted outside the contract, pushing the vote share below 50%.
-
-In a critical scenario where equity falls very low, qualified FPS2 holders (1% of votes with delegation) can trigger a cap table restructuring that burns the shares of specified FPS1 and FPS2 holders. This is an emergency mechanism of last resort.
