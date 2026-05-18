@@ -34,7 +34,7 @@ contract GovernanceFactory {
 
     error InnerFactoryDeploymentFailed();
 
-    function deploy(address fps2mainnet) external returns (address votes, address helper) {
+    function deploy(address fps2mainnet) external returns (address helper) {
         address inner = innerFactoryAddress();
         if (inner.code.length == 0) {
             (bool ok, ) = ARACHNID_DEPLOYER.call(abi.encodePacked(INNER_SALT, type(InnerFactory).creationCode));
@@ -73,7 +73,7 @@ contract InnerFactory {
     
     error AlreadyDeployed();
 
-    function deploy(address fps2mainnet) external returns (address votes, address helper) {
+    function deploy(address fps2mainnet) external returns (address helper) {
         /**
          * We must only allow for one-time use. Without this guard, an attacker could call deploy(attackeraddress)
          * on L2 chains to gain eternal veto power through the baked-in delegations in the FPS2 constructor.
@@ -85,11 +85,11 @@ contract InnerFactory {
             CCIPGovernance ccipGov = new CCIPGovernance(governance, fps2mainnet, MAINNET_TOKEN_POOL.owner());
             MinterGovernance minterGov = new MinterGovernance(MAINNET_ZCHF, MAINNET_FPS1_VOTES, governance, address(ccipGov), fps2mainnet);
             InterestGovernance interestGov = new InterestGovernance(MAINNET_FPS1_VOTES, governance, fps2mainnet, MAINNET_BORROWING_LEADRATE, MAINNET_SAVINGS_LEADRATE, address(minterGov));
-            return (address(governance), address(interestGov));
+            return address(interestGov);
         } else {
             CCIPGovernance ccipGov = new CCIPGovernance(governance, fps2mainnet, TOKEN_POOL.owner());
             MinterGovernance minterGov = new MinterGovernance(L2_FRANKENCOIN, L2_FPS1_VOTES, governance, address(ccipGov), fps2mainnet);
-            return (address(governance), address(0));
+            return address(0);
         }
     }
 

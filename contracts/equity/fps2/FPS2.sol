@@ -11,21 +11,18 @@ import "../IEquity.sol";
  * @title FPS2
  *
  * Wraps the Frankencoin Pool Share to alter the governance dynamics of the Frankencoin system. Think of this
- * contract as a "shareholder agreement" for FPS token holders. No one is forced to join, but it makes sense to join.
+ * contract as a "shareholder agreement" for FPS token holders.
  *
  * The most important features are:
  * - Reduce the veto power threshold from 2% in FPS1 to 1% in FPS2
- * - Increase minter proposal fee to 5000 ZCHF and minimum application period of 90 days
+ * - Increase minter application period of 60 days
  * - Minting and redemption following the ERC 4626 standard
- * - No more waiting period for redemption, but potentially very low redemption prices
- * - Redemption limit (about 20% of capital per month) to prevent equity holders from exiting first in a crisis
+ * - No more waiting period for redemption, but potentially very low redemption prices when too many FPS2 are redeemed within a short time
  * - Ability to prevent FPS1 holders from participating in governance or redeeming their FPS by "shooting" them
  *
  * The FPS2 contract is "binding" as long as more than 50% of all votes are controlled by this contract.
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
-
-    IGovernance public immutable MAINNET_GOVERNANCE;
 
     event Wrapped(address who, uint amount);
     event Unwrapped(address who, uint amount);
@@ -38,11 +35,10 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     constructor(IGovernanceFactory factory, IGovernance fps1Gov, IFrankencoin zchf_) AccumulatingVotesToken() FPS2MintRedeem(zchf_) {
         (address votes, address helper) = factory.deploy(address(this));
         fps1Gov.delegateVoteTo(helper);
-        MAINNET_GOVERNANCE = IGovernance(votes);
     }
 
     function name() external pure override returns (string memory) {
-        return "Frankencoin Pool Share 2";
+        return "Frankencoin Pool Shares 2";
     }
 
     function symbol() external pure override returns (string memory) {
@@ -76,6 +72,8 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     /**
      * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
      * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all votes are controlled by this contract.
+     * 
+     * This can be used to effectively force FPS1 holders into FPS2.
      *
      * @param target           the FPS1 holder whose votes to destroy
      */
@@ -99,32 +97,11 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    /**
-     * @notice Restructure the cap table of the old Equity contract when equity is critically low.
-     * Wraps Equity.restructureCapTable, which checks qualification against the old Equity contract.
-     * @param helpers              FPS2 holders who delegate their votes to the caller
-     * @param fps1HoldersToWipe    Addresses whose FPS1 will be burned on the old Equity contract
-     * @param fps2HoldersToWipe    Addresses whose FPS2 will be burned on this contract
-     */
-    function restructureCapTable(address[] calldata helpers, address[] calldata fps1HoldersToWipe, address[] calldata fps2HoldersToWipe) external {
-        MAINNET_GOVERNANCE.checkQualified(msg.sender, helpers);
-        for (uint256 i = 0; i < fps1HoldersToWipe.length; i++) {
-            if (fps1HoldersToWipe[i] == address(this)) revert CannotWipeSelf();
-        }
-        FPS1.restructureCapTable(new address[](0), fps1HoldersToWipe);
-        for (uint256 i = 0; i < fps2HoldersToWipe.length; i++) {
-            address current = fps2HoldersToWipe[i];
-            _burn(current, balanceOf(current));
-        }
-        uint256 fps1Balance = FPS1.balanceOf(address(this));
-        uint256 fps2Supply = totalSupply();
-        if (fps1Balance > fps2Supply) {
-            // redeem excess FPS from the old equity
-            uint256 proceeds = FPS1.redeem(address(this), fps1Balance - fps2Supply);
-            // return ZCHF to equity contract
-            ZCHF.transfer(address(FPS1), proceeds);
-        }
-    }
+    // Note
+    // Earlier versions had a "restructureCaptable" function here like the one in FPS1.
+    // However, in such a catastrophic scenario, it is unclear whether we would still want to have FPS2 and
+    // not better restart with FPS1 and a completely new setup.
+
 }
 
 interface IGovernanceFactory {
