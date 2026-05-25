@@ -264,6 +264,9 @@ contract MintingHubV2 {
     /**
      * @notice Calculates the current Dutch auction price.
      * @dev Starts at the full price at time 'start' and linearly goes to 0 as 'phase2' passes.
+     * 
+     * Note that this function assumes collaterals with not too high precision. This is capped at 24 decimals in openPosition.
+     * 
      */
     function _calculatePrice(uint40 start, uint40 phase2, uint256 liqPrice) internal view returns (uint256) {
         uint40 timeNow = uint40(block.timestamp);
