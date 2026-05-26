@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 import { ADDRESS } from "../exports/address.config";
 import { mainnet } from "viem/chains";
 
@@ -6,12 +6,10 @@ import { mainnet } from "viem/chains";
 // See: https://github.com/Arachnid/deterministic-deployment-proxy
 const ARACHNID_FACTORY = "0x4e59b44847b379578588920cA78FbF26c0B4956C";
 
-const ARACHNID_ABI = [
-  "function deploy(bytes32 salt, bytes memory initCode) external payable returns (address)",
-];
-
 // Change this string only on breaking upgrades to get a fresh address.
 const SALT = ethers.id("TransferWithAuthorization-v1");
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -54,12 +52,12 @@ async function main() {
   if (existingCode !== "0x") {
     console.log("Already deployed — skipping deploy step.");
   } else {
-    const arachnid = new ethers.Contract(
-      ARACHNID_FACTORY,
-      ARACHNID_ABI,
-      deployer
-    );
-    const tx = await arachnid.deploy(SALT, initCode);
+    // The Arachnid factory is raw assembly — no function selector.
+    // Calldata layout: [salt (32 bytes)][initcode]
+    const tx = await deployer.sendTransaction({
+      to: ARACHNID_FACTORY,
+      data: ethers.concat([SALT, initCode]),
+    });
     await tx.wait();
     console.log("Deployed in tx:", tx.hash);
 
@@ -67,6 +65,9 @@ async function main() {
     if (deployedCode === "0x")
       throw new Error("Deployment failed — no code at predicted address.");
     console.log("Deployed to:", predicted);
+
+    console.log("Waiting 30s for RPC propagation...");
+    await sleep(30_000);
   }
 
   // ── 3. initialize if not yet done ─────────────────────────────────────────
@@ -85,11 +86,8 @@ async function main() {
     console.log("Initialized with asset:", asset);
   }
 
-  console.log(
-    `\nVerify with:\nnpx hardhat verify --network ${
-      process.env.HARDHAT_NETWORK ?? "mainnet"
-    } ${predicted}`
-  );
+  console.log("Waiting 30s for Etherscan to index the contract...");
+  await sleep(30_000);
 }
 
 main().catch((error) => {
