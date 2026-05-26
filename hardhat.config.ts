@@ -156,18 +156,20 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      // @ts-ignore
-      mainnet: etherscan,
+      mainnet:   etherscan!,
+      polygon:   etherscan!,
+      arbitrum:  etherscan!,
+      optimism:  etherscan!,
+      base:      etherscan!,
+      avalanche: etherscan!,
     },
     customChains: [
-      {
-        network: "mainnet",
-        chainId: 1,
-        urls: {
-          apiURL: "https://api.etherscan.io/v2/api?chainid=1",
-          browserURL: "https://etherscan.io",
-        },
-      },
+      { network: "mainnet",   chainId: 1,     urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=1",     browserURL: "https://etherscan.io" } },
+      { network: "polygon",   chainId: 137,   urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=137",   browserURL: "https://polygonscan.com" } },
+      { network: "arbitrum",  chainId: 42161, urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=42161", browserURL: "https://arbiscan.io" } },
+      { network: "optimism",  chainId: 10,    urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=10",    browserURL: "https://optimistic.etherscan.io" } },
+      { network: "base",      chainId: 8453,  urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=8453",  browserURL: "https://basescan.org" } },
+      { network: "avalanche", chainId: 43114, urls: { apiURL: "https://api.etherscan.io/v2/api?chainid=43114", browserURL: "https://snowtrace.io" } },
     ],
   },
   sourcify: {
