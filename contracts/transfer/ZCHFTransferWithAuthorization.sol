@@ -30,8 +30,7 @@ contract ZCHFTransferWithAuthorization {
     // keccak256("CancelAuthorization(address authorizer,bytes32 nonce)")
     bytes32 public constant CANCEL_AUTHORIZATION_TYPEHASH = 0x158b0a9edf7a828aad02f63cd515c68ef2f50ba807396f6d12842833a1597429;
 
-    // authorizer => nonce => consumed
-    // EIP-3009 uses random 32-byte nonces (not sequential) to allow concurrent authorizations.
+    /// @notice Returns the state of an authorization
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
     event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
@@ -59,17 +58,16 @@ contract ZCHFTransferWithAuthorization {
             );
     }
 
-    /**
-     * @notice Execute a transfer on behalf of the authorizer.
-     * @dev Any caller may submit a valid authorization. When calling from a smart contract,
-     *      prefer receiveWithAuthorization to prevent front-running.
-     * @param from      Token owner and signer of the authorization.
-     * @param to        Recipient of the transfer.
-     * @param value     Amount of ZCHF to transfer.
-     * @param validAfter  Unix timestamp before which the authorization is not yet valid.
-     * @param validBefore Unix timestamp at or after which the authorization expires.
-     * @param nonce     Randomly generated 32-byte value unique to this authorization.
-     */
+    /// @notice Execute a transfer with a signed authorization
+    /// @param from         Payer's address (Authorizer)
+    /// @param to           Payee's address
+    /// @param value        Amount to be transferred
+    /// @param validAfter   The time after which this is valid (unix time)
+    /// @param validBefore  The time before which this is valid (unix time)
+    /// @param nonce        Unique nonce
+    /// @param v            v of the signature
+    /// @param r            r of the signature
+    /// @param s            s of the signature
     function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external {
         _requireValidAuthorization(from, nonce, validAfter, validBefore);
         _requireValidSignature(from, keccak256(abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)), v, r, s);
@@ -78,9 +76,19 @@ contract ZCHFTransferWithAuthorization {
     }
 
     /**
-     * @notice Execute a transfer restricted to msg.sender == to.
-     * @dev Use this variant when the recipient is a smart contract. The caller restriction
-     *      prevents a front-runner from extracting the signature and redirecting it.
+     * @notice Receive a transfer with a signed authorization from the payer
+     * @dev This has an additional check to ensure that the payee's address matches
+     * the caller of this function to prevent front-running attacks. (See security
+     * considerations)
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function receiveWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external {
         if (msg.sender != to) revert CallerMustBePayee();
@@ -90,9 +98,12 @@ contract ZCHFTransferWithAuthorization {
         token.transferFrom(from, to, value);
     }
 
-    /**
-     * @notice Cancel an unused authorization. Only the authorizer can cancel their own nonce.
-     */
+    /// @notice Attempt to cancel an authorization
+    /// @param authorizer   Authorizer's address
+    /// @param nonce        Nonce of the authorization
+    /// @param v            v of the signature
+    /// @param r            r of the signature
+    /// @param s            s of the signature
     function cancelAuthorization(address authorizer, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external {
         if (authorizationState[authorizer][nonce]) revert AuthorizationAlreadyUsed();
         _requireValidSignature(authorizer, keccak256(abi.encode(CANCEL_AUTHORIZATION_TYPEHASH, authorizer, nonce)), v, r, s);
