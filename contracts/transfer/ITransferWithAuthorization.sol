@@ -42,7 +42,9 @@ interface ITransferWithAuthorization {
     // Read-only
     // -------------------------------------------------------------------------
 
-    function token() external view returns (IERC20);
+    function asset() external view returns (IERC20);
+
+    function balanceOf(address account) external view returns (uint256);
 
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 

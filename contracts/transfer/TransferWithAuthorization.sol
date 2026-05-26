@@ -19,7 +19,7 @@ import {ITransferWithAuthorization, IERC20} from "./ITransferWithAuthorization.s
  *   5. Once ZCHF.isMinter(address(this)) == true, the contract is live.
  */
 contract TransferWithAuthorization is ITransferWithAuthorization {
-    IERC20 public immutable token;
+    IERC20 public immutable asset;
 
     // Hashed at construction time so DOMAIN_SEPARATOR() avoids a string copy + external call on every verification.
     bytes32 private immutable _hashedName;
@@ -37,9 +37,9 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
     /// @notice Returns the state of an authorization
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
-    constructor(IERC20 _token) {
-        token = _token;
-        _hashedName = keccak256(bytes(_token.name()));
+    constructor(IERC20 _asset) {
+        asset = _asset;
+        _hashedName = keccak256(bytes(_asset.name()));
         _hashedVersion = keccak256(bytes("1"));
     }
 
@@ -57,6 +57,10 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
             );
     }
 
+    function balanceOf(address account) external view returns (uint256) {
+        return asset.balanceOf(account);
+    }
+
     /// @notice Execute a transfer with a signed authorization
     /// @param from         Payer's address (Authorizer)
     /// @param to           Payee's address
@@ -71,7 +75,7 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
         _requireValidAuthorization(from, nonce, validAfter, validBefore);
         _requireValidSignature(from, keccak256(abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)), v, r, s);
         _markUsed(from, nonce);
-        token.transferFrom(from, to, value);
+        asset.transferFrom(from, to, value);
     }
 
     /**
@@ -94,7 +98,7 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
         _requireValidAuthorization(from, nonce, validAfter, validBefore);
         _requireValidSignature(from, keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce)), v, r, s);
         _markUsed(from, nonce);
-        token.transferFrom(from, to, value);
+        asset.transferFrom(from, to, value);
     }
 
     /// @notice Attempt to cancel an authorization
