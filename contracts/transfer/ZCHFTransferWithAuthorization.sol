@@ -21,6 +21,10 @@ import "../stablecoin/IFrankencoin.sol";
 contract ZCHFTransferWithAuthorization {
     IFrankencoin public immutable token;
 
+    // Hashed at construction time so DOMAIN_SEPARATOR() avoids a string copy + external call on every verification.
+    bytes32 private immutable _hashedName;
+    bytes32 private immutable _hashedVersion;
+
     // keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
     bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267;
 
@@ -44,14 +48,18 @@ contract ZCHFTransferWithAuthorization {
 
     constructor(IFrankencoin _token) {
         token = _token;
+        _hashedName = keccak256(bytes(_token.name()));
+        _hashedVersion = keccak256(bytes("1"));
     }
 
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
         return
             keccak256(
                 abi.encode(
-                    //keccak256("EIP712Domain(uint256 chainId,address verifyingContract)");
-                    bytes32(0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218),
+                    //keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+                    bytes32(0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f),
+                    _hashedName,
+                    _hashedVersion,
                     block.chainid,
                     address(this)
                 )
