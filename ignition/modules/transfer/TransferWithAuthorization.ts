@@ -5,8 +5,8 @@ import { Address } from "viem";
 import { base } from "viem/chains";
 
 // config and select
-export const NAME: string = "ZCHFTransferWithAuthorization";
-export const FILE: string = "ZCHFTransferWithAuthorization";
+export const NAME: string = "TransferWithAuthorization";
+export const FILE: string = "TransferWithAuthorization";
 export const MOD: string = NAME + "Module";
 console.log(NAME);
 

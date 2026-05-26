@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../stablecoin/IFrankencoin.sol";
+import {ITransferWithAuthorization, IERC20} from "./ITransferWithAuthorization.sol";
 
 /**
- * @title ZCHFTransferWithAuthorization
+ * @title TransferWithAuthorization
  * @notice EIP-3009 sidecar for the Frankencoin (ZCHF) stablecoin.
  *
  * Approved minters on the Frankencoin contract hold an implicit infinite allowance over
@@ -18,8 +18,8 @@ import "../stablecoin/IFrankencoin.sol";
  *   4. Wait out the application period with no qualified veto from FPS holders.
  *   5. Once ZCHF.isMinter(address(this)) == true, the contract is live.
  */
-contract ZCHFTransferWithAuthorization {
-    IFrankencoin public immutable token;
+contract TransferWithAuthorization is ITransferWithAuthorization {
+    IERC20 public immutable token;
 
     // Hashed at construction time so DOMAIN_SEPARATOR() avoids a string copy + external call on every verification.
     bytes32 private immutable _hashedName;
@@ -37,16 +37,7 @@ contract ZCHFTransferWithAuthorization {
     /// @notice Returns the state of an authorization
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
-    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
-    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
-
-    error AuthorizationNotYetValid();
-    error AuthorizationExpired();
-    error AuthorizationAlreadyUsed();
-    error InvalidSignature();
-    error CallerMustBePayee();
-
-    constructor(IFrankencoin _token) {
+    constructor(IERC20 _token) {
         token = _token;
         _hashedName = keccak256(bytes(_token.name()));
         _hashedVersion = keccak256(bytes("1"));
