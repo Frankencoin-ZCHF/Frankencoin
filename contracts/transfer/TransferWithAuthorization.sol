@@ -12,18 +12,18 @@ import {ITransferWithAuthorization, IERC20} from "./ITransferWithAuthorization.s
  * any holder who signs a valid EIP-3009 authorization — no on-chain approve() required.
  *
  * Deployment steps:
- *   1. Deploy this contract with the ZCHF address.
- *   2. Ensure the deployer holds at least ZCHF.MIN_FEE() in ZCHF (suggestMinter debits it from msg.sender).
- *   3. Call ZCHF.suggestMinter(address(this), ZCHF.MIN_APPLICATION_PERIOD(), ZCHF.MIN_FEE(), "EIP-3009 sidecar").
- *   4. Wait out the application period with no qualified veto from FPS holders.
- *   5. Once ZCHF.isMinter(address(this)) == true, the contract is live.
+ *   1. Deploy this contract via the Arachnid CREATE2 factory (no constructor args — identical bytecode = identical address on every chain).
+ *   2. Call initialize(asset) with the chain-specific ZCHF/bridged-token address.
+ *   3. Ensure the caller holds at least ZCHF.MIN_FEE() in ZCHF (suggestMinter debits it from msg.sender).
+ *   4. Call ZCHF.suggestMinter(address(this), ZCHF.MIN_APPLICATION_PERIOD(), ZCHF.MIN_FEE(), "EIP-3009 sidecar").
+ *   5. Wait out the application period with no qualified veto from FPS holders.
+ *   6. Once ZCHF.isMinter(address(this)) == true, the contract is live.
  */
 contract TransferWithAuthorization is ITransferWithAuthorization {
-    IERC20 public immutable asset;
+    IERC20 public asset;
 
-    // Hashed at construction time so DOMAIN_SEPARATOR() avoids a string copy + external call on every verification.
-    bytes32 private immutable _hashedName;
-    bytes32 private immutable _hashedVersion;
+    bytes32 private _hashedName;
+    bytes32 private _hashedVersion;
 
     // keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)")
     bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267;
@@ -37,7 +37,8 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
     /// @notice Returns the state of an authorization
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
-    constructor(IERC20 _asset) {
+    function initialize(IERC20 _asset) external {
+        if (address(asset) != address(0)) revert AlreadyInitialized();
         asset = _asset;
         _hashedName = keccak256(bytes(_asset.name()));
         _hashedVersion = keccak256(bytes("1"));

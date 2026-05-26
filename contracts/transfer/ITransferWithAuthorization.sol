@@ -19,6 +19,7 @@ interface ITransferWithAuthorization {
     // Errors
     // -------------------------------------------------------------------------
 
+    error AlreadyInitialized();
     error AuthorizationNotYetValid();
     error AuthorizationExpired();
     error AuthorizationAlreadyUsed();
@@ -41,6 +42,8 @@ interface ITransferWithAuthorization {
     // -------------------------------------------------------------------------
     // Read-only
     // -------------------------------------------------------------------------
+
+    function initialize(IERC20 _asset) external;
 
     function asset() external view returns (IERC20);
 
