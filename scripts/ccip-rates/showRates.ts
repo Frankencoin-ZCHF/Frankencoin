@@ -85,7 +85,7 @@ function fmtLimit(isEnabled: boolean, capacity: bigint, rate: bigint): string {
   if (!isEnabled) return "bypassed";
   const cap = Number(formatUnits(capacity, 18)).toLocaleString("en-US", { maximumFractionDigits: 0 });
   const rph = Number(formatUnits(rate * 3600n, 18)).toLocaleString("en-US", { maximumFractionDigits: 0 });
-  return `${cap} ZCHF cap / ${rph} per h`;
+  return `${cap} ZCHF cap | ${rph} per h`;
 }
 
 function chainName(chainId: number): string {

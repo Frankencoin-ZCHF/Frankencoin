@@ -7,14 +7,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -25,14 +25,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -43,14 +43,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "13888888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "1388888888888888888"
     }
   },
   {
@@ -61,14 +61,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -79,14 +79,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -97,14 +97,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -115,14 +115,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -133,14 +133,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -151,14 +151,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -169,14 +169,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
     }
   },
   {
@@ -187,14 +187,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -205,14 +205,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -223,14 +223,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -241,14 +241,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -259,14 +259,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -277,14 +277,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -295,14 +295,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "27777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     }
   },
   {
@@ -313,14 +313,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     }
   },
   {
@@ -331,14 +331,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -349,14 +349,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -367,14 +367,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -390,9 +390,9 @@
       "rate": "1388888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "13888888888888888888"
     }
   },
   {
@@ -408,9 +408,9 @@
       "rate": "1388888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     }
   },
   {
@@ -426,9 +426,9 @@
       "rate": "2777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "27777777777777777777"
     }
   },
   {
@@ -444,9 +444,9 @@
       "rate": "2777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "27777777777777777777"
     }
   },
   {
@@ -462,9 +462,9 @@
       "rate": "1388888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     }
   },
   {
@@ -480,9 +480,9 @@
       "rate": "1388888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "13888888888888888888"
     }
   },
   {
@@ -498,9 +498,9 @@
       "rate": "1388888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     }
   },
   {
@@ -511,14 +511,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -529,14 +529,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -547,14 +547,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     }
   },
   {
@@ -565,14 +565,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "27777777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
     }
   },
   {
@@ -583,14 +583,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -601,14 +601,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -619,14 +619,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -637,14 +637,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -655,14 +655,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -673,14 +673,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -691,14 +691,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
     }
   },
   {
@@ -709,14 +709,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -727,14 +727,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -745,14 +745,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -763,14 +763,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -781,14 +781,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -799,14 +799,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -817,14 +817,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "13888888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "1388888888888888888"
     }
   },
   {
@@ -835,14 +835,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -853,14 +853,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -871,14 +871,14 @@
     "destinationChainId": 146,
     "destinationSelector": "1673871237479749969",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -889,14 +889,14 @@
     "destinationChainId": 42161,
     "destinationSelector": "4949039107694359620",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -907,14 +907,14 @@
     "destinationChainId": 43114,
     "destinationSelector": "6433500567565415381",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -925,14 +925,14 @@
     "destinationChainId": 8453,
     "destinationSelector": "15971525489660198786",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -943,14 +943,14 @@
     "destinationChainId": 1,
     "destinationSelector": "5009297550715157269",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "13888888888888888888"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
     }
   },
   {
@@ -961,14 +961,14 @@
     "destinationChainId": 100,
     "destinationSelector": "465200170687744372",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -979,14 +979,14 @@
     "destinationChainId": 10,
     "destinationSelector": "3734403246176062136",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   },
   {
@@ -997,14 +997,14 @@
     "destinationChainId": 137,
     "destinationSelector": "4051577828743386545",
     "incoming": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     },
     "outgoing": {
-      "isEnabled": false,
-      "capacity": "0",
-      "rate": "0"
+      "isEnabled": true,
+      "capacity": "1000000000000000000000",
+      "rate": "27777777777777777"
     }
   }
 ]

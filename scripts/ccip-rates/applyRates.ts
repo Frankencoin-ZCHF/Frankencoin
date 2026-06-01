@@ -91,7 +91,7 @@ function fmtConfig(c: RateConfig): string {
   if (!c.isEnabled) return "bypassed";
   const cap = Number(formatUnits(BigInt(c.capacity), 18)).toLocaleString("en-US", { maximumFractionDigits: 0 });
   const rph = Number(formatUnits(BigInt(c.rate) * 3600n, 18)).toLocaleString("en-US", { maximumFractionDigits: 0 });
-  return `${cap} / ${rph}ph`;
+  return `${cap} | ${rph}ph`;
 }
 
 function configsMatch(desired: RateConfig, actual: { isEnabled: boolean; capacity: bigint; rate: bigint }): boolean {
