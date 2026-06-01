@@ -1,0 +1,1010 @@
+[
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Arbitrum One",
+    "sourceChainId": 42161,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Avalanche",
+    "sourceChainId": 43114,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Base",
+    "sourceChainId": 8453,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "1388888888888888888"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "500000000000000000000000",
+      "rate": "2777777777777777777"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "200000000000000000000000",
+      "rate": "1388888888888888888"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Ethereum",
+    "sourceChainId": 1,
+    "ccipAdmin": "0x2527ec458c863073a303CF0a362Bf78aDD5dFEf8",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": true,
+      "capacity": "100000000000000000000000",
+      "rate": "1388888888888888888"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Gnosis",
+    "sourceChainId": 100,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "OP Mainnet",
+    "sourceChainId": 10,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Polygon",
+    "sourceChainId": 137,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Sonic",
+    "destinationChainId": 146,
+    "destinationSelector": "1673871237479749969",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Arbitrum One",
+    "destinationChainId": 42161,
+    "destinationSelector": "4949039107694359620",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Avalanche",
+    "destinationChainId": 43114,
+    "destinationSelector": "6433500567565415381",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Base",
+    "destinationChainId": 8453,
+    "destinationSelector": "15971525489660198786",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Ethereum",
+    "destinationChainId": 1,
+    "destinationSelector": "5009297550715157269",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Gnosis",
+    "destinationChainId": 100,
+    "destinationSelector": "465200170687744372",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "OP Mainnet",
+    "destinationChainId": 10,
+    "destinationSelector": "3734403246176062136",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  },
+  {
+    "source": "Sonic",
+    "sourceChainId": 146,
+    "ccipAdmin": "0xdE4cB79A62fd4036Cadf6D71D23240dc4d7a484E",
+    "destination": "Polygon",
+    "destinationChainId": 137,
+    "destinationSelector": "4051577828743386545",
+    "incoming": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    },
+    "outgoing": {
+      "isEnabled": false,
+      "capacity": "0",
+      "rate": "0"
+    }
+  }
+]
