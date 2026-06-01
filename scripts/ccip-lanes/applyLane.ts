@@ -105,8 +105,8 @@ async function main() {
   }
 
   const filtered = lanes.filter((l) => {
-    if (filterSource && l.chain.toLowerCase()  !== filterSource.toLowerCase()) return false;
-    if (filterDest   && l.remote.toLowerCase() !== filterDest.toLowerCase())   return false;
+    if (filterSource && filterSource.toLowerCase() !== "all" && l.chain.toLowerCase()  !== filterSource.toLowerCase()) return false;
+    if (filterDest   && filterDest.toLowerCase()   !== "all" && l.remote.toLowerCase() !== filterDest.toLowerCase())   return false;
     return true;
   });
 
