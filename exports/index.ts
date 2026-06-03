@@ -51,7 +51,8 @@ export * from "./abis/stablecoin/Frankencoin";
 export * from "./abis/stablecoin/IBasicFrankencoin";
 export * from "./abis/stablecoin/IFrankencoin";
 
-export * from "./abis/swap/StablecoinBridge";
+export * from "./abis/swap/StablecoinBridgeV1";
+export * from "./abis/swap/StablecoinBridgeV2";
 
 export * from "./abis/transfer/ITransferReference";
 export * from "./abis/transfer/TransferReference";

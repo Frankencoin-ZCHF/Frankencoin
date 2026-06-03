@@ -87,6 +87,8 @@ export type ChainAddressMainnet = {
   xchfToken: Address;
   stablecoinBridgeVCHF: Address;
   vchfToken: Address;
+  stablecoinBridgeCHFAU: Address;
+  chfauToken: Address;
 
   // multi chain support
   transferReference: Address; // separate SC for mainnet transfers
