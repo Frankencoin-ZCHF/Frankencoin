@@ -18,7 +18,7 @@ contract Frankencoin is ERC20PermitLight, IFrankencoin {
      * @notice Minimal fee and application period when suggesting a new minter.
      */
     uint256 public constant MIN_FEE = 1000 * (10 ** 18);
-    uint256 public immutable MIN_APPLICATION_PERIOD; // for example 10 days
+    uint256 public immutable MIN_APPLICATION_PERIOD; // deployed with 1209600 (14 days)
 
     /**
      * @notice The contract that holds the reserve.
