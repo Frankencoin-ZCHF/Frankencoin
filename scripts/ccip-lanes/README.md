@@ -1,16 +1,26 @@
 # CCIP Lane Scripts
 
-Three scripts for managing which remote chains are supported by each CCIP token pool.
+Four scripts for managing which remote chains are supported by each CCIP token pool.
+
+## Setup
+
+All scripts must be run from this directory, or extend the command with the correct path to the files:
+
+```bash
+cd scripts/ccip-lanes
+```
+
+---
 
 ## Workflow
 
 ```
-showLanes  ──────────────────────────────────────────→  read on-chain
-applyLane.json  →  applyLane (propose)  →  7-day delay  →  applyAddChain / applyRemoveChain
+showLanes   ──────────────────────────────────────────→  read on-chain
+applyLanes.json  →  applyLanes (propose)  →  7-day delay  →  enactLanes (execute)
 ```
 
 > **Note:** Adding or removing a lane goes through a 7-day governance delay.
-> `applyLane.ts` submits the proposal. Execution is done via the scripts in `scripts/ccip/`.
+> `applyLanes.ts` submits the proposal. `enactLanes.ts` executes it once the delay has passed.
 
 ---
 
@@ -27,51 +37,68 @@ npx ts-node showLanes.ts --export
 
 ---
 
-## `applyLane.json` — Desired lane config
+## `applyLanes.json` — Desired lane config
 
 Contains all 56 chain pairs (8 chains × 7 remotes). Set `active: true` to enable a lane, `false` to disable.
 
 Each entry:
 
-| Field                 | Description                                |
-|-----------------------|--------------------------------------------|
-| `chain`               | Source chain name                          |
-| `chainId`             | Source chain ID                            |
-| `ccipAdmin`           | CCIPAdmin contract on the source chain     |
-| `tokenPool`           | Token pool on the source chain             |
-| `remote`              | Remote chain name                          |
-| `remoteChainSelector` | Remote chain CCIP selector                 |
-| `remotePoolAddress`   | Token pool address on the remote chain     |
-| `remoteTokenAddress`  | ZCHF token address on the remote chain     |
-| `active`              | `true` = lane should exist, `false` = not  |
+| Field                 | Description                               |
+| --------------------- | ----------------------------------------- |
+| `chain`               | Source chain name                         |
+| `chainId`             | Source chain ID                           |
+| `ccipAdmin`           | CCIPAdmin contract on the source chain    |
+| `tokenPool`           | Token pool on the source chain            |
+| `remote`              | Remote chain name                         |
+| `remoteChainSelector` | Remote chain CCIP selector                |
+| `remotePoolAddress`   | Token pool address on the remote chain    |
+| `remoteTokenAddress`  | ZCHF token address on the remote chain    |
+| `active`              | `true` = lane should exist, `false` = not |
 
 ---
 
-## `applyLane.ts` — Submit proposals
+## `applyLanes.ts` — Submit proposals
 
-Reads `applyLane.json`, checks on-chain state, and submits `proposeAddChain` or `proposeRemoveChain` for any lanes that differ.
+Reads `applyLanes.json`, checks on-chain state, and submits `proposeAddChain` or `proposeRemoveChain` for any lanes that differ.
 
 ```bash
 # Dry run — show diff only
-npx ts-node applyLane.ts
+npx ts-node applyLanes.ts
 
 # Filter by source chain
-npx ts-node applyLane.ts Ethereum
+npx ts-node applyLanes.ts Ethereum
 
 # Filter by source and destination
-npx ts-node applyLane.ts Ethereum Base
+npx ts-node applyLanes.ts Ethereum Base
 
 # Submit proposals on-chain
-npx ts-node applyLane.ts --submit
-npx ts-node applyLane.ts Ethereum --submit
+npx ts-node applyLanes.ts --submit
+npx ts-node applyLanes.ts Ethereum --submit
 ```
 
 Requires `PRIVATE_KEY` in `.env`. The caller must be a qualified governance voter.
 Optionally `HELPERS` (comma-separated addresses) for governance qualification.
 
-After 7 days, execute proposals using the existing scripts:
+---
+
+## `enactLanes.ts` — Execute proposals
+
+Fetches pending proposals from the Frankencoin API and executes any that have passed the 7-day delay by calling `applyAddChain` or `applyRemoveChain` on the appropriate CCIPAdmin contract.
 
 ```bash
-npx ts-node ../ccip/applyAddChain.ts    <chain> <ccipAdmin> <remote>
-npx ts-node ../ccip/applyRemoveChain.ts <chain> <ccipAdmin> <remote>
+# Dry run — show all pending proposals
+npx ts-node enactLanes.ts
+
+# Filter to one source chain (dry run)
+npx ts-node enactLanes.ts Ethereum
+
+# Enact all ready proposals
+npx ts-node enactLanes.ts --submit
+
+# Enact only Ethereum proposals
+npx ts-node enactLanes.ts Ethereum --submit
 ```
+
+The table shows each proposal's `Ready` status (✓/✗) and `ETA` (time remaining in the delay). Proposals still inside the delay window are displayed but skipped even with `--submit`.
+
+Requires `PRIVATE_KEY` in `.env`.
