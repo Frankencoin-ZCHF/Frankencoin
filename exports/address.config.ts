@@ -121,6 +121,9 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x6426324Af1b14Df3cd03b2d500529083c5ea61BC",
     ccipRouter: "0x881e3A65B4d4a04dD529061dd0071cf975F58bCD",
+
+    // utils
+    transferWithAuthorization: "0xF0B7Dc6612cC98a964EdBc9546ea4756E649d4d6",
   },
   [avalanche.id]: {
     // identifier

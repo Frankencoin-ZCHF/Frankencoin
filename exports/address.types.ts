@@ -173,6 +173,9 @@ export type ChainAddressBase = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressAvalanche = {
