@@ -155,23 +155,17 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * @notice Binary search for the minimum ZCHF needed to receive at least the given number of FPS shares.
+     * 
+     * Can be slightly off due to approximations when doing the calculation in the other direction.
+     * 
+     * TODO: test accuracy, review calculation method.
      */
     function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
-        if (shares == 0) return 0;
-        uint256 lo = _mulD18(shares, FPS1.price());
-        uint256 hi = lo + lo / 5 + 1;
-        while (FPS1.calculateShares(hi) < shares) {
-            hi *= 2;
-        }
-        while (lo < hi) {
-            uint256 mid = lo + (hi - lo) / 2;
-            if (FPS1.calculateShares(mid) >= shares) {
-                hi = mid;
-            } else {
-                lo = mid + 1;
-            }
-        }
-        return lo;
+        uint256 fps1Supply = FPS1.totalSupply();
+        uint256 growthFactor = 10**18 * (fps1Supply + shares) / fps1Supply;
+        uint256 capitalGrowth = growthFactor * growthFactor / 10**18 * growthFactor / 10**18;
+        uint256 capitalNeeded = ZCHF.equity() * capitalGrowth / 10**18 - ZCHF.equity();
+        return capitalNeeded * 1000 / 997;
     }
     
     function _notifyInvestment(uint256 fpsShares) internal {
@@ -210,6 +204,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return shares;
     }
 
+    error RedemptionLimitExceeded(uint256 limit);
+
     /**
      * @notice Binary search for the minimum FPS2 shares to redeem in order to receive at least the given ZCHF amount.
      */
@@ -218,9 +214,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         uint256 totalSupply = totalSupply();
         uint256 recent = weightedRecentRedemptions();
         uint256 lo = _divD18(assets, FPS1.price());
-        uint256 hi = lo + lo / 5 + 1;
-        while (calculateEffectiveProceeds(totalSupply, recent, hi, FPS1.calculateProceeds(hi)) < assets) {
-            hi *= 2;
+        uint256 hi = totalSupply / 10; // redeem at most 10% of all shares at once
+        if (calculateEffectiveProceeds(totalSupply, recent, hi, FPS1.calculateProceeds(hi)) < assets) {
+            revert RedemptionLimitExceeded(hi);
         }
         while (lo < hi) {
             uint256 mid = lo + (hi - lo) / 2;
