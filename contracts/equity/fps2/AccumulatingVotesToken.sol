@@ -59,6 +59,11 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
         return totalVotesAtAnchor + totalSupply() * (_anchorTime() - totalVotesAnchorTime);
     }
 
+    function averageHoldingDuration() public view returns (uint256) {
+        uint256 supply = totalSupply();
+        return (supply == 0) ? 0 : (totalVotes() / supply) >> TIME_RESOLUTION_BITS;
+    }
+
     function relativeVotes(address holder) external view returns (uint256) {
         return (ONE_DEC18 * votes(holder)) / totalVotes();
     }

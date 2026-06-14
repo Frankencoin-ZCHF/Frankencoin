@@ -28,9 +28,9 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     event Unwrapped(address who, uint amount);
     event Shot(address target, uint256 votesDestroyed);
 
-    error CannotWipeSelf();
     error Binding();
     error NotBinding();
+    error NotFIFO();
 
     constructor(IGovernanceFactory factory, IGovernance fps1Gov, IFrankencoin zchf_) AccumulatingVotesToken() FPS2MintRedeem(zchf_) {
         (address votes, address helper) = factory.deploy(address(this));
@@ -60,6 +60,12 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         emit Wrapped(msg.sender, amount);
     }
 
+    function _redeem(address from, address to, uint256 shares) internal override returns (uint256)  {
+        // Only allow redemptions as long as the contract is binding
+        if (!isBinding()) revert NotBinding();
+        super._redeem(from, to, shares);
+    }
+
     /**
      * This contract is binding and there is no escape any more once more than half of all votes are controlled by this contract.
      *
@@ -71,7 +77,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
     /**
      * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
-     * redeeming their FPS. Can only be called when the contract is binding, i.e. when more than half of all votes are controlled by this contract.
+     * redeeming their FPS. Can only be called when the contract is binding.
      * 
      * This can be used to effectively force FPS1 holders into FPS2.
      *
@@ -86,8 +92,15 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         emit Shot(target, votesToDestroy);
     }
 
+    /**
+     * Unwrap FPS2 into FPS1.
+     * 
+     * This can only be done while not binding and even when FPS is not binding, the
+     * later joiners must wait for the earlier joiners to unwrap first.
+     */
     function unwrap(uint256 amount) external {
         if (isBinding()) revert Binding();
+        if (holdingDuration(msg.sender) >= averageHoldingDuration()) revert NotFIFO();
         _burn(msg.sender, amount);
         FPS1.transfer(msg.sender, amount);
         emit Unwrapped(msg.sender, amount);
