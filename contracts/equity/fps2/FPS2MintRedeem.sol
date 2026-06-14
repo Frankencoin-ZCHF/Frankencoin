@@ -192,8 +192,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return previewRedeem(balanceOf(owner));
     }
 
-    function calculateEffectiveProceeds(uint256 recent, uint256 latest, uint256 proceeds) internal view returns (uint256) {
-        return _mulD18(proceeds, discount(recent, latest));
+    function calculateEffectiveProceeds(uint256 currentSupply, uint256 recent, uint256 latest, uint256 proceeds) internal pure returns (uint256) {
+        return _mulD18(proceeds, discountPure(currentSupply, recent, latest));
     }
 
     function previewWithdraw(uint256 assets) public view returns (uint256) {
@@ -215,15 +215,16 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      */
     function _findSharesForAssets(uint256 assets) internal view returns (uint256) {
         if (assets == 0) return 0;
+        uint256 totalSupply = totalSupply();
         uint256 recent = weightedRecentRedemptions();
         uint256 lo = _divD18(assets, FPS1.price());
         uint256 hi = lo + lo / 5 + 1;
-        while (calculateEffectiveProceeds(recent, hi, FPS1.calculateProceeds(hi)) < assets) {
+        while (calculateEffectiveProceeds(totalSupply, recent, hi, FPS1.calculateProceeds(hi)) < assets) {
             hi *= 2;
         }
         while (lo < hi) {
             uint256 mid = lo + (hi - lo) / 2;
-            if (calculateEffectiveProceeds(recent, mid, FPS1.calculateProceeds(mid)) >= assets) {
+            if (calculateEffectiveProceeds(totalSupply, recent, mid, FPS1.calculateProceeds(mid)) >= assets) {
                 hi = mid;
             } else {
                 lo = mid + 1;
@@ -237,7 +238,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     function previewRedeem(uint256 shares) public view returns (uint256) {
-        return calculateEffectiveProceeds(weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
+        return calculateEffectiveProceeds(totalSupply(), weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
     }
 
     /**
@@ -272,9 +273,10 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         if (msg.sender != from) _useAllowance(from, msg.sender, shares);
 
         uint256 recent = weightedRecentRedemptions();
+        uint256 totalSupply = totalSupply();
         _burn(from, shares);
         uint256 rawProceeds = FPS1.redeem(address(this), shares);
-        uint256 effectiveProceeds = calculateEffectiveProceeds(recent, shares, rawProceeds);
+        uint256 effectiveProceeds = calculateEffectiveProceeds(totalSupply, recent, shares, rawProceeds);
 
         recentlyRedeemed = uint192(recent + shares);
         redemptionAnchor = uint64(block.timestamp);
@@ -296,7 +298,10 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * @return The discount factor with 18 decimals (1e18 = no discount)
      */
     function discount(uint256 recentRedemptions, uint256 plannedRedemption) public view returns (uint256) {
-        uint256 currentSupply = totalSupply();
+        return discountPure(totalSupply(), recentRedemptions, plannedRedemption);
+    }
+
+    function discountPure(uint256 currentSupply, uint256 recentRedemptions, uint256 plannedRedemption) internal pure returns (uint256) {
         uint256 total = currentSupply + recentRedemptions;
         uint256 leftMiddle = currentSupply - plannedRedemption / 2;
         uint256 factor = _divD18(leftMiddle, total);
