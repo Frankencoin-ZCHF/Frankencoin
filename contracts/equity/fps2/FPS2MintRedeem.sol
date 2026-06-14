@@ -113,7 +113,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * @param expectedShares  Minimum FPS2 shares expected
      * @return The number of FPS2 shares minted
      */
-    function deposit(uint256 amount, uint256 expectedShares) external returns (uint256) {
+    function depositExpected(uint256 amount, uint256 expectedShares) external returns (uint256) {
         uint256 shares = _deposit(msg.sender, amount);
         require(shares >= expectedShares);
         return shares;
