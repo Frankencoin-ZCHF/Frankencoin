@@ -13,7 +13,7 @@ import "./GovernanceModule.sol";
 contract MinterGovernance is GovernanceModule {
     
     // --- Constants ---
-    uint256 public constant MIN_APPLICATION_FEE = 1000 ether;
+    uint256 public constant MIN_APPLICATION_FEE = 1200 ether;
 
     // --- Constants ---
     uint256 public constant MIN_APPLICATION_PERIOD = 60 days;
@@ -55,7 +55,7 @@ contract MinterGovernance is GovernanceModule {
 
         // refill the reward pool to contain at least 1000 ZCHF for the MEV bots that will help enforce the application period
         uint256 rewardPoolSize = rewardPool();
-        uint256 rewardPoolRefill = rewardPoolSize >= 1000 ether ? 0 : 1000 ether - rewardPoolSize; 
+        uint256 rewardPoolRefill = rewardPoolSize < 1000 ether ? 200 ether : 0; 
         ZCHF.transferFrom(msg.sender, address(this), _applicationFee);
         ZCHF.suggestMinter(_minter, _applicationPeriod, _applicationFee - rewardPoolRefill, _message);
         announcements[_minter] = block.timestamp;
@@ -115,5 +115,7 @@ contract MinterGovernance is GovernanceModule {
     function denyPosition(address position, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
         IPosition(position).deny(defaultHelper(), message);
     }
+
+    // TODO: enforce longer position approval process for new collateral.
 
 }
