@@ -26,6 +26,9 @@ import "./InterestGovernance.sol";
  *     - Mainnet MinterGovernance address
  * 5. Later, anyone: push FPS1 votes to all bridged chains once FPS2 has reached veto power in FPS1
  * 6. Later, users: push FPS2 votes to all bridged chains in order to make use of FPS2 veto power
+ * 
+ * When deploying Frankencoin on a completely new chain (without FPS1), the new contracts should rely on FPS2
+ * directly, without going through FPS1.
  */
 contract GovernanceFactory {
 

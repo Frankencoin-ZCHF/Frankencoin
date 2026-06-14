@@ -34,7 +34,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     error NotFIFO();
 
     constructor(IGovernanceFactory factory, IGovernance fps1Gov, IFrankencoin zchf_) AccumulatingVotesToken() FPS2MintRedeem(zchf_) {
-        (address votes, address helper) = factory.deploy(address(this));
+        address helper = factory.deploy(address(this));
         fps1Gov.delegateVoteTo(helper);
     }
 
@@ -120,5 +120,5 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 }
 
 interface IGovernanceFactory {
-    function deploy(address fps2mainnet) external returns (address votes, address helper);
+    function deploy(address fps2mainnet) external returns (address helper);
 }
