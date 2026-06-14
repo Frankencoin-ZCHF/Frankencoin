@@ -30,6 +30,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
     error Binding();
     error NotBinding();
+    error SelfShooting();
     error NotFIFO();
 
     constructor(IGovernanceFactory factory, IGovernance fps1Gov, IFrankencoin zchf_) AccumulatingVotesToken() FPS2MintRedeem(zchf_) {
@@ -85,6 +86,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
      */
     function shoot(address target) external {
         if (!isBinding()) revert NotBinding();
+        if (target == address(this)) revert SelfShooting();
         address[] memory targets = new address[](1);
         targets[0] = target;
         uint256 votesToDestroy = FPS1.votes(target);
