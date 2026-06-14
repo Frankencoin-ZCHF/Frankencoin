@@ -105,8 +105,9 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
         uint256 budget = _reduceVotes(msg.sender, votesToDestroy);
         uint256 destroyedVotes = 0;
         for (uint256 i = 0; i < targets.length && destroyedVotes < budget; i++) {
-            destroyedVotes += _reduceVotes(targets[i], budget - destroyedVotes);
-            emit MutualDestruction(msg.sender, targets[i], destroyedVotes);
+            uint256 destroyed = _reduceVotes(targets[i], budget - destroyedVotes);
+            destroyedVotes += destroyed;
+            emit MutualDestruction(msg.sender, targets[i], destroyed);
         }
         require(destroyedVotes > 0);
         setTotalVotes(totalVotes() - destroyedVotes - budget);
