@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "../erc20/IERC20.sol";
 import "../stablecoin/IFrankencoin.sol";
 import "../minting/IPosition.sol";
+import "./ILeadrate.sol";
 
 /**
  * @title Leadrate (attempt at translating the nicely concise German term 'Leitzins')
@@ -13,7 +14,7 @@ import "../minting/IPosition.sol";
  * This is an abstract module that is agnostic about the way the lead rate is updated.
  *
  **/
-abstract contract AbstractLeadrate {
+abstract contract AbstractLeadrate is ILeadrate {
 
     // the following five variables are less than 256 bit so they should be stored
     // in the same slot, making them cheap to access together, right?
