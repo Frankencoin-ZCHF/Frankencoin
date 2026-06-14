@@ -67,12 +67,12 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     }
 
     /**
-     * This contract is binding and there is no escape any more once more than half of all votes are controlled by this contract.
+     * This contract is binding and there is no escape any more once more than 2/3 of all votes are controlled by this contract.
      *
      * Note that FPS2 could become "unbinding" again in case a lot of FPS2 are redeemed or FPS1 minted.
      */
     function isBinding() public view returns (bool) {
-        return FPS1.relativeVotes(address(this)) > 1e18 / 2;
+        return FPS1.relativeVotes(address(this)) * 3 > 2e18;
     }
 
     /**
