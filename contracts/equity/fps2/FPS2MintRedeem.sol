@@ -51,17 +51,24 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * The value of the given amount of shares based on the marginal issuance price, without slippage.
+     * Convert a given monetary amount into shares at the current price.
+     * 
+     * This returns more than what a user would actually get when investing, i.e. what is returned
+     * by previewDeposit.
      */
     function convertToShares(uint256 assets) public view returns (uint256) {
-        return _divD18(assets, ask());
+        return _divD18(assets, FPS1.price());
     }
 
     /**
-     * The price of the given amount of assets based on the marginal redemption price, without slippage.
+     * The price of the given amount of assets based on the current price of the shares.
+     * 
+     * This can be used to calculate the market value of a given number of shares. It must not be confused
+     * with "previewRedeem", which returns a much lower number for significant redemptions due to the
+     * underlying bonding curve and slippage.
      */
     function convertToAssets(uint256 shares) public view returns (uint256) {
-        return _mulD18(shares, bid());
+        return _mulD18(shares, FPS1.price());
     }
 
     /**
@@ -102,8 +109,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     /**
      * Deposit ZCHF and receive FPS2 shares. In the background, FPS1 are bought and wrapped.
      */
-    function deposit(uint256 assets, address receiver) public returns (uint256 shares) {
-        return _deposit(receiver, assets);
+    function deposit(uint256 assets, address recipient) public returns (uint256 shares) {
+        return _deposit(recipient, assets);
     }
 
     /**
@@ -113,8 +120,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * @param expectedShares  Minimum FPS2 shares expected
      * @return The number of FPS2 shares minted
      */
-    function depositExpected(uint256 amount, uint256 expectedShares) external returns (uint256) {
-        uint256 shares = _deposit(msg.sender, amount);
+    function depositExpected(uint256 amount, address recipient, uint256 expectedShares) external returns (uint256) {
+        uint256 shares = _deposit(recipient, amount);
         require(shares >= expectedShares);
         return shares;
     }
