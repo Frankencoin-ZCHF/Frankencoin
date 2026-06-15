@@ -22,7 +22,7 @@ abstract contract AbstractLeadrate is ILeadrate {
     uint24 public currentRatePPM; // 24 bit allows rates of up to 1670% per year
 
     uint40 private anchorTime; // 40 bits for time in seconds spans up to 1000 human generations
-    uint64 private ticksAnchor; // in bips * seconds, uint88 allows up to
+    uint64 private ticksAnchor; // in bips * seconds, leaves 40 bits for the time
 
     event RateChanged(uint24 newRate);
 

@@ -18,7 +18,7 @@ contract BridgedVotes is Governance, CCIPReceiver {
     mapping(address => uint256) private _fps2Votes;
     uint256 private _fps2TotalVotes;
 
-    event FPS2VotesReceived(bytes32 messageId, uint64 sourceChain, uint256 totalVotes, SyncVote[] syncedVotes);
+    event FPS2VotesReceived(bytes32 indexed messageId, uint64 sourceChain, uint256 totalVotes, SyncVote[] syncedVotes);
 
     error InvalidSourceChain();
     error InvalidSender();

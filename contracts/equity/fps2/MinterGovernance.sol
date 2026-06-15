@@ -45,7 +45,7 @@ contract MinterGovernance is GovernanceModule {
     /**
      * @notice Publicly accessible method to suggest a new way of minting Frankencoin.
      *
-     * Wraps the existing functionality in Frankencoin to enforce a 90 days application period.
+     * Wraps the existing functionality in Frankencoin to enforce a 60 days application period.
      * The fee is forwarded to Frankencoin. Minters suggested through this contract are recorded
      * and protected from being vetoed through denyMinter.
      */
@@ -72,7 +72,8 @@ contract MinterGovernance is GovernanceModule {
     /**
      * Check the reward that the caller would receive for denying an unannounced minter.
      * 
-     * @dev To find the candidates for the 'minter' parameter, look for MinterApplied events emitted by the Frankencoin contract after this contract was deploed and whose minter parameter is not this contract's address.
+     * @dev To find the candidates for the 'minter' parameter, look for MinterApplied events emitted by the Frankencoin contract
+     * after this contract was deployed and that is not accompanied by a MinterAnnounced event emited from this contract.
      */
     function checkReward(address minter) public view returns (uint256) {
         if (announcements[minter] != 0) return 0;
@@ -86,7 +87,8 @@ contract MinterGovernance is GovernanceModule {
      * @notice Veto a minter that was not announced through the MinterGovernance after MinterGovernance was deployed.
      * @param minter The minter to veto
      * 
-     * @dev To find the candidates for the 'minter' parameter, look for MinterApplied events emitted by the Frankencoin contract after this contract was deploed and whose minter parameter is not this contract's address.
+          * @dev To find the candidates for the 'minter' parameter, look for MinterApplied events emitted by the Frankencoin contract
+     * after this contract was deployed and that is not accompanied by a MinterAnnounced event emited from this contract.
      */
     function denyUnannouncedMinter(address minter) external {
         if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();

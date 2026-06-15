@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 
 import "./MinterGovernance.sol";
 import "../IGovernance.sol";
-import "../../stablecoin/IFrankencoin.sol";
-import "../../minting/IPosition.sol";
 import "../../bridge/ICCIPAdmin.sol";
 import {ITokenPool} from "../../bridge/ITokenPool.sol";
 import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol";

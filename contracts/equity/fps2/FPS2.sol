@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "./AccumulatingVotesToken.sol";
 import "./FPS2MintRedeem.sol";
 import "../IGovernance.sol";
-import "../IEquity.sol";
 
 /**
  * @title FPS2
@@ -24,9 +23,9 @@ import "../IEquity.sol";
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
-    event Wrapped(address who, uint amount);
-    event Unwrapped(address who, uint amount);
-    event Shot(address target, uint256 votesDestroyed);
+    event Wrapped(address indexed who, uint amount);
+    event Unwrapped(address indexed who, uint amount);
+    event Shot(address indexed target, uint256 votesDestroyed);
 
     error Binding();
     error NotBinding();

@@ -19,10 +19,11 @@ interface IFPS2Votes {
 contract MainnetVotes is Governance, CCIPSender {
 
     IFPS2Votes public immutable VOTES;
+    IGovernance public immutable FPS1;
 
     address private constant LINK_TOKEN = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
 
-    event FPS2VotesSynced(uint64 indexed chain, address receiver, address[] syncedVoters);
+    event FPS2VotesSynced(uint64 chain, address indexed receiver, address[] syncedVoters);
 
     constructor(
         address fps2_,

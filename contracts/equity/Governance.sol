@@ -6,7 +6,6 @@ import "./IGovernance.sol";
 
 /**
  * Contract to consult when checking if someone has veto power.
- * Veto power is reached with 2% of the votes.
  */
 abstract contract Governance is IGovernance {
 
