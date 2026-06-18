@@ -117,8 +117,8 @@ Please provide **the final commit hash** that includes all modifications made an
   - [ ] Risk Accepted
   - [ ] No Issue
   - [ ] Other:
-- **Description of changes**: I agree that "convertToAssets" should probably be based on the raw underlying price. However, "totalAssets" should probably not overstate the amount of Frankencoins that are in the equity pool.
-- **Commit hash (if applicable)**:
+- **Description of changes**: I agree that "convertToAssets" should probably be based on the raw underlying price. However, "totalAssets" should probably not overstate the amount of Frankencoins that are in the equity pool. Replaced binary search for mint operation with explicit calculation that slightly overshoots to guarantee the desired amount.
+- **Commit hash (if applicable)**: 6b84ed425e0634c7d23d55faca6ab966d8c70655
 
 ---
 
