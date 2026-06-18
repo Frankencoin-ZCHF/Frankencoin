@@ -84,7 +84,7 @@ contract MinterGovernance is GovernanceModule {
     }
 
     /**
-     * @notice Veto a minter that was not announced through the MinterGovernance after MinterGovernance was deployed.
+     * @notice Veto a minter that was not announced through the MinterGovernance
      * @param minter The minter to veto
      * 
           * @dev To find the candidates for the 'minter' parameter, look for MinterApplied events emitted by the Frankencoin contract

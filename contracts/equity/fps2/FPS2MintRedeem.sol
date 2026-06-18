@@ -31,6 +31,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     // The timestamp of the last redemption and the time recentlyRedeemed was last recalculated.
     uint64 public redemptionAnchor;
 
+    error RedemptionsDisabled();
+
     constructor(IFrankencoin zchf_) {
         FPS1 = IEquity(address(zchf_.reserve()));
         ZCHF = zchf_;
@@ -53,8 +55,10 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     /**
      * Convert a given monetary amount into shares at the current price.
      * 
-     * This returns more than what a user would actually get when investing, i.e. what is returned
-     * by previewDeposit.
+     * This is the inverse method of 'convertToAssets' and based on the current price of Frankencoin Pool Shares (FPS).
+     * 
+     * It disregards slippage, fees, redemption discounts and other factors that would apply when actually minting or
+     * redeeming FPS2 tokens.
      */
     function convertToShares(uint256 assets) public view returns (uint256) {
         return _divD18(assets, FPS1.price());
@@ -63,9 +67,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     /**
      * The price of the given amount of assets based on the current price of the shares.
      * 
-     * This can be used to calculate the market value of a given number of shares. It must not be confused
-     * with "previewRedeem", which returns a much lower number for significant redemptions due to the
-     * underlying bonding curve and slippage.
+     * This can be used to calculate the market value of a given number of shares, for example when showing the value
+     * of a user's portfolio in a wallet app. It must not be confused with "previewRedeem", which returns a much
+     * lower number for significant redemptions due to the underlying bonding curve and slippage.
      */
     function convertToAssets(uint256 shares) public view returns (uint256) {
         return _mulD18(shares, FPS1.price());
@@ -148,15 +152,19 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * @notice Mint exactly the requested FPS2 shares by depositing the necessary ZCHF.
-     * The required amount is found via binary search on the cubic root pricing curve.
+     * To fulfill ERC-4626 specs, this function will always result in the caller receiving exactly 'shares'
+     * shares, even if the underlying mechanism yields slightly more than requested due to rounding. In that
+     * case, the excess dust amount is left in this contract as a micro-donation from the caller.
      */
     function mint(uint256 shares, address receiver) public returns (uint256) {
         uint256 assets = _findAssetsForShares(shares);
         ZCHF.transferFrom(msg.sender, address(this), assets);
-        uint256 actualShares = FPS1.invest(assets, shares);
-        _mint(receiver, actualShares);
-        _notifyInvestment(actualShares);
-        emit Deposit(msg.sender, receiver, assets, actualShares);
+        FPS1.invest(assets, shares); // must yield at least shares
+        // note that we might have received more shares than requested due to rounding
+        // this can leave dust amounts of FPS1 in this contract.
+        _mint(receiver, shares);
+        _notifyInvestment(shares);
+        emit Deposit(msg.sender, receiver, assets, shares);
         return assets;
     }
 
@@ -169,9 +177,10 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      */
     function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
         uint256 fps1Supply = FPS1.totalSupply();
-        uint256 growthFactor = 10**18 * (fps1Supply + shares) / fps1Supply;
-        uint256 capitalGrowth = growthFactor * growthFactor / 10**18 * growthFactor / 10**18;
-        uint256 capitalNeeded = ZCHF.equity() * capitalGrowth / 10**18 - ZCHF.equity();
+        uint256 worstCaseUndershoot = 3 * fps1Supply / 1e18;
+        uint256 growthFactor = _divD18(fps1Supply + shares + worstCaseUndershoot, fps1Supply);
+        uint256 capitalGrowth = _mulD18(_mulD18(growthFactor, growthFactor), growthFactor);
+        uint256 capitalNeeded = _mulD18(ZCHF.equity(), capitalGrowth) - ZCHF.equity();
         return capitalNeeded * 1000 / 997;
     }
     
@@ -236,12 +245,18 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return lo;
     }
 
+    function redemptionsEnabled() internal view virtual returns (bool);
+
     function maxRedeem(address owner) public view returns (uint256) {
-        return balanceOf(owner);
+        return redemptionsEnabled() ? previewRedeem(balanceOf(owner)) : 0;
     }
 
     function previewRedeem(uint256 shares) public view returns (uint256) {
-        return calculateEffectiveProceeds(totalSupply(), weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
+        if (redemptionsEnabled()) {
+            return calculateEffectiveProceeds(totalSupply(), weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -272,7 +287,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         return proceeds;
     }
     
-    function _redeem(address from, address to, uint256 shares) internal returns (uint256) {
+    function _redeem(address from, address to, uint256 shares) internal virtual returns (uint256) {
+        if (!redemptionsEnabled()) revert RedemptionsDisabled();
         if (msg.sender != from) _useAllowance(from, msg.sender, shares);
 
         uint256 recent = weightedRecentRedemptions();

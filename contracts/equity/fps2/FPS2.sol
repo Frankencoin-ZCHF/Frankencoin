@@ -22,7 +22,6 @@ import "../IGovernance.sol";
  * The FPS2 contract is "binding" as long as more than 50% of all votes are controlled by this contract.
  */
 contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
-
     event Wrapped(address indexed who, uint amount);
     event Unwrapped(address indexed who, uint amount);
     event Shot(address indexed target, uint256 votesDestroyed);
@@ -60,10 +59,8 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         emit Wrapped(msg.sender, amount);
     }
 
-    function _redeem(address from, address to, uint256 shares) internal override returns (uint256)  {
-        // Only allow redemptions as long as the contract is binding
-        if (!isBinding()) revert NotBinding();
-        super._redeem(from, to, shares);
+    function redemptionsEnabled() internal view override returns (bool) {
+        return isBinding();
     }
 
     /**
@@ -78,7 +75,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     /**
      * @notice destroy the votes of an FPS1 holder to prevent them from participating in governance or
      * redeeming their FPS. Can only be called when the contract is binding.
-     * 
+     *
      * This can be used to effectively force FPS1 holders into FPS2.
      *
      * @param target           the FPS1 holder whose votes to destroy
@@ -95,7 +92,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
 
     /**
      * Unwrap FPS2 into FPS1.
-     * 
+     *
      * This can only be done while not binding and even when FPS is not binding, the
      * later joiners must wait for the earlier joiners to unwrap first.
      */
@@ -115,7 +112,6 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     // Earlier versions had a "restructureCaptable" function here like the one in FPS1.
     // However, in such a catastrophic scenario, it is unclear whether we would still want to have FPS2 and
     // not better restart with FPS1 and a completely new setup.
-
 }
 
 interface IGovernanceFactory {
