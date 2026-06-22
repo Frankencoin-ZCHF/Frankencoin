@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 
-import { createWalletClient, http, encodeAbiParameters } from "viem";
+import { createPublicClient, createWalletClient, http, encodeAbiParameters } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { arbitrum, avalanche, base, gnosis, mainnet, optimism, polygon, sonic } from "viem/chains";
 import { ADDRESS } from "../../exports/address.config";
@@ -215,48 +215,66 @@ async function main() {
   }
   const account = privateKeyToAccount(privateKey);
 
-  // ─── Enact ─────────────────────────────────────────────────────────────────
+  // ─── Enact — grouped by chain, nonce-managed per chain ───────────────────
 
+  const byChain = new Map<number, typeof ready>();
   for (const row of ready) {
-    const viemChain = CHAIN_BY_ID[row.chainId]!;
-    const wallet    = createWalletClient({ account, chain: viemChain, transport: http(ALCHEMY_RPC[row.chainId]) });
-    const selector  = BigInt(row.remoteChainSelector);
+    const list = byChain.get(row.chainId) ?? [];
+    list.push(row);
+    byChain.set(row.chainId, list);
+  }
 
-    if (row.action === "AddChain") {
-      const encodedPool  = encodeAbiParameters([{ type: "address" }], [row.remotePoolAddress  as `0x${string}`]);
-      const encodedToken = encodeAbiParameters([{ type: "address" }], [row.remoteTokenAddress as `0x${string}`]);
+  for (const [chainId, rows] of byChain) {
+    const viemChain    = CHAIN_BY_ID[chainId]!;
+    const publicClient = createPublicClient({ chain: viemChain, transport: http(ALCHEMY_RPC[chainId]) });
+    const wallet       = createWalletClient({ account, chain: viemChain, transport: http(ALCHEMY_RPC[chainId]) });
 
-      process.stdout.write(`  applyAddChain ${row.chain} → ${row.remote} ... `);
-      try {
-        const hash = await wallet.writeContract({
-          address: row.ccipAdmin as `0x${string}`,
-          abi: CCIP_ADMIN_ABI,
-          functionName: "applyAddChain",
-          args: [{
-            remoteChainSelector:      selector,
-            remotePoolAddresses:      [encodedPool],
-            remoteTokenAddress:       encodedToken,
-            outboundRateLimiterConfig: DISABLED_RATE,
-            inboundRateLimiterConfig:  DISABLED_RATE,
-          }],
-        });
-        console.log(`✓ ${hash}`);
-      } catch (err: any) {
-        console.log(`✗ ${err?.shortMessage ?? err?.message ?? err}`);
-      }
+    let nonce = await publicClient.getTransactionCount({ address: account.address });
+    console.log(`\n${viemChain.name} — ${rows.length} tx(s) starting at nonce ${nonce}`);
 
-    } else {
-      process.stdout.write(`  applyRemoveChain ${row.chain} → ${row.remote} ... `);
-      try {
-        const hash = await wallet.writeContract({
-          address: row.ccipAdmin as `0x${string}`,
-          abi: CCIP_ADMIN_ABI,
-          functionName: "applyRemoveChain",
-          args: [selector],
-        });
-        console.log(`✓ ${hash}`);
-      } catch (err: any) {
-        console.log(`✗ ${err?.shortMessage ?? err?.message ?? err}`);
+    for (const row of rows) {
+      const selector = BigInt(row.remoteChainSelector);
+
+      if (row.action === "AddChain") {
+        const encodedPool  = encodeAbiParameters([{ type: "address" }], [row.remotePoolAddress  as `0x${string}`]);
+        const encodedToken = encodeAbiParameters([{ type: "address" }], [row.remoteTokenAddress as `0x${string}`]);
+
+        process.stdout.write(`  applyAddChain → ${row.remote} (nonce ${nonce}) ... `);
+        try {
+          const hash = await wallet.writeContract({
+            address: row.ccipAdmin as `0x${string}`,
+            abi: CCIP_ADMIN_ABI,
+            functionName: "applyAddChain",
+            nonce: nonce++,
+            args: [{
+              remoteChainSelector:      selector,
+              remotePoolAddresses:      [encodedPool],
+              remoteTokenAddress:       encodedToken,
+              outboundRateLimiterConfig: DISABLED_RATE,
+              inboundRateLimiterConfig:  DISABLED_RATE,
+            }],
+          });
+          console.log(`✓ ${hash}`);
+        } catch (err: any) {
+          console.log(`✗ ${err?.shortMessage ?? err?.message ?? err}`);
+          nonce++;
+        }
+
+      } else {
+        process.stdout.write(`  applyRemoveChain → ${row.remote} (nonce ${nonce}) ... `);
+        try {
+          const hash = await wallet.writeContract({
+            address: row.ccipAdmin as `0x${string}`,
+            abi: CCIP_ADMIN_ABI,
+            functionName: "applyRemoveChain",
+            nonce: nonce++,
+            args: [selector],
+          });
+          console.log(`✓ ${hash}`);
+        } catch (err: any) {
+          console.log(`✗ ${err?.shortMessage ?? err?.message ?? err}`);
+          nonce++;
+        }
       }
     }
   }

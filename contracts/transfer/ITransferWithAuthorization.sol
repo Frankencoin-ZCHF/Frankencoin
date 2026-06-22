@@ -27,6 +27,7 @@ interface ITransferWithAuthorization {
     error AuthorizationExpired();
     error AuthorizationAlreadyUsed();
     error InvalidSignature();
+    error CallerMustBeDeployer();
     error CallerMustBePayee();
 
     // -------------------------------------------------------------------------
@@ -64,18 +65,7 @@ interface ITransferWithAuthorization {
      * @return salt     Not used; always zero.
      * @return extensions  Not used; always empty.
      */
-    function eip712Domain()
-        external
-        view
-        returns (
-            bytes1 fields,
-            string memory name,
-            string memory version,
-            uint256 chainId,
-            address verifyingContract,
-            bytes32 salt,
-            uint256[] memory extensions
-        );
+    function eip712Domain() external view returns (bytes1 fields, string memory name, string memory version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] memory extensions);
 
     /// @notice Returns the state of an authorization
     /// @dev Nonces are randomly generated 32-byte data unique to the authorizer's address
