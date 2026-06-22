@@ -66,11 +66,6 @@ export type ChainAddressMainnet = {
   frankencoin: Address; // ZCHF token
   equity: Address; // FPS token
 
-  // utils
-  wFPS: Address; // wrapped FPS
-  uniswapPoolV3ZCHFUSDT: Address;
-  chainlinkOCR2Aggregator: Address;
-
   // minting hub v1
   mintingHubV1: Address;
   positionFactoryV1: Address;
@@ -105,6 +100,12 @@ export type ChainAddressMainnet = {
   ccipRouter: Address;
   linkToken: Address;
 
+  // utils
+  wFPS: Address; // wrapped FPS
+  uniswapPoolV3ZCHFUSDT: Address;
+  chainlinkOCR2Aggregator: Address;
+  transferWithAuthorization: Address;
+
   // custom
   svZCHF: Address;
 };
@@ -125,6 +126,9 @@ export type ChainAddressPolygon = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressArbitrum = {
@@ -142,6 +146,9 @@ export type ChainAddressArbitrum = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressOptimism = {
@@ -159,6 +166,9 @@ export type ChainAddressOptimism = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressBase = {
@@ -190,6 +200,9 @@ export type ChainAddressAvalanche = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressGnosis = {
@@ -204,6 +217,9 @@ export type ChainAddressGnosis = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 
   // custom
   svZCHF: Address;
@@ -221,6 +237,9 @@ export type ChainAddressSonic = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+
+  // utils
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressMap = {
