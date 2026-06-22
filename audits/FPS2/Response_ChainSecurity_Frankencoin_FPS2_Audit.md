@@ -88,7 +88,7 @@ Please provide **the final commit hash** that includes all modifications made an
   - [X] Risk Accepted
   - [ ] No Issue
   - [ ] Other:
-- **Description of changes**: If someone frontruns the FPS2 deployment, we will simply repeat it and treat the first successful deployment as the one we move into. And when deploying Frankencoin to new L2 chains in the future, it should be done in an adjusted version without the baggage of the old versions. And that adjusted version can look at FPS2 votes explicitely without having to rely on any delegations.
+- **Description of changes**: If someone frontruns the FPS2 deployment, we will simply repeat it and treat the first successful deployment as the one we move into. And when deploying Frankencoin to new L2 chains in the future, it should be done in an adjusted version without the baggage of the old versions. And that adjusted version can look at FPS2 votes explicitely without having to rely on the delegations setup in GovernanceFactory. Also note that MainnetVotes.pushFPS2Votes can synchronize votes to any receiving contract on another chain, so we are free to have adjusted BridgedVotes contract on different addresses in the future. The system does not rely on the governance contracts having the same addresses on every L2 chain.
 - **Commit hash (if applicable)**:
 
 ---
