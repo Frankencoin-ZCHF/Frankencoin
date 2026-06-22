@@ -85,7 +85,7 @@ async function main() {
     // Contract not on-chain yet (dry run skipped deploy)
     console.log("[dry run] Would initialize with asset:", asset);
   } else {
-    const contract     = await ethers.getContractAt("TransferWithAuthorization", predicted);
+    const contract     = await ethers.getContractAt("TransferWithAuthorization", predicted, deployer);
     const currentAsset = await contract.asset();
 
     if (currentAsset !== ethers.ZeroAddress) {
