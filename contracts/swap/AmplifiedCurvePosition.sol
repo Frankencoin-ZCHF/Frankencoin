@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {IERC20} from "../../erc20/IERC20.sol";
-import {Ownable} from "../../utils/Ownable.sol";
-import {ITwocrypto} from "./helper/ITwocrypto.sol";
-import {IAmplifierCurve} from "./helper/IAmplifierCurve.sol";
-import {IAmplifiedCurvePosition} from "./helper/IAmplifiedCurvePosition.sol";
+import {IERC20} from "../erc20/IERC20.sol";
+import {Ownable} from "../utils/Ownable.sol";
+import {ITwocrypto} from "./utils/ITwocrypto.sol";
+import {ICurveAmplifier} from "./utils/ICurveAmplifier.sol";
+import {IAmplifiedCurvePosition} from "./utils/IAmplifiedCurvePosition.sol";
 
 /**
  * @title AmplifiedCurvePosition
@@ -25,7 +25,7 @@ import {IAmplifiedCurvePosition} from "./helper/IAmplifiedCurvePosition.sol";
  *   3. Debt and LP balance are decremented.
  */
 contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
-    IAmplifierCurve public AMP;
+    ICurveAmplifier public AMP;
 
     uint256 public borrowed;
     uint256 public lpBalance;
@@ -38,14 +38,14 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     // Clones do not run constructors, so their AMP starts at address(0) and
     // initialize() works normally on them.
     constructor() {
-        AMP = IAmplifierCurve(address(1));
+        AMP = ICurveAmplifier(address(1));
         _locked = 1;
     }
 
     /**
      * One-shot initializer called by AmplifierCurve immediately after cloning.
      */
-    function initialize(IAmplifierCurve amp, address positionOwner) external {
+    function initialize(ICurveAmplifier amp, address positionOwner) external {
         if (address(AMP) != address(0)) revert AlreadyInitialized();
         AMP = amp;
         _setOwner(positionOwner);

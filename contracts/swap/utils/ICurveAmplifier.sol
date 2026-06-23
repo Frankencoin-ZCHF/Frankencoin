@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {IERC20} from "../../../erc20/IERC20.sol";
-import {IFrankencoin} from "../../../stablecoin/IFrankencoin.sol";
+import {IERC20} from "../../erc20/IERC20.sol";
+import {IFrankencoin} from "../../stablecoin/IFrankencoin.sol";
 import {ITwocrypto} from "./ITwocrypto.sol";
 
-interface IAmplifierCurve {
+interface ICurveAmplifier {
     // --- Errors ---
     error AccessDenied();
     error AmplifierExpired();

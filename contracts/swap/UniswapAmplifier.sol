@@ -7,7 +7,7 @@ import "../minting/IPosition.sol";
 import "./utils/IUniswapV3Pool.sol";
 import "../utils/Ownable.sol";
 import "./utils/IUniswapV3MintCallback.sol";
-import "./utils/SafeERC20.sol";
+import "../erc20/SafeERC20.sol";
 
 /**
  * @title Amplifier
@@ -21,7 +21,7 @@ import "./utils/SafeERC20.sol";
  * prices within the range from 0.68 and 1.02 CHF / USD.
  *
  **/
-contract Amplifier {
+contract UniswapAmplifier {
     using SafeERC20 for IERC20;
 
     uint256 internal constant Q96 = 0x1000000000000000000000000;
@@ -197,7 +197,7 @@ contract Amplifier {
  * An amplified position belonging to a specific owner.
  */
 contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
-    Amplifier immutable AMP;
+    UniswapAmplifier immutable AMP;
 
     uint256 public borrowed;
     uint128 public totalLiquidity;
@@ -207,7 +207,7 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     event Mint(int24 tickLow, int24 tickHigh, uint128 liquidityAdded, uint256 newlyBorrowedFrankencoin);
     event Burn(int24 tickLow, int24 tickHigh, uint128 liquidityRemoved, uint256 returnedFrankencoins);
 
-    constructor(Amplifier parent, address owner) {
+    constructor(UniswapAmplifier parent, address owner) {
         AMP = parent;
         _setOwner(owner);
     }

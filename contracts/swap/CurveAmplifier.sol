@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {IFrankencoin, IERC20} from "../../stablecoin/IFrankencoin.sol";
-import {SafeERC20} from "../../erc20/SafeERC20.sol";
-import {ITwocrypto} from "./helper/ITwocrypto.sol";
-import {IAmplifierCurve} from "./helper/IAmplifierCurve.sol";
+import {IFrankencoin, IERC20} from "../stablecoin/IFrankencoin.sol";
+import {SafeERC20} from "../erc20/SafeERC20.sol";
+import {ITwocrypto} from "./utils/ITwocrypto.sol";
+import {ICurveAmplifier} from "./utils/ICurveAmplifier.sol";
 import {AmplifiedCurvePosition} from "./AmplifiedCurvePosition.sol";
 
 /**
- * @title AmplifierCurve
+ * @title CurveAmplifier
  *
  * Factory and registered minter for amplified Curve TwoCrypto positions. Amplified positions
  * are positions where the ZCHF half of the trading pair is borrowed from the Frankencoin
@@ -24,7 +24,7 @@ import {AmplifiedCurvePosition} from "./AmplifiedCurvePosition.sol";
  *  - The borrow limit (LIMIT) caps total protocol exposure.
  *  - Positions are tracked in an internal mapping; no Frankencoin position registry is used.
  */
-contract AmplifierCurve is IAmplifierCurve {
+contract CurveAmplifier is ICurveAmplifier {
     using SafeERC20 for IERC20;
 
     ITwocrypto public immutable CURVE_POOL;
@@ -163,7 +163,7 @@ contract AmplifierCurve is IAmplifierCurve {
      */
     function createAmplifiedPosition() external notExpired returns (address position) {
         position = _clone(POSITION_IMPLEMENTATION);
-        AmplifiedCurvePosition(position).initialize(IAmplifierCurve(this), msg.sender);
+        AmplifiedCurvePosition(position).initialize(ICurveAmplifier(this), msg.sender);
         isPosition[position] = true;
         emit AmplifiedPositionCreated(position, msg.sender);
     }

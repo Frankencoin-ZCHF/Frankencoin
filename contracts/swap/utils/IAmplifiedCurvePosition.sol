@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {IAmplifierCurve} from "./IAmplifierCurve.sol";
+import {ICurveAmplifier} from "./ICurveAmplifier.sol";
 
 interface IAmplifiedCurvePosition {
     // --- Errors ---
@@ -14,14 +14,14 @@ interface IAmplifiedCurvePosition {
     event Burn(uint256 lpBurned, uint256 zchfRepaid);
 
     // --- State ---
-    function AMP() external view returns (IAmplifierCurve);
+    function AMP() external view returns (ICurveAmplifier);
 
     function borrowed() external view returns (uint256);
 
     function lpBalance() external view returns (uint256);
 
     // --- Mutating ---
-    function initialize(IAmplifierCurve amp, address positionOwner) external;
+    function initialize(ICurveAmplifier amp, address positionOwner) external;
 
     function mint(uint256 zchfAmount, uint256 collateralAmount, uint256 minLp) external returns (uint256 lpReceived);
 

@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.0;
 
-import "./interface/IERC20.sol";
-import "./interface/IFrankencoin.sol";
-import "./interface/IPosition.sol";
-import "./interface/IUniswapV3Pool.sol";
+import "./erc20/IERC20.sol";
+import "./stablecoin/IFrankencoin.sol";
+import "./minting/IPosition.sol";
+import "./swap/utils/IUniswapV3Pool.sol";
 import "./utils/Ownable.sol";
 import "./utils/Math.sol";
-import "./interface/IUniswapV3MintCallback.sol";
+import "./swap/utils/IUniswapV3MintCallback.sol";
 
 /**
  * @title Amplifier
