@@ -22,6 +22,7 @@ import "../erc20/SafeERC20.sol";
  *
  **/
 contract UniswapAmplifier {
+    
     using SafeERC20 for IERC20;
 
     uint256 internal constant Q96 = 0x1000000000000000000000000;

@@ -3,9 +3,8 @@ pragma solidity 0.8.24;
 
 import {IERC20} from "../erc20/IERC20.sol";
 import {Ownable} from "../utils/Ownable.sol";
+import {IFrankencoin} from "../stablecoin/IFrankencoin.sol";
 import {ITwocrypto} from "./utils/ITwocrypto.sol";
-import {ICurveAmplifier} from "./utils/ICurveAmplifier.sol";
-import {IAmplifiedCurvePosition} from "./utils/IAmplifiedCurvePosition.sol";
 
 /**
  * @title AmplifiedCurvePosition
@@ -24,7 +23,8 @@ import {IAmplifiedCurvePosition} from "./utils/IAmplifiedCurvePosition.sol";
  *   2. Proportional ZCHF debt is burned from the owner via AmplifierCurve.repay().
  *   3. Debt and LP balance are decremented.
  */
-contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
+contract AmplifiedCurvePosition is Ownable {
+
     ICurveAmplifier public AMP;
 
     uint256 public borrowed;
@@ -33,6 +33,15 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
     // 0 = unlocked (clone default), 1 = locked.
     // Intentionally not initialised to 1 — clones don't run constructors.
     uint256 private _locked;
+
+    // --- Errors ---
+    error AlreadyInitialized();
+    error ZeroAmount();
+    error Reentered();
+
+    // --- Events ---
+    event Mint(uint256 zchfAmount, uint256 collateralAmount, uint256 lpReceived);
+    event Burn(uint256 lpBurned, uint256 zchfRepaid);
 
     // Brick the bare implementation so it can never be initialized.
     // Clones do not run constructors, so their AMP starts at address(0) and
@@ -126,4 +135,44 @@ contract AmplifiedCurvePosition is Ownable, IAmplifiedCurvePosition {
         amounts[zchfIndex] = zchfAmt;
         amounts[1 - zchfIndex] = collateralAmt;
     }
+}
+
+interface ICurveAmplifier {
+
+    // --- Immutables ---
+    function CURVE_POOL() external view returns (ITwocrypto);
+
+    function ZCHF() external view returns (IFrankencoin);
+
+    function COLLATERAL() external view returns (IERC20);
+
+    function ZCHF_INDEX() external view returns (uint256);
+
+    function PRICE_ANCHOR() external view returns (uint256);
+
+    function EXPIRATION() external view returns (uint40);
+
+    function LIMIT() external view returns (uint256);
+
+    function POSITION_IMPLEMENTATION() external view returns (address);
+
+    // --- State ---
+    function totalBorrowed() external view returns (uint256);
+
+    function isPosition(address position) external view returns (bool);
+
+    // --- View ---
+    function getMinimumCollateral(uint256 zchfAmount) external view returns (uint256);
+
+    function getMaximumMint(uint256 collateralAmount) external view returns (uint256);
+
+    function checkPrice() external view;
+
+    // --- Position-only (not for direct calls) ---
+    function borrowIntoPosition(address owner, uint256 zchfAmount, uint256 collateralAmount) external;
+
+    function repay(address owner, uint256 zchfAmount) external;
+
+    // --- Public ---
+    function createAmplifiedPosition() external returns (address position);
 }

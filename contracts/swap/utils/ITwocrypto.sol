@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Code generated with https://etherscan.io/address/0x027b40f5917fcd0eac57d7015e120096a5f92ca9#code as input.
 pragma solidity 0.8.24;
 
 interface ITwocrypto {

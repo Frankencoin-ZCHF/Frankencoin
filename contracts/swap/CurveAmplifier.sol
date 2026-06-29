@@ -4,8 +4,8 @@ pragma solidity 0.8.24;
 import {IFrankencoin, IERC20} from "../stablecoin/IFrankencoin.sol";
 import {SafeERC20} from "../erc20/SafeERC20.sol";
 import {ITwocrypto} from "./utils/ITwocrypto.sol";
-import {ICurveAmplifier} from "./utils/ICurveAmplifier.sol";
 import {AmplifiedCurvePosition} from "./AmplifiedCurvePosition.sol";
+import {ICurveAmplifier} from "./AmplifiedCurvePosition.sol";
 
 /**
  * @title CurveAmplifier
@@ -24,7 +24,8 @@ import {AmplifiedCurvePosition} from "./AmplifiedCurvePosition.sol";
  *  - The borrow limit (LIMIT) caps total protocol exposure.
  *  - Positions are tracked in an internal mapping; no Frankencoin position registry is used.
  */
-contract CurveAmplifier is ICurveAmplifier {
+contract CurveAmplifier is ICurveAmplifier{
+
     using SafeERC20 for IERC20;
 
     ITwocrypto public immutable CURVE_POOL;
@@ -48,6 +49,23 @@ contract CurveAmplifier is ICurveAmplifier {
 
     uint256 internal constant ONE = 1e18;
     uint256 internal constant TWENTY_PERCENT = ONE / 5;
+
+    // --- Errors ---
+    error AccessDenied();
+    error AmplifierExpired();
+    error CloneFailed();
+    error ZCHFNotInPool();
+    error InvalidDecimals();
+    error InvalidExpiration();
+    error InvalidLimit();
+    error LimitExceeded(uint256 newValue, uint256 limit);
+    error PriceDeviatedTooMuch(uint256 current, uint256 anchor);
+    error InsufficientCollateral(uint256 required, uint256 provided);
+
+    // --- Events ---
+    event AmplifiedPositionCreated(address indexed position, address indexed owner);
+    event Borrowed(address indexed position, uint256 amount, uint256 totalBorrowed);
+    event Repaid(address indexed position, uint256 amount, uint256 totalBorrowed);
 
     /**
      * @param curvePool_     Curve TwoCrypto pool address. Must contain ZCHF as one of its coins.
