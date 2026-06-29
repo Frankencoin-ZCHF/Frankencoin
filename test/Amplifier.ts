@@ -215,7 +215,9 @@ describe("Amplifier", async () => {
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
-      await expect(position.mint("500000000000000")).emit(position, "Mint");
+      await expect(
+        position.mint("500000000000000", await amplifier.getPrice())
+      ).emit(position, "Mint");
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
@@ -230,6 +232,13 @@ describe("Amplifier", async () => {
       expect(totalBorrowedAfter).to.be.greaterThan(totalBorrowedBefore);
     });
 
+    it("should revert mint when the expected price is off by more than 0.1%", async () => {
+      const price = await amplifier.getPrice();
+      await expect(
+        position.mint("100000000000000", (price * 990n) / 1000n)
+      ).revertedWithCustomError(amplifier, "PriceChangedTooMuch");
+    });
+
     it("should partially burn", async () => {
       const usdtUserBefore = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolBefore = await usdt.balanceOf(await pool.getAddress());
@@ -237,7 +246,9 @@ describe("Amplifier", async () => {
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
-      await expect(position.burn("250000000000000")).emit(position, "Burn");
+      await expect(
+        position.burn("250000000000000", await amplifier.getPrice())
+      ).emit(position, "Burn");
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
@@ -255,7 +266,9 @@ describe("Amplifier", async () => {
     });
 
     it("should burn fully", async () => {
-      await expect(position.burn("250000000000000")).emit(position, "Burn");
+      await expect(
+        position.burn("250000000000000", await amplifier.getPrice())
+      ).emit(position, "Burn");
 
       expect(await position.borrowed()).to.be.eq(0);
       expect(await amplifier.totalBorrowed()).to.be.eq(0);
@@ -269,13 +282,13 @@ describe("Amplifier", async () => {
 
     it("should not allow alice to mint", async () => {
       await expect(
-        position.connect(alice).mint("500000000000000")
+        position.connect(alice).mint("500000000000000", await amplifier.getPrice())
       ).revertedWithCustomError(position, "NotOwner");
     });
 
     it("should not allow alice to burn", async () => {
       await expect(
-        position.connect(alice).burn("500000000000000")
+        position.connect(alice).burn("500000000000000", await amplifier.getPrice())
       ).revertedWithCustomError(position, "NotOwner");
     });
   });

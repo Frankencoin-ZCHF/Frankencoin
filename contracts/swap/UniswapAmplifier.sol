@@ -63,8 +63,8 @@ contract UniswapAmplifier {
         EXPIRATION = expiration;
         LIMIT = borrowingLimit;
 
-        (uint160 sqrtPriceX96, int24 tick, , , , , ) = UNISWAP_POOL.slot0();
-        uint256 price = Math.mulDiv(sqrtPriceX96, sqrtPriceX96, Q96);
+        (, int24 tick, , , , , ) = UNISWAP_POOL.slot0();
+        uint256 price = getPrice();
         if ((price * 99) / 100 > expectedPriceQ96) revert PriceChangedTooMuch(expectedPriceQ96, price);
         if ((price * 101) / 100 < expectedPriceQ96) revert PriceChangedTooMuch(expectedPriceQ96, price);
         TICK_ANCHOR = tick;
@@ -88,6 +88,26 @@ contract UniswapAmplifier {
     /// @return Amount of dollars
     function getMinimumDollars(uint256 zchfAmount) public view returns (uint256) {
         return Math.mulDiv(PRICE_ANCHOR_X96, zchfAmount, Q96);
+    }
+
+    /// @notice The current pool price, denominated as token1 per token0 in Q96.
+    function getPrice() public view returns (uint256) {
+        (uint160 sqrtPriceX96, , , , , , ) = UNISWAP_POOL.slot0();
+        return Math.mulDiv(sqrtPriceX96, sqrtPriceX96, Q96);
+    }
+
+    /// @notice Slippage guard: reverts unless the live pool price is within 0.1% of the expected price.
+    /// @dev With a fixed liquidity amount and range, both token amounts of a mint or burn are a deterministic
+    ///      function of the price. Pinning the price to a tight band therefore bounds the amounts on both
+    ///      sides at once, protecting mints and burns against sandwiching.
+    /// @param expectedPriceX96 Expected pool price (token1 per token0) in Q96, same convention as the constructor.
+    function checkPrice(uint256 expectedPriceX96) public view {
+        if (expectedPriceX96 > 0) {
+            uint256 price = getPrice();
+            if ((price * 999) / 1000 > expectedPriceX96 || (price * 1001) / 1000 < expectedPriceX96) {
+                revert PriceChangedTooMuch(price, expectedPriceX96);
+            }
+        }
     }
 
     /// @notice Borrows ZCHF into the pool against the owner's dollars.
@@ -177,7 +197,9 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     /// @notice Mints the provided amount of liquidity into this position's range.
     /// @dev This function only succeeds if the caller has sufficient dollars on his address and if there is an allowance in place.
     /// @param amount Amount of liquidity to add
-    function mint(uint128 amount) external onlyOwner {
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
+    function mint(uint128 amount, uint256 expectedPriceX96) external onlyOwner {
+        AMP.checkPrice(expectedPriceX96);
         uint256 previouslyBorrowed = borrowed;
         (uint256 amount0, uint256 amount1) = AMP.UNISWAP_POOL().mint(address(this), tickLow, tickHigh, amount, "");
         totalLiquidity += amount;
@@ -197,22 +219,25 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     ///      ZCHF are taken from the owner's address. When burning X% of the position liquidity, X% of the borrowed Frankencoins must be returned.
     ///      At the same time, accrued fees are collected.
     /// @param burnedLiquidity Liquidity to burn
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
     /// @return amounts of token0 and token1 returned
-    function burn(uint128 burnedLiquidity) external onlyOwner returns (uint256, uint256) {
-        return _burn(burnedLiquidity);
+    function burn(uint128 burnedLiquidity, uint256 expectedPriceX96) external onlyOwner returns (uint256, uint256) {
+        return _burn(burnedLiquidity, expectedPriceX96);
     }
 
     /// @notice Once the amplifier has expired, let anyone burn positions and collect the underlying tokens.
     /// @dev As long as the exchange rate has not fallen by more than 50% since the deployment of the amplifier,
     ///      this can be called profitably at the expense of the position owner.
     /// @param burnedLiquidity Liquidity to burn
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
     /// @return amounts of token0 and token1 returned
-    function expiredPublicBurn(uint128 burnedLiquidity) external returns (uint256, uint256) {
+    function expiredPublicBurn(uint128 burnedLiquidity, uint256 expectedPriceX96) external returns (uint256, uint256) {
         if (block.timestamp <= AMP.EXPIRATION()) revert NotExpired();
-        return _burn(burnedLiquidity);
+        return _burn(burnedLiquidity, expectedPriceX96);
     }
 
-    function _burn(uint128 burnedLiquidity) internal returns (uint256, uint256) {
+    function _burn(uint128 burnedLiquidity, uint256 expectedPriceX96) internal returns (uint256, uint256) {
+        AMP.checkPrice(expectedPriceX96);
         IUniswapV3Pool pool = AMP.UNISWAP_POOL();
         pool.burn(tickLow, tickHigh, burnedLiquidity); // burn does not collect yet
         (uint128 amount0, uint128 amount1) = pool.collect(msg.sender, tickLow, tickHigh, type(uint128).max, type(uint128).max); // collect principal + fees
