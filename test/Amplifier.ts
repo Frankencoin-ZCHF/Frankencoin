@@ -1,7 +1,5 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
-  Amplifier,
-  Amplifier__factory,
   Frankencoin,
   IERC20,
   IUniswapV3Pool,
@@ -9,17 +7,24 @@ import {
 import { ethers, network } from "hardhat";
 import { evm_increaseTime } from "./helper";
 import { expect } from "chai";
-import { AmplifiedPosition } from "../typechain/contracts/swap/Amplifier.sol";
+import {
+  UniswapAmplifier,
+  AmplifiedPosition,
+} from "../typechain/contracts/swap/UniswapAmplifier.sol";
 
 describe("Amplifier", async () => {
   let owner: HardhatEthersSigner;
   let alice: HardhatEthersSigner;
 
   let zchf: Frankencoin;
-  let amplifier: Amplifier;
+  let amplifier: UniswapAmplifier;
   let usdt: IERC20;
   let pool: IUniswapV3Pool;
   let expiration = Math.round(Date.now() / 1000) + 1209600 + 3600; // now + minApplicationPeriod + 1h
+
+  // The widest tick range, aligned to the pool's tick spacing, that stays within +/- 20% of the anchor.
+  let tickLow: bigint;
+  let tickHigh: bigint;
 
   before(async () => {
     [owner, alice] = await ethers.getSigners();
@@ -78,7 +83,7 @@ describe("Amplifier", async () => {
       .transfer(await owner.getAddress(), ethers.parseEther("500000"));
 
     // Setup amplifier
-    const amplifierFactory = await ethers.getContractFactory("Amplifier");
+    const amplifierFactory = await ethers.getContractFactory("UniswapAmplifier");
     amplifier = await amplifierFactory.deploy(
       await pool.getAddress(),
       "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
@@ -86,6 +91,17 @@ describe("Amplifier", async () => {
       expiration,
       ethers.parseEther("5000000")
     );
+
+    // Pick the widest aligned range within +/- 20% of the anchor for the test positions.
+    const spacing = BigInt(await pool.tickSpacing());
+    const anchor = await amplifier.TICK_ANCHOR();
+    const ceilToSpacing = (t: bigint) => {
+      const m = ((t % spacing) + spacing) % spacing;
+      return m === 0n ? t : t + (spacing - m);
+    };
+    const floorToSpacing = (t: bigint) => t - (((t % spacing) + spacing) % spacing);
+    tickLow = ceilToSpacing(anchor - 2000n);
+    tickHigh = floorToSpacing(anchor + 2000n);
 
     // Apply amplifier as minter
     await zchf.suggestMinter(
@@ -121,17 +137,7 @@ describe("Amplifier", async () => {
     expect(await amplifier.LIMIT()).to.be.eq(ethers.parseEther("5000000"));
 
     let slot0 = await pool.slot0();
-    let tickSpacing = (await pool.fee()) / 100n;
-    if (tickSpacing > 1) {
-      tickSpacing = tickSpacing * 2n;
-    }
-    const lowerBound =
-      slot0.tick - 2000n - ((slot0.tick - 2000n) % tickSpacing);
-    const upperBound =
-      slot0.tick + 2000n + tickSpacing - ((slot0.tick + 2000n) % tickSpacing);
-
-    expect(await amplifier.TICK_LOW_LIMIT()).to.be.eq(lowerBound);
-    expect(await amplifier.TICK_HIGH_LIMIT()).to.be.eq(upperBound);
+    expect(await amplifier.TICK_ANCHOR()).to.be.eq(slot0.tick);
     expect(await amplifier.PRICE_ANCHOR_X96()).to.be.eq(
       (slot0.sqrtPriceX96 * slot0.sqrtPriceX96) >> 96n
     );
@@ -144,7 +150,7 @@ describe("Amplifier", async () => {
   });
 
   it("should create a position", async () => {
-    await expect(amplifier.createAmplifiedPosition()).to.emit(
+    await expect(amplifier.createAmplifiedPosition(tickLow, tickHigh)).to.emit(
       amplifier,
       "AmplifiedPositionCreated"
     );
@@ -166,22 +172,35 @@ describe("Amplifier", async () => {
     let position: AmplifiedPosition;
 
     before(async () => {
-      const tx = await amplifier.createAmplifiedPosition();
+      const tx = await amplifier.createAmplifiedPosition(tickLow, tickHigh);
       const receipt = await tx.wait();
-      let log = amplifier.interface.parseLog((receipt?.logs ?? [])[1]);
-      if (!log) {
-        log = amplifier.interface.parseLog((receipt?.logs ?? [])[0]);
+      const created = (receipt?.logs ?? [])
+        .map((l) => {
+          try {
+            return amplifier.interface.parseLog(l);
+          } catch {
+            return null;
+          }
+        })
+        .find((e) => e?.name === "AmplifiedPositionCreated");
+
+      if (!created) {
+        throw new Error("Unable to find AmplifiedPositionCreated log");
       }
 
-      if (!log) {
-        throw new Error("Unable to find log");
-      }
-
-      position = await ethers.getContractAt("AmplifiedPosition", log.args[0]);
+      position = await ethers.getContractAt(
+        "AmplifiedPosition",
+        created.args[0]
+      );
     });
 
     it("should set the owner", async () => {
       expect(await position.owner()).to.be.eq(await owner.getAddress());
+    });
+
+    it("should be bound to the given tick range", async () => {
+      expect(await position.tickLow()).to.be.eq(tickLow);
+      expect(await position.tickHigh()).to.be.eq(tickHigh);
     });
 
     it("should mint", async () => {
@@ -196,13 +215,7 @@ describe("Amplifier", async () => {
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
-      await expect(
-        position.mint(
-          (await amplifier.TICK_LOW_LIMIT()),
-          (await amplifier.TICK_HIGH_LIMIT()) - 800n,
-          "500000000000000"
-        )
-      ).emit(position, "Mint");
+      await expect(position.mint("500000000000000")).emit(position, "Mint");
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
@@ -224,13 +237,7 @@ describe("Amplifier", async () => {
       const borrowedBefore = await position.borrowed();
       const totalBorrowedBefore = await amplifier.totalBorrowed();
 
-      await expect(
-        position.burn(
-          await amplifier.TICK_LOW_LIMIT(),
-          (await amplifier.TICK_HIGH_LIMIT()) - 800n,
-          "250000000000000"
-        )
-      ).emit(position, "Burn");
+      await expect(position.burn("250000000000000")).emit(position, "Burn");
 
       const usdtUserAfter = await usdt.balanceOf(await owner.getAddress());
       const usdtPoolAfter = await usdt.balanceOf(await pool.getAddress());
@@ -248,13 +255,7 @@ describe("Amplifier", async () => {
     });
 
     it("should burn fully", async () => {
-      await expect(
-        position.burn(
-          await amplifier.TICK_LOW_LIMIT(),
-          (await amplifier.TICK_HIGH_LIMIT()) - 800n,
-          "250000000000000"
-        )
-      ).emit(position, "Burn");
+      await expect(position.burn("250000000000000")).emit(position, "Burn");
 
       expect(await position.borrowed()).to.be.eq(0);
       expect(await amplifier.totalBorrowed()).to.be.eq(0);
@@ -268,25 +269,13 @@ describe("Amplifier", async () => {
 
     it("should not allow alice to mint", async () => {
       await expect(
-        position
-          .connect(alice)
-          .mint(
-            await amplifier.TICK_LOW_LIMIT(),
-            (await amplifier.TICK_HIGH_LIMIT()) - 800n,
-            "500000000000000"
-          )
+        position.connect(alice).mint("500000000000000")
       ).revertedWithCustomError(position, "NotOwner");
     });
 
     it("should not allow alice to burn", async () => {
       await expect(
-        position
-          .connect(alice)
-          .burn(
-            await amplifier.TICK_LOW_LIMIT(),
-            (await amplifier.TICK_HIGH_LIMIT()) - 800n,
-            "500000000000000"
-          )
+        position.connect(alice).burn("500000000000000")
       ).revertedWithCustomError(position, "NotOwner");
     });
   });
