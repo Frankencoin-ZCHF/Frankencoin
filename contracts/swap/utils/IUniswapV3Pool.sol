@@ -66,6 +66,24 @@ interface IUniswapV3Pool {
         uint128 amount
     ) external returns (uint256 amount0, uint256 amount1);
 
+    /// @notice Returns the information about a position by the position's key
+    /// @param key The position's key is a hash of a preimage composed by the owner, tickLower and tickUpper
+    /// @return liquidity The amount of liquidity in the position,
+    /// @return feeGrowthInside0LastX128 fee growth of token0 inside the tick range as of the last mint/burn/poke,
+    /// @return feeGrowthInside1LastX128 fee growth of token1 inside the tick range as of the last mint/burn/poke,
+    /// @return tokensOwed0 the computed amount of token0 owed to the position as of the last mint/burn/poke,
+    /// @return tokensOwed1 the computed amount of token1 owed to the position as of the last mint/burn/poke
+    function positions(bytes32 key)
+        external
+        view
+        returns (
+            uint128 liquidity,
+            uint256 feeGrowthInside0LastX128,
+            uint256 feeGrowthInside1LastX128,
+            uint128 tokensOwed0,
+            uint128 tokensOwed1
+        );
+
     /// @notice The first of the two tokens of the pool, sorted by address
     /// @return The token contract address
     function token0() external view returns (address);

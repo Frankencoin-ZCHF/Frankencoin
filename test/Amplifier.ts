@@ -87,21 +87,24 @@ describe("Amplifier", async () => {
     amplifier = await amplifierFactory.deploy(
       await pool.getAddress(),
       "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
-      99536518700449223n,
+      "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB", // the Frankencoin contract acts as the IFrankencoinMinter
       expiration,
       ethers.parseEther("5000000")
     );
 
-    // Pick the widest aligned range within +/- 20% of the anchor for the test positions.
+    // Pick the widest aligned range within the amplifier's allowed band for the test positions.
     const spacing = BigInt(await pool.tickSpacing());
-    const anchor = await amplifier.TICK_ANCHOR();
+    const minTick = await amplifier.MINIMUM_TICK();
+    const maxTick = await amplifier.MAXIMUM_TICK();
     const ceilToSpacing = (t: bigint) => {
       const m = ((t % spacing) + spacing) % spacing;
       return m === 0n ? t : t + (spacing - m);
     };
     const floorToSpacing = (t: bigint) => t - (((t % spacing) + spacing) % spacing);
-    tickLow = ceilToSpacing(anchor - 2000n);
-    tickHigh = floorToSpacing(anchor + 2000n);
+    // Symmetric ~+/-1000 tick range around the anchor (minTick = anchor - 1000), so the position is roughly
+    // balanced at the current price and comfortably meets the 4/5 dollar-collateral requirement.
+    tickLow = ceilToSpacing(minTick);
+    tickHigh = floorToSpacing(minTick + 2000n);
 
     // Apply amplifier as minter
     await zchf.suggestMinter(
@@ -130,23 +133,61 @@ describe("Amplifier", async () => {
     expect((await amplifier.UNISWAP_POOL()).toLowerCase()).to.be.eq(
       await pool.getAddress()
     );
-    expect(await amplifier.TOKEN0()).to.be.eq(await pool.token0());
     expect(await amplifier.ZCHF()).to.be.eq(await zchf.getAddress());
     expect(await amplifier.USD()).to.be.eq(await usdt.getAddress());
     expect(await amplifier.EXPIRATION()).to.be.eq(expiration);
     expect(await amplifier.LIMIT()).to.be.eq(ethers.parseEther("5000000"));
 
     let slot0 = await pool.slot0();
-    expect(await amplifier.TICK_ANCHOR()).to.be.eq(slot0.tick);
+    // ZCHF is token0 in this pool, so a weaker dollar means a higher tick: more room upward (+1500) than down (-1000)
+    expect(await amplifier.ZCHF_IS_TOKEN0()).to.be.eq(true);
+    expect(await amplifier.MINIMUM_TICK()).to.be.eq(slot0.tick - 1000n);
+    expect(await amplifier.MAXIMUM_TICK()).to.be.eq(slot0.tick + 1500n);
     expect(await amplifier.PRICE_ANCHOR_X96()).to.be.eq(
       (slot0.sqrtPriceX96 * slot0.sqrtPriceX96) >> 96n
     );
   });
 
   it("should return the correct min. dollars", async () => {
+    // 4/5 of the anchor-price value of 1 ZCHF, allowing 1.25:1 leverage
+    const anchor = await amplifier.PRICE_ANCHOR_X96();
+    const expected = ((anchor * ethers.parseEther("1")) / (1n << 96n)) * 4n / 5n;
     expect(await amplifier.getMinimumDollars(ethers.parseEther("1"))).to.be.eq(
-      1256327
+      expected
     );
+  });
+
+  it("should report the exploit threshold price", async () => {
+    // Replicate the contract: P* = anchor / 1.0001^appreciationTicks + getMinimumDollars(Q96); exploitable below the
+    // reciprocal dollar price, scaled to 18 decimals. Derived from the live parameters, so no magic constants.
+    const Q96 = 1n << 96n;
+    const mulDiv = (a: bigint, b: bigint, c: bigint) => (a * b) / c; // floor, matching Math.mulDiv
+    const pow1_0001 = (ticks: bigint) => {
+      let base = mulDiv(10001n, Q96, 10000n);
+      let exp = ticks;
+      let result = Q96;
+      while (exp > 0n) {
+        if (exp & 1n) result = mulDiv(result, base, Q96);
+        base = mulDiv(base, base, Q96);
+        exp >>= 1n;
+      }
+      return result;
+    };
+
+    const anchor = await amplifier.PRICE_ANCHOR_X96();
+    const appreciationTicks = BigInt(await amplifier.MAX_DOLLAR_APPRECIATION_TICKS());
+    const floorX96 = mulDiv(anchor, Q96, pow1_0001(appreciationTicks));
+    const pStarX96 = floorX96 + (await amplifier.getMinimumDollars(Q96));
+    const chfPerUsdX96 = mulDiv(Q96, Q96, pStarX96);
+    const usdDecimals = await usdt.decimals();
+    const expected = mulDiv(chfPerUsdX96, 10n ** usdDecimals, Q96);
+
+    const reported = await amplifier.exploitableAt();
+    expect(reported).to.be.eq(expected);
+
+    // sanity: with an anchor near 0.80 CHF/USD, the threshold is a ~41% dollar decline, i.e. roughly 0.47 CHF/USD
+    expect(reported).to.be.greaterThan(ethers.parseEther("0.40"));
+    expect(reported).to.be.lessThan(ethers.parseEther("0.55"));
   });
 
   it("should create a position", async () => {
