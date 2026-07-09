@@ -44,8 +44,9 @@ contract TestAmplifier is IFrankencoinMinter {
         emit Withdrawn(msg.sender, amount);
     }
 
-    /// @notice Sends 'amount' of the deposit of 'to' back to 'to', simulating a mint.
-    /// @dev Callable by anyone, but harmless: the tokens can only ever move to their own depositor.
+    /// @notice Hands out 'amount' ZCHF to 'to' from the shared deposit pool, simulating a mint.
+    /// @dev Only the amplifier may call this; otherwise anyone could drain the pooled deposits. The deposits are
+    ///      lent collectively, so this draws from the total balance rather than from 'to's own deposit.
     function mint(address to, uint256 amount) external {
         if (msg.sender != address(AMP)) revert NotAmplifier();
         uint256 available = ZCHF.balanceOf(address(this));
@@ -53,8 +54,9 @@ contract TestAmplifier is IFrankencoinMinter {
         ZCHF.transfer(to, amount);
     }
 
-    /// @notice Takes 'amount' from 'from' and credits it back to their deposit, simulating a burn.
-    /// @dev Requires an allowance from 'from' to this contract.
+    /// @notice Takes 'amount' ZCHF from 'from' back into the pool, simulating a burn.
+    /// @dev Only the amplifier may call this; otherwise anyone could pull the ZCHF of any address that has an
+    ///      allowance to this contract. Requires an allowance from 'from' to this contract.
     function burnFrom(address from, uint256 amount) external {
         if (msg.sender != address(AMP)) revert NotAmplifier();
         ZCHF.transferFrom(from, address(this), amount);

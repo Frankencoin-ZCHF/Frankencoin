@@ -333,4 +333,79 @@ describe("Amplifier", async () => {
       ).revertedWithCustomError(position, "NotOwner");
     });
   });
+
+  describe("TestAmplifier (deposit-based minter)", () => {
+    let testAmp: any;
+    let tAmp: UniswapAmplifier;
+    let tLow: bigint;
+    let tHigh: bigint;
+
+    before(async () => {
+      const factory = await ethers.getContractFactory("TestAmplifier");
+      testAmp = await factory.deploy(
+        await pool.getAddress(),
+        await zchf.getAddress(),
+        expiration,
+        ethers.parseEther("5000000")
+      );
+      tAmp = await ethers.getContractAt("UniswapAmplifier", await testAmp.AMP());
+
+      const spacing = BigInt(await pool.tickSpacing());
+      const minTick = await tAmp.MINIMUM_TICK();
+      const ceil = (t: bigint) => {
+        const m = ((t % spacing) + spacing) % spacing;
+        return m === 0n ? t : t + (spacing - m);
+      };
+      const floor = (t: bigint) => t - (((t % spacing) + spacing) % spacing);
+      tLow = ceil(minTick);
+      tHigh = floor(minTick + 2000n);
+    });
+
+    it("reverts external mint and burnFrom with NotAmplifier", async () => {
+      // this is the exact vector that was exploited: a direct external call must now revert
+      await expect(testAmp.mint(owner.address, 1n)).to.be.revertedWithCustomError(testAmp, "NotAmplifier");
+      await expect(testAmp.burnFrom(owner.address, 1n)).to.be.revertedWithCustomError(testAmp, "NotAmplifier");
+      await expect(
+        testAmp.connect(alice).mint(alice.address, ethers.parseEther("1"))
+      ).to.be.revertedWithCustomError(testAmp, "NotAmplifier");
+      await expect(
+        testAmp.connect(alice).burnFrom(owner.address, ethers.parseEther("1"))
+      ).to.be.revertedWithCustomError(testAmp, "NotAmplifier");
+    });
+
+    it("still mints a position through the amplifier, drawing ZCHF from the deposit pool", async () => {
+      const lend = ethers.parseEther("100000");
+      await zchf.approve(await testAmp.getAddress(), lend);
+      await testAmp.deposit(lend);
+      expect(await testAmp.deposits(owner.address)).to.equal(lend);
+
+      // the owner approves the amplifier for USDT (collateral) and ZCHF (the mint-to-owner detour)
+      await usdt.approve(await tAmp.getAddress(), ethers.parseUnits("5000000", 6));
+      await zchf.approve(await tAmp.getAddress(), lend);
+
+      const tx = await tAmp.createAmplifiedPosition(tLow, tHigh);
+      const receipt = await tx.wait();
+      const created = (receipt?.logs ?? [])
+        .map((l) => {
+          try {
+            return tAmp.interface.parseLog(l);
+          } catch {
+            return null;
+          }
+        })
+        .find((e) => e?.name === "AmplifiedPositionCreated");
+      if (!created) throw new Error("Unable to find AmplifiedPositionCreated log");
+      const position = await ethers.getContractAt("AmplifiedPosition", created.args[0]);
+
+      const poolZchfBefore = await zchf.balanceOf(await testAmp.getAddress());
+      await expect(
+        position.mint("500000000000000", await tAmp.getPrice())
+      ).emit(position, "Mint");
+
+      // the borrowed ZCHF was funded out of the shared deposit pool
+      const borrowed = await position.borrowed();
+      expect(borrowed).to.be.greaterThan(0);
+      expect(await zchf.balanceOf(await testAmp.getAddress())).to.equal(poolZchfBefore - borrowed);
+    });
+  });
 });

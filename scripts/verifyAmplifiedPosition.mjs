@@ -9,8 +9,8 @@ dotenv.config();
 const API = "https://api.etherscan.io/v2/api?chainid=1";
 const KEY = process.env.ETHERSCAN_API;
 const RPC = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_RPC_KEY}`;
-const AMPLIFIER = "0x1a37135C07738aD9c7561A55011Fefea854751F5";
-const BUILD_INFO = "artifacts/build-info/96fddcb510219d83a52ae26f2957512a.json";
+const AMPLIFIER = process.argv[3] ?? "0x560E4889e01f41612133Af0a363dD686534c2dA7";
+const BUILD_INFO = "artifacts/build-info/0285d94913a0e8f18734349da28bb7c7.json";
 
 const position = process.argv[2];
 if (!position) throw new Error("Usage: node scripts/verifyAmplifiedPosition.mjs <positionAddress>");
