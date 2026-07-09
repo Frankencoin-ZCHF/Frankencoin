@@ -19,6 +19,7 @@ contract TestAmplifier is IFrankencoinMinter {
 
     UniswapAmplifier public immutable AMP;
 
+    error NotAmplifier();
     error InsufficientDeposit(uint256 available, uint256 required);
 
     event Deposited(address indexed account, uint256 amount);
@@ -46,6 +47,7 @@ contract TestAmplifier is IFrankencoinMinter {
     /// @notice Sends 'amount' of the deposit of 'to' back to 'to', simulating a mint.
     /// @dev Callable by anyone, but harmless: the tokens can only ever move to their own depositor.
     function mint(address to, uint256 amount) external {
+        if (msg.sender != address(AMP)) revert NotAmplifier();
         uint256 available = ZCHF.balanceOf(address(this));
         if (available < amount) revert InsufficientDeposit(available, amount);
         ZCHF.transfer(to, amount);
@@ -54,6 +56,7 @@ contract TestAmplifier is IFrankencoinMinter {
     /// @notice Takes 'amount' from 'from' and credits it back to their deposit, simulating a burn.
     /// @dev Requires an allowance from 'from' to this contract.
     function burnFrom(address from, uint256 amount) external {
+        if (msg.sender != address(AMP)) revert NotAmplifier();
         ZCHF.transferFrom(from, address(this), amount);
     }
 }
