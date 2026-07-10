@@ -10,17 +10,16 @@ import "../../erc20/IERC4626.sol";
 
 /**
  * Equips the FPS2 token with minting and redemption functionality that is compatible with the ERC-4626 standard.
- * 
+ *
  * While FPS2 wraps FPS1 tokens, minting and redemption is done directly in ZCHF, making this effectively a ZCHF vault token.
- * 
+ *
  * To discourage large-scale redemptions, the redemption price drops fast on redemptions, leading to a potentially large spread.
- * 
+ *
  * This spread is closed linearly over the course of a week. For large redemptions, it is recommended to spread the redemptions into
  * tranches that are executed over a longer period of time.
  */
 abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
-
-     // How long it takes for the price to fully recover (linearly) after a redemption
+    // How long it takes for the price to fully recover (linearly) after a redemption
     uint256 public constant RECOVERY_PERIOD = 7 days;
 
     IEquity public immutable FPS1;
@@ -55,9 +54,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * Convert a given monetary amount into shares at the current price.
-     * 
+     *
      * This is the inverse method of 'convertToAssets' and based on the current price of Frankencoin Pool Shares (FPS).
-     * 
+     *
      * It disregards slippage, fees, redemption discounts and other factors that would apply when actually minting or
      * redeeming FPS2 tokens.
      */
@@ -67,7 +66,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * The price of the given amount of assets based on the current price of the shares.
-     * 
+     *
      * This can be used to calculate the market value of a given number of shares, for example when showing the value
      * of a user's portfolio in a wallet app. It must not be confused with "previewRedeem", which returns a much
      * lower number for significant redemptions due to the underlying bonding curve and slippage.
@@ -78,7 +77,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * The marginal price when buying FPS2 with ZCHF.
-     * 
+     *
      * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
     function ask() public view returns (uint256) {
@@ -87,7 +86,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * @notice The marginal redemption price of one FPS2 in ZCHF, reflecting the current discount.
-     * 
+     *
      * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
     function bid() public view returns (uint256) {
@@ -120,7 +119,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * Deposit ZCHF to receive FPS2 tokens with frontrunning protection.
-     * 
+     *
      * @param amount          ZCHF to invest
      * @param expectedShares  Minimum FPS2 shares expected
      * @return The number of FPS2 shares minted
@@ -176,13 +175,13 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      */
     function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
         uint256 fps1Supply = FPS1.totalSupply();
-        uint256 worstCaseUndershoot = 3 * fps1Supply / 1e18;
+        uint256 worstCaseUndershoot = (3 * fps1Supply) / 1e18;
         uint256 growthFactor = _divD18(fps1Supply + shares + worstCaseUndershoot, fps1Supply);
         uint256 capitalGrowth = _mulD18(_mulD18(growthFactor, growthFactor), growthFactor);
         uint256 capitalNeeded = _mulD18(ZCHF.equity(), capitalGrowth) - ZCHF.equity();
-        return capitalNeeded * 1000 / 997;
+        return (capitalNeeded * 1000) / 997;
     }
-    
+
     function _notifyInvestment(uint256 fpsShares) internal {
         uint256 recent = weightedRecentRedemptions();
         if (recent == 0) {
@@ -198,20 +197,36 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     // ==================== Withdraw & Redeem ====================
 
     function maxWithdraw(address owner) public view returns (uint256) {
-        return previewRedeem(balanceOf(owner));
+        if (redemptionsEnabled()) {
+            uint256 cap = totalSupply() / 10; // withdraw at most 10% of all shares at once
+            uint256 balance = balanceOf(owner);
+            return previewRedeem(cap < balance ? cap : balance);
+        } else {
+            return 0;
+        }
     }
 
     function calculateEffectiveProceeds(uint256 currentSupply, uint256 recent, uint256 latest, uint256 proceeds) internal pure returns (uint256) {
         return _mulD18(proceeds, discountPure(currentSupply, recent, latest));
     }
 
+    /**
+     * Returns the number of shares that result from withdrawing the given number of assets.
+     * 
+     * Reverts with a RedemptionLimitExceeded error if the requested amount would imply redeeming more than 10% of all shares at once.
+     * 
+     * If you want to redeem more than 10% of all shares at once, use the redeem function. Generally, it is recommended to split large redemptions/withdrawals
+     * into smaller tranches as the discount calculation slightly favors multiple smaller redemptions over a single large redemption. The 10% cap helps
+     * protecting the users from unnecessary losses when withdrawing. Also, it helps to spread large redemptions over multiple days or weeks.
+     */
     function previewWithdraw(uint256 assets) public view returns (uint256) {
         return _findSharesForAssets(assets);
     }
 
     /**
-     * @notice Withdraw exactly the requested ZCHF by burning the necessary FPS2 shares.
+     * @notice Withdraw at least the requested ZCHF by burning the necessary FPS2 shares.
      * The required shares are found via binary search on the discount curve.
+     * It is possible for the returned amount to slightly overshoot by a dust amount of ZCHF due to rounding.
      */
     function withdraw(uint256 assets, address receiver, address owner) public returns (uint256) {
         uint256 shares = _findSharesForAssets(assets);
@@ -246,16 +261,20 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     function redemptionsEnabled() internal view virtual returns (bool);
 
+    /**
+     * The maximum amount the owner can redeem at the moment or 0 if redemptions are disabled.
+     * This is the same as the owner's FPS2 balance.
+     */
     function maxRedeem(address owner) public view returns (uint256) {
-        return redemptionsEnabled() ? previewRedeem(balanceOf(owner)) : 0;
+        return redemptionsEnabled() ? balanceOf(owner) : 0;
     }
 
+    /**
+     * Returns the ZCHF proceeds the user would get by redeeming the given number of shares, ignoring whether
+     * the user actually has enough shares and also ignoring whether redemptions are actually enabled at the moment.
+     */
     function previewRedeem(uint256 shares) public view returns (uint256) {
-        if (redemptionsEnabled()) {
-            return calculateEffectiveProceeds(totalSupply(), weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
-        } else {
-            return 0;
-        }
+        return calculateEffectiveProceeds(totalSupply(), weightedRecentRedemptions(), shares, FPS1.calculateProceeds(shares));
     }
 
     /**
@@ -285,7 +304,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         require(proceeds >= expectedProceeds);
         return proceeds;
     }
-    
+
     function _redeem(address from, address to, uint256 shares) internal virtual returns (uint256) {
         if (!redemptionsEnabled()) revert RedemptionsDisabled();
         if (msg.sender != from) _useAllowance(from, msg.sender, shares);
@@ -335,7 +354,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
         if (elapsed >= RECOVERY_PERIOD) {
             return 0;
         } else {
-            return recentlyRedeemed * (RECOVERY_PERIOD - elapsed) / RECOVERY_PERIOD;
+            return (recentlyRedeemed * (RECOVERY_PERIOD - elapsed)) / RECOVERY_PERIOD;
         }
     }
 
@@ -347,5 +366,4 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     function currentDiscount(uint256 shares) public view returns (uint256) {
         return discount(weightedRecentRedemptions(), shares);
     }
-
 }
