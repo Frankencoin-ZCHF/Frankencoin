@@ -65,7 +65,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
      * This ensures that an attacked cannot reduce the voting power of this contract below 2/3 of all votes by redeeming and investing in a loop.
      */
     function redemptionsEnabled() internal view override returns (bool) {
-        return isBinding();
+        return isBinding() && FPS1.canRedeem(address(this));
     }
 
     /**
