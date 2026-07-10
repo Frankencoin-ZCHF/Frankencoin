@@ -45,11 +45,13 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * Total assets that can potentially be redeemed over time, disregarding the redemption discount, but including the 0.3%
-     * fee of the underlying FPS1 system.
+     * Total assets attributable to the FPS2 holders collectively.
+     * 
+     * This is the share of the total equity capital held by FPS2 holders, which is proportional to their share of the total FPS1 supply.
      */
     function totalAssets() public view returns (uint256) {
-        return FPS1.calculateProceeds(FPS1.balanceOf(address(this)));
+        // No overflow risk in any realistic scenario. Equity capital would need to exceed the value of all the assets in the world.
+        return ZCHF.equity() * totalSupply() / FPS1.totalSupply();
     }
 
     /**
