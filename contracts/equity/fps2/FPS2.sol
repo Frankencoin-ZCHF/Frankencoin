@@ -59,6 +59,11 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
         emit Wrapped(msg.sender, amount);
     }
 
+    /**
+     * Only allow redemptions when the contract is binding, i.e. when more than 2/3 of all votes are controlled by this contract.
+     * 
+     * This ensures that an attacked cannot reduce the voting power of this contract below 2/3 of all votes by redeeming and investing in a loop.
+     */
     function redemptionsEnabled() internal view override returns (bool) {
         return isBinding();
     }
@@ -93,12 +98,16 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
     /**
      * Unwrap FPS2 into FPS1.
      *
-     * This can only be done while not binding and even when FPS is not binding, the
-     * later joiners must wait for the earlier joiners to unwrap first.
+     * Unwrapping is only allowed for those with an above-average holding duration in order to prevent vote destruction attacks
+     * where an attacker wraps and unwraps FPS2 in a loop to destroy the votes of this contract in the FPS1 contract.
+     * 
+     * In the initial design, unwrapping was only allowed while the contract was not binding. However, we decided to relax this restricution
+     * in order to allow for a smoother transition from FPS2 to a future FPS3 contract (in case that is ever needed). Generally, unwrapping
+     * your FPS2 puts you in a strictly worse position as you cannot redeem any more fore 90 days, you temporarily lose all voting power, and
+     * you are at risk of getting shot by FPS2 holders such that you will never regain any voting power unless you join FPS2 agin.
      */
     function unwrap(uint256 amount) external {
-        if (isBinding()) revert Binding();
-        if (holdingDuration(msg.sender) >= averageHoldingDuration()) revert NotFIFO();
+        if (holdingDuration(msg.sender) < averageHoldingDuration()) revert NotFIFO();
         _burn(msg.sender, amount);
         FPS1.transfer(msg.sender, amount);
         emit Unwrapped(msg.sender, amount);
