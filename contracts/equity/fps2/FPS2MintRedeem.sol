@@ -46,7 +46,8 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * Total assets that can potentially be redeemed over time, disregarding the redemption discount.
+     * Total assets that can potentially be redeemed over time, disregarding the redemption discount, but including the 0.3%
+     * fee of the underlying FPS1 system.
      */
     function totalAssets() public view returns (uint256) {
         return FPS1.calculateProceeds(FPS1.balanceOf(address(this)));
@@ -169,11 +170,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Binary search for the minimum ZCHF needed to receive at least the given number of FPS shares.
-     * 
-     * Can be slightly off due to approximations when doing the calculation in the other direction.
-     * 
-     * TODO: test accuracy, review calculation method.
+     * Calculates the Frankencoins needed to buy the given number of FPS2 shares. The returned value
+     * is guaranteed to be sufficient to mint the requested number of shares, but may be slightly higher
+     * than necessary due to rounding.
      */
     function _findAssetsForShares(uint256 shares) internal view returns (uint256) {
         uint256 fps1Supply = FPS1.totalSupply();
