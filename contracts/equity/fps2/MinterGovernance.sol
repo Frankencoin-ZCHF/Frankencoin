@@ -104,6 +104,7 @@ contract MinterGovernance is GovernanceModule {
      */
     function denyMinter(address minter, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
         ZCHF.denyMinter(minter, defaultHelper(), message);
+        delete announcements[minter]; // clear the announcement if it exists, so that the minter can be announced and denied again in the future
     }
 
     // ==================== Position governance ====================
@@ -118,6 +119,6 @@ contract MinterGovernance is GovernanceModule {
         IPosition(position).deny(defaultHelper(), message);
     }
 
-    // TODO: enforce longer position approval process for new collateral.
+    // TODO: enforce longer position approval process for new collateral when introducing MintingHub3.
 
 }
