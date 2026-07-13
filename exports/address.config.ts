@@ -34,12 +34,15 @@ export const ADDRESS: ChainAddressMap = {
     rollerV2: "0xAD0107D3Da540Fd54b1931735b65110C909ea6B6",
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
+    cloneHelper: "0x55cD2820735Db56ca0965BE224D71994265F8bee",
 
     // stablecoin swap bridges
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
     xchfToken: "0xb4272071ecadd69d933adcd19ca99fe80664fc08",
     stablecoinBridgeVCHF: "0x3b71ba73299f925a837836160c3e1fec74340403",
     vchfToken: "0x79d4f0232A66c4c91b89c76362016A1707CFBF4f",
+    stablecoinBridgeCHFAU: "0x3e445ff4ddDf0ff8aE7458c9746eD80bD664F6C1",
+    chfauToken: "0xBD4DfC058eb95b8De5ceAF39966A1a70F5556F78",
 
     // multi chain support
     transferReference: "0xf98c221661F51578f5E5236B189a493E2a8a1916",

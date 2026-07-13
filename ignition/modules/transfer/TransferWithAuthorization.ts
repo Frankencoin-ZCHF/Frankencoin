@@ -1,29 +1,27 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { storeConstructorArgs } from "../../../helper/store.args";
 import { ADDRESS } from "../../../exports/address.config";
-import { mainnet } from "viem/chains";
 import { Address } from "viem";
+import { base } from "viem/chains";
 
 // config and select
-export const NAME: string = "Savings"; // <-- select smart contract
-export const FILE: string = "SavingsReferral"; // <-- name exported file
+export const NAME: string = "TransferWithAuthorization";
+export const FILE: string = "TransferWithAuthorization";
 export const MOD: string = NAME + "Module";
 console.log(NAME);
 
 // params
 export type DeploymentParams = {
   zchf: Address;
-  rate: number;
 };
 
 export const params: DeploymentParams = {
-  zchf: ADDRESS[mainnet.id].frankencoin,
-  rate: 30_000, // 3% in ppm
+  zchf: ADDRESS[base.id].ccipBridgedFrankencoin, // 0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553
 };
 
-export type ConstructorArgs = [Address, number];
+export type ConstructorArgs = [Address];
 
-export const args: ConstructorArgs = [params.zchf, params.rate];
+export const args: ConstructorArgs = [params.zchf];
 
 console.log("Imported Params:");
 console.log(params);
@@ -36,7 +34,6 @@ console.log(args);
 // fail safe
 process.exit();
 
-// deploy module
 export default buildModule(MOD, (m) => {
   return {
     [NAME]: m.contract(NAME, args),
