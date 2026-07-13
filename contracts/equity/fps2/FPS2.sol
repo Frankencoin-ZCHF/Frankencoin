@@ -50,6 +50,7 @@ contract FPS2 is AccumulatingVotesToken, FPS2MintRedeem {
      * @param amount  Number of FPS to wrap
      */
     function wrap(uint256 amount) external {
+        if (amount == 0) return; // nothing to do
         uint256 votesBefore = FPS1.votes(msg.sender);
         IERC20(address(FPS1)).transferFrom(msg.sender, address(this), amount);
         uint256 votesAfter = FPS1.votes(msg.sender);

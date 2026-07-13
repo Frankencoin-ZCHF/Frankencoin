@@ -6,8 +6,9 @@ import {
   Equity,
   Frankencoin,
   FPS2,
-  GovernanceFactory,
-  MainnetGovernance,
+  MinterGovernance,
+  MainnetVotes,
+  TestGovernanceFactory,
   StablecoinBridge,
   TestToken,
 } from "../typechain";
@@ -26,7 +27,21 @@ describe("FPS2 Tests", () => {
   let zchf: Frankencoin;
   let xchf: TestToken;
   let bridge: StablecoinBridge;
-  let fps2Gov: MainnetGovernance;
+  let minterGov: MinterGovernance;
+  // The IGovernance vote contract (reads FPS2 votes, provides checkQualified/delegateVoteTo/votesDelegated)
+  let mainnetVotes: MainnetVotes;
+  // Address FPS2 delegates its FPS1 votes to (the governance cluster helper == InterestGovernance)
+  let govHelper: string;
+
+  // Make FPS2 "binding" (control > 2/3 of FPS1 votes) by wrapping the owner's directly-held FPS1 into FPS2,
+  // leaving FPS2 as effectively the sole FPS1 holder. Required for redemptions to be enabled.
+  async function bindFps2() {
+    const ownerFps1 = await equity.balanceOf(owner.address);
+    if (ownerFps1 > 0n) {
+      await equity.approve(await fps2.getAddress(), ownerFps1);
+      await fps2.wrap(ownerFps1);
+    }
+  }
 
   before(async () => {
     [owner, alice, bob] = await ethers.getSigners();
@@ -62,33 +77,35 @@ describe("FPS2 Tests", () => {
     await zchf.approve(await equity.getAddress(), floatToDec18(10_000));
     await equity.invest(floatToDec18(10_000), 0);
 
-    // Deploy GovernanceFactory first
-    const govFactoryFactory = await ethers.getContractFactory("GovernanceFactory");
-    const govFactory = await govFactoryFactory.deploy();
-
-    // Deploy FPS2 with mock addresses for CCIP/leadrate (not tested here)
-    const fps2Factory = await ethers.getContractFactory("FPS2");
-    fps2 = await fps2Factory.deploy(
-      await govFactory.getAddress(),
+    // Deploy a test governance factory wired to the local Frankencoin/Equity. The production
+    // GovernanceFactory/InnerFactory hardcode mainnet addresses and branch on chainid, so they
+    // cannot wire to a fresh local FPS1 (which is required for FPS2 to become "binding").
+    const testFactoryFactory = await ethers.getContractFactory("TestGovernanceFactory");
+    const testFactory: TestGovernanceFactory = await testFactoryFactory.deploy(
       await zchf.getAddress(),
-      await equity.getAddress(),
-      ethers.ZeroAddress, // ccipAdmin
-      ethers.ZeroAddress, // borrowing leadrate
-      ethers.ZeroAddress, // savings leadrate
-      ethers.ZeroAddress, // CCIP router
-      ethers.ZeroAddress  // LINK token
+      await equity.getAddress()
     );
 
-    // Retrieve MainnetGovernance address from equity's delegation
-    const fps2GovAddress = await equity.delegates(await fps2.getAddress());
-    fps2Gov = await ethers.getContractAt("MainnetGovernance", fps2GovAddress);
+    // FPS2's constructor calls factory.deploy(this), which deploys the governance cluster and
+    // delegates FPS2's FPS1 votes to the returned helper.
+    const fps2Factory = await ethers.getContractFactory("FPS2");
+    fps2 = await fps2Factory.deploy(
+      await testFactory.getAddress(),
+      await equity.getAddress(), // fps1Gov
+      await zchf.getAddress()
+    );
+
+    // MinterGovernance module exposes suggestMinter/denyMinter for the governance tests.
+    minterGov = await ethers.getContractAt("MinterGovernance", await testFactory.minterGov());
+    mainnetVotes = await ethers.getContractAt("MainnetVotes", await testFactory.governance());
+    govHelper = await testFactory.interestGov(); // the helper FPS2 delegates its FPS1 votes to
   });
 
   // ==================== Initialization ====================
 
   describe("initialization", () => {
     it("should have correct name and symbol", async () => {
-      expect(await fps2.name()).to.equal("Frankencoin Pool Share 2");
+      expect(await fps2.name()).to.equal("Frankencoin Pool Shares 2");
       expect(await fps2.symbol()).to.equal("FPS2");
     });
 
@@ -126,10 +143,10 @@ describe("FPS2 Tests", () => {
       expect(await fps2.totalAssets()).to.equal(0);
     });
 
-    it("should have delegated FPS1 votes to FPS2Governance", async () => {
+    it("should have delegated FPS1 votes to the governance helper", async () => {
       const fps2Address = await fps2.getAddress();
       const delegatee = await equity.delegates(fps2Address);
-      expect(delegatee).to.equal(await fps2Gov.getAddress());
+      expect(delegatee).to.equal(govHelper);
     });
   });
 
@@ -171,19 +188,19 @@ describe("FPS2 Tests", () => {
       ).to.be.reverted;
     });
 
-    it("deposit with slippage protection should revert if shares too low", async () => {
+    it("depositExpected should revert if shares too low", async () => {
       const amount = floatToDec18(10_000);
       await zchf.approve(await fps2.getAddress(), amount);
       await expect(
-        fps2["deposit(uint256,uint256)"](amount, floatToDec18(999_999))
+        fps2.depositExpected(amount, owner.address, floatToDec18(999_999))
       ).to.be.revertedWithoutReason();
     });
 
-    it("deposit with slippage protection should succeed when shares met", async () => {
+    it("depositExpected should succeed when shares met", async () => {
       const amount = floatToDec18(10_000);
       await zchf.approve(await fps2.getAddress(), amount);
       const expectedShares = await equity.calculateShares(amount);
-      await fps2["deposit(uint256,uint256)"](amount, expectedShares);
+      await fps2.depositExpected(amount, owner.address, expectedShares);
 
       expect(await fps2.balanceOf(owner.address)).to.be.greaterThanOrEqual(expectedShares);
     });
@@ -213,6 +230,7 @@ describe("FPS2 Tests", () => {
       // First deposit and redeem to set the counter
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
       await evm_increaseTime(NINETY_DAYS + 60);
 
       await fps2["redeem(address,uint256)"](owner.address, floatToDec18(100));
@@ -263,12 +281,14 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
     });
 
-    it("should revert before FPS1 90-day holding period", async () => {
+    it("should revert before FPS1 90-day holding period (redemptions disabled)", async () => {
+      // FPS2 is binding, but its FPS1 holding is younger than 90 days, so redemptions are disabled.
       await expect(
         fps2["redeem(uint256,address,address)"](floatToDec18(1), owner.address, owner.address)
-      ).to.be.revertedWithoutReason();
+      ).to.be.revertedWithCustomError(fps2, "RedemptionsDisabled");
     });
 
     it("should succeed after 90-day holding period", async () => {
@@ -330,6 +350,7 @@ describe("FPS2 Tests", () => {
     });
 
     it("maxRedeem should return owner's balance", async () => {
+      await evm_increaseTime(NINETY_DAYS + 60); // redemptions must be enabled (binding + matured holding)
       expect(await fps2.maxRedeem(owner.address)).to.equal(await fps2.balanceOf(owner.address));
     });
 
@@ -349,6 +370,7 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -378,6 +400,7 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -401,9 +424,13 @@ describe("FPS2 Tests", () => {
       expect(received).to.be.approximately(assets, assets / 100n);
     });
 
-    it("maxWithdraw should return effective proceeds for full balance", async () => {
+    it("maxWithdraw should return effective proceeds for the withdrawable amount", async () => {
+      // withdraw is capped at 10% of supply, so maxWithdraw = previewRedeem(min(10% cap, balance)).
+      const cap = (await fps2.totalSupply()) / 10n;
+      const balance = await fps2.balanceOf(owner.address);
+      const amount = cap < balance ? cap : balance;
       const maxW = await fps2.maxWithdraw(owner.address);
-      const preview = await fps2.previewRedeem(await fps2.balanceOf(owner.address));
+      const preview = await fps2.previewRedeem(amount);
       expect(maxW).to.equal(preview);
     });
   });
@@ -414,6 +441,7 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
     });
 
     it("weightedRecentRedemptions should be 0 initially", async () => {
@@ -544,6 +572,7 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -629,30 +658,8 @@ describe("FPS2 Tests", () => {
         .withArgs(alice.address, fps1Balance);
     });
 
-    it("should revert unwrap when binding", async () => {
-      // To become binding, FPS2 must hold > 50% of FPS1 supply.
-      // Owner has FPS1 from initial seed. Get total supply.
-      const totalFps1 = await equity.totalSupply();
-
-      // Alice wraps her FPS1. If alice holds >50%, it becomes binding.
-      // Ensure alice has majority by also having owner invest through FPS2
-      const ownerFps1 = await equity.balanceOf(owner.address);
-      if (ownerFps1 > 0n) {
-        await equity.approve(await fps2.getAddress(), ownerFps1);
-        await fps2.wrap(ownerFps1);
-      }
-
-      const aliceFps1 = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), aliceFps1);
-      await fps2.connect(alice).wrap(aliceFps1);
-
-      // Now FPS2 holds all FPS1 -> binding
-      expect(await fps2.isBinding()).to.be.true;
-
-      await expect(
-        fps2.connect(alice).unwrap(floatToDec18(1))
-      ).to.be.revertedWithCustomError(fps2, "Binding");
-    });
+    // Note: the current design intentionally relaxed the "cannot unwrap while binding" rule (see FPS2.unwrap).
+    // Unwrapping is now only gated by the FIFO/holding-duration check, not by the binding state.
 
     it("should require FPS1 approval to wrap", async () => {
       await expect(
@@ -732,29 +739,29 @@ describe("FPS2 Tests", () => {
     });
 
     it("should allow delegating votes", async () => {
-      await fps2Gov.connect(alice).delegateVoteTo(owner.address);
-      expect(await fps2Gov.delegates(alice.address)).to.equal(owner.address);
+      await mainnetVotes.connect(alice).delegateVoteTo(owner.address);
+      expect(await mainnetVotes.delegates(alice.address)).to.equal(owner.address);
     });
 
     it("votesDelegated should include helper votes", async () => {
-      await fps2Gov.connect(alice).delegateVoteTo(owner.address);
+      await mainnetVotes.connect(alice).delegateVoteTo(owner.address);
       await evm_increaseTime(100);
 
-      const without = await fps2Gov.votesDelegated(owner.address, []);
-      const withHelpers = await fps2Gov.votesDelegated(owner.address, [alice.address]);
+      const without = await mainnetVotes.votesDelegated(owner.address, []);
+      const withHelpers = await mainnetVotes.votesDelegated(owner.address, [alice.address]);
       expect(withHelpers).to.be.greaterThan(without);
     });
 
     it("checkQualified should pass for major holder (>= 1%)", async () => {
       await evm_increaseTime(100);
-      await fps2Gov.checkQualified(owner.address, []);
+      await mainnetVotes.checkQualified(owner.address, []);
     });
 
     it("checkQualified should revert for non-holder", async () => {
       await evm_increaseTime(100);
       await expect(
-        fps2Gov.checkQualified(bob.address, [])
-      ).to.be.revertedWithCustomError(fps2Gov, "NotQualified");
+        mainnetVotes.checkQualified(bob.address, [])
+      ).to.be.revertedWithCustomError(mainnetVotes, "NotQualified");
     });
   });
 
@@ -795,20 +802,7 @@ describe("FPS2 Tests", () => {
     });
   });
 
-  // ==================== Restructure Cap Table ====================
-
-  describe("restructureCapTable", () => {
-    it("should revert when equity is above minimum", async () => {
-      // System is healthy, restructure should fail on FPS1 side
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await evm_increaseTime(100);
-
-      await expect(
-        fps2.restructureCapTable([], [], [])
-      ).to.be.reverted;
-    });
-  });
+  // restructureCapTable was intentionally removed from FPS2 (see the note in FPS2.sol); no test needed.
 
   // ==================== ERC-4626 View Consistency ====================
 
@@ -816,6 +810,7 @@ describe("FPS2 Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
       await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFps2();
     });
 
     it("convertToShares should be inverse of ask price", async () => {
@@ -841,9 +836,10 @@ describe("FPS2 Tests", () => {
       expect(await fps2.maxMint(owner.address)).to.equal(ethers.MaxUint256);
     });
 
-    it("totalAssets should reflect FPS1 value of held shares", async () => {
-      const supply = await fps2.totalSupply();
-      const expectedAssets = await equity.calculateProceeds(supply);
+    it("totalAssets should reflect the FPS2 share of total equity", async () => {
+      // totalAssets = ZCHF.equity() * FPS2.totalSupply() / FPS1.totalSupply()
+      const expectedAssets =
+        ((await zchf.equity()) * (await fps2.totalSupply())) / (await equity.totalSupply());
       expect(await fps2.totalAssets()).to.equal(expectedAssets);
     });
   });
@@ -863,10 +859,10 @@ describe("FPS2 Tests", () => {
       const fee = floatToDec18(5_000);
       const period = NINETY_DAYS;
 
-      await zchf.connect(alice).approve(await fps2Gov.getAddress(), fee);
-      await fps2Gov.connect(alice).suggestMinter(minter, period, fee, "test minter");
+      await zchf.connect(alice).approve(await minterGov.getAddress(), fee);
+      await minterGov.connect(alice).suggestMinter(minter, period, fee, "test minter");
 
-      expect(await fps2Gov.announcements(minter)).to.be.greaterThan(0);
+      expect(await minterGov.announcements(minter)).to.be.greaterThan(0);
       expect(await zchf.minters(minter)).to.be.greaterThan(0);
     });
 
@@ -874,25 +870,25 @@ describe("FPS2 Tests", () => {
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(5_000);
 
-      await zchf.connect(alice).approve(await fps2Gov.getAddress(), fee);
-      await expect(fps2Gov.connect(alice).suggestMinter(minter, NINETY_DAYS, fee, "test"))
-        .to.emit(fps2Gov, "MinterAnnounced");
+      await zchf.connect(alice).approve(await minterGov.getAddress(), fee);
+      await expect(minterGov.connect(alice).suggestMinter(minter, NINETY_DAYS, fee, "test"))
+        .to.emit(minterGov, "MinterAnnounced");
     });
 
     it("should revert if application period < 90 days", async () => {
       const fee = floatToDec18(5_000);
-      await zchf.connect(alice).approve(await fps2Gov.getAddress(), fee);
+      await zchf.connect(alice).approve(await minterGov.getAddress(), fee);
       await expect(
-        fps2Gov.connect(alice).suggestMinter(ethers.Wallet.createRandom().address, 10 * 86400, fee, "test")
-      ).to.be.revertedWithCustomError(fps2Gov, "PeriodTooShort");
+        minterGov.connect(alice).suggestMinter(ethers.Wallet.createRandom().address, 10 * 86400, fee, "test")
+      ).to.be.revertedWithCustomError(minterGov, "PeriodTooShort");
     });
 
     it("should revert if fee < MIN_APPLICATION_FEE", async () => {
       const lowFee = floatToDec18(100);
-      await zchf.connect(alice).approve(await fps2Gov.getAddress(), lowFee);
+      await zchf.connect(alice).approve(await minterGov.getAddress(), lowFee);
       await expect(
-        fps2Gov.connect(alice).suggestMinter(ethers.Wallet.createRandom().address, NINETY_DAYS, lowFee, "test")
-      ).to.be.revertedWithCustomError(fps2Gov, "FeeTooLow");
+        minterGov.connect(alice).suggestMinter(ethers.Wallet.createRandom().address, NINETY_DAYS, lowFee, "test")
+      ).to.be.revertedWithCustomError(minterGov, "FeeTooLow");
     });
 
     it("denyUnannouncedMinter should veto unannounced minter", async () => {
@@ -905,7 +901,7 @@ describe("FPS2 Tests", () => {
       // Minter should exist before deny
       expect(await zchf.minters(minter)).to.be.greaterThan(0);
 
-      await fps2Gov.connect(bob).denyUnannouncedMinter(minter);
+      await minterGov.connect(bob).denyUnannouncedMinter(minter);
 
       // Minter should be removed
       expect(await zchf.minters(minter)).to.equal(0);
@@ -918,47 +914,47 @@ describe("FPS2 Tests", () => {
       await zchf.connect(alice).suggestMinter(minter, 10 * 86400, fee, "bypass");
 
       // Fund reward pool
-      await zchf.transfer(await fps2Gov.getAddress(), floatToDec18(1_000));
+      await zchf.transfer(await minterGov.getAddress(), floatToDec18(1_000));
 
       // checkReward should show expected reward
-      const expectedReward = await fps2Gov.checkReward(minter);
+      const expectedReward = await minterGov.checkReward(minter);
       expect(expectedReward).to.equal(floatToDec18(100));
 
-      await expect(fps2Gov.connect(bob).denyUnannouncedMinter(minter))
-        .to.emit(fps2Gov, "Rewarded");
+      await expect(minterGov.connect(bob).denyUnannouncedMinter(minter))
+        .to.emit(minterGov, "Rewarded");
     });
 
     it("denyUnannouncedMinter should revert for properly announced minter", async () => {
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(5_000);
-      await zchf.approve(await fps2Gov.getAddress(), fee);
-      await fps2Gov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
+      await zchf.approve(await minterGov.getAddress(), fee);
+      await minterGov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
 
       await expect(
-        fps2Gov.denyUnannouncedMinter(minter)
-      ).to.be.revertedWithCustomError(fps2Gov, "MinterCorrectlyAnnounced");
+        minterGov.denyUnannouncedMinter(minter)
+      ).to.be.revertedWithCustomError(minterGov, "MinterCorrectlyAnnounced");
     });
 
     it("denyMinter should require qualified FPS2 holder", async () => {
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(5_000);
-      await zchf.approve(await fps2Gov.getAddress(), fee);
-      await fps2Gov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
+      await zchf.approve(await minterGov.getAddress(), fee);
+      await minterGov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
 
-      // Bob has no FPS2 votes
+      // Bob has no FPS2 votes; NotQualified is raised by the governance vote contract
       await expect(
-        fps2Gov.connect(bob).denyMinter(minter, [], "veto")
-      ).to.be.revertedWithCustomError(fps2Gov, "NotQualified");
+        minterGov.connect(bob).denyMinter(minter, [], "veto")
+      ).to.be.revertedWithCustomError(mainnetVotes, "NotQualified");
     });
 
     it("denyMinter should succeed for qualified holder", async () => {
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(5_000);
-      await zchf.approve(await fps2Gov.getAddress(), fee);
-      await fps2Gov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
+      await zchf.approve(await minterGov.getAddress(), fee);
+      await minterGov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
 
       // Owner has FPS2 votes and should be qualified
-      await fps2Gov.denyMinter(minter, [], "veto");
+      await minterGov.denyMinter(minter, [], "veto");
       expect(await zchf.minters(minter)).to.equal(0);
     });
   });
@@ -970,6 +966,7 @@ describe("FPS2 Tests", () => {
       const investAmount = floatToDec18(50_000);
       await zchf.approve(await fps2.getAddress(), investAmount);
       await fps2["deposit(uint256,address)"](investAmount, owner.address);
+      await bindFps2(); // required for redemptions to be enabled
 
       const fps2Balance = await fps2.balanceOf(owner.address);
       expect(fps2Balance).to.be.greaterThan(0);
@@ -1007,6 +1004,7 @@ describe("FPS2 Tests", () => {
 
       expect(await fps2.balanceOf(alice.address)).to.equal(aliceFps1);
 
+      await bindFps2(); // wrap owner's remaining FPS1 so FPS2 controls > 2/3 of votes
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Redeem FPS2
@@ -1027,6 +1025,7 @@ describe("FPS2 Tests", () => {
       await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(20_000));
       await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(20_000), alice.address);
 
+      await bindFps2(); // wrap owner's remaining FPS1 so FPS2 is binding
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Both redeem partial amounts
@@ -1047,6 +1046,7 @@ describe("FPS2 Tests", () => {
       await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
       expect(await fps2.ask()).to.equal(await equity.price());
 
+      await bindFps2(); // required for redemptions to be enabled
       await evm_increaseTime(NINETY_DAYS + 60);
       await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
       expect(await fps2.ask()).to.equal(await equity.price());

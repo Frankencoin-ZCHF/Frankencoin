@@ -86,6 +86,10 @@ abstract contract AccumulatingVotesToken is ERC20, MathUtil {
         setTotalVotes(totalVotes() - roundingLoss - lostVotes);
     }
 
+    /**
+     * Credits the number of votes to the holder.
+     * Reverts if the holder has no balance as it is not possible to have votes without a balance.
+     */
     function creditVotes(address holder, uint256 additionalVotes) internal {
         uint256 recipientVotesBefore = votes(holder);
         uint256 balance = balanceOf(holder);
