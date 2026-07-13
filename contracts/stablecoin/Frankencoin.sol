@@ -34,7 +34,8 @@ contract Frankencoin is ERC20PermitLight, IFrankencoin {
 
     /**
      * @notice Map of minters to approval time stamps. If the time stamp is in the past, the minter contract is allowed
-     * to mint Frankencoins.
+     * to mint Frankencoins. If it is in the future, the minter application is pending and it can be denied.
+     * The entry gets deleted when a minter is denied. If it is zero, there is no valid minter for that address.
      */
     mapping(address minter => uint256 validityStart) public minters;
 

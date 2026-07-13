@@ -103,7 +103,11 @@ contract MinterGovernance is GovernanceModule {
      * No reward is paid out in this case. If you want a reward, call denyUnannouncedMinter instead.
      */
     function denyMinter(address minter, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
-        ZCHF.denyMinter(minter, defaultHelper(), message);
+        if (ZCHF.minters(minter) == 0) {
+            // There is no minter to deny. Maybe it got denied directly. Instead of reverting, we still allow the announcement to be cleared.
+        } else {
+            ZCHF.denyMinter(minter, defaultHelper(), message);
+        } 
         delete announcements[minter]; // clear the announcement if it exists, so that the minter can be announced and denied again in the future
     }
 
