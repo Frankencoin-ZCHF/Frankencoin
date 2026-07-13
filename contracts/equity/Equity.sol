@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "./Governance.sol";
 import "../stablecoin/Frankencoin.sol";
 import "../utils/MathUtil.sol";
-import "../erc20/IERC677Receiver.sol";
 
 /**
  * @title Equity
@@ -88,7 +87,7 @@ contract Equity is Governance, ERC20PermitLight, MathUtil {
     }
 
     /**
-     * @notice Returns the price of one FPS in ZCHF with 18 decimals precision.
+     * @notice Returns the price of one FPS in ZCHF as an 18 decimals number.
      */
     function price() public view returns (uint256) {
         uint256 equity = zchf.equity();

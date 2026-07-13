@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "./ICCIPAdmin.sol";
 import {IGovernance} from "../equity/IGovernance.sol";
 import {ITokenPool} from "./ITokenPool.sol";
 import {TokenAdminRegistry} from "@chainlink/contracts-ccip/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol";
@@ -19,12 +20,7 @@ import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/src/v0.8/ccip
  * For example, any qualified users can at any time adjust the rate limit of the bridge. But the other, less time-critical
  * functions are exercised in two steps, a proposal and a delayed actual execution if no veto has been cast in the meantime.
  */
-contract CCIPAdmin {
-    struct RemotePoolUpdate {
-        bool add; // true if adding, false if removing
-        uint64 chain;
-        bytes poolAddress;
-    }
+contract CCIPAdmin is ICCIPAdmin {
 
     uint64 public constant DAY = 24 * 60 * 60;
 
@@ -57,7 +53,7 @@ contract CCIPAdmin {
     event ChainRemoved(uint64 id);
     event ChainAdded(ITokenPool.ChainUpdate config);
     event AdminTransferred(address newAdmin);
-    event RateLimit(uint64 remoteChain, RateLimiter.Config inboundConfigs, RateLimiter.Config outboundConfig);
+    event RateLimit(uint64 remoteChain, RateLimiter.Config outboundConfig, RateLimiter.Config inboundConfigs);
 
     modifier onlyQualified(address[] calldata helpers) {
         GOVERNANCE.checkQualified(msg.sender, helpers);
@@ -130,12 +126,12 @@ contract CCIPAdmin {
     ///         they can be applied quickly.
     /// @dev Requires the token pool to be set
     /// @param chain The chain to set the rate limits for
-    /// @param inbound The inbound rate limits
     /// @param outbound The outbound rate limits
+    /// @param inbound The inbound rate limits
     /// @param helpers Array of helper addresses for qualification check
-    function applyRateLimit(uint64 chain, RateLimiter.Config calldata inbound, RateLimiter.Config calldata outbound, address[] calldata helpers) external onlyQualified(helpers) tokenPoolSet {
-        tokenPool.setChainRateLimiterConfig(chain, inbound, outbound);
-        emit RateLimit(chain, inbound, outbound);
+    function applyRateLimit(uint64 chain, RateLimiter.Config calldata outbound, RateLimiter.Config calldata inbound, address[] calldata helpers) external onlyQualified(helpers) tokenPoolSet {
+        tokenPool.setChainRateLimiterConfig(chain, outbound, inbound);
+        emit RateLimit(chain, outbound, inbound);
     }
     
     /// @notice Propose to add or remove remote chains

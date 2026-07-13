@@ -6,14 +6,15 @@ import "./IGovernance.sol";
 
 /**
  * Contract to consult when checking if someone has veto power.
- * Veto power is reached with 2% of the votes.
  */
 abstract contract Governance is IGovernance {
 
     /**
      * @notice The quorum in basis points. 100 is 1%.
+     * 
+     * Used to be 200 in earlier versions, most notably in FPS1.
      */
-    uint32 private constant QUORUM = 200;
+    uint32 private constant QUORUM = 100;
 
     /**
      * @notice Keeping track on who delegated votes to whom.
@@ -76,7 +77,8 @@ abstract contract Governance is IGovernance {
      */
     function checkQualified(address sender, address[] calldata helpers) public view override {
         uint256 _votes = votesDelegated(sender, helpers);
-        if (_votes * 10000 < QUORUM * totalVotes()) revert NotQualified();
+        // Switching to "<=" with FPS2 from "<" to ensure that no one is qualified when total votes are zero
+        if (_votes * 10000 <= QUORUM * totalVotes()) revert NotQualified();
     }
 
     error NotQualified();
