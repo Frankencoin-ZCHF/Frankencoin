@@ -244,6 +244,31 @@ describe("Amplifier", async () => {
       expect(await position.tickHigh()).to.be.eq(tickHigh);
     });
 
+    it("should be a minimal proxy clone of the amplifier's template", async () => {
+      const impl = (await amplifier.positionImplementation()).toLowerCase().slice(2);
+      const code = await ethers.provider.getCode(await position.getAddress());
+      // EIP-1167 minimal proxy: 45 bytes embedding the implementation address
+      expect(code.length).to.be.lessThan(2 + 45 * 2 + 2);
+      expect(code.toLowerCase()).to.contain(impl);
+    });
+
+    it("should not allow re-initializing an existing position", async () => {
+      await expect(
+        position.initialize(alice.address, tickLow, tickHigh)
+      ).revertedWithCustomError(position, "AccessDenied");
+    });
+
+    it("should not allow initializing the template directly", async () => {
+      const impl = await ethers.getContractAt(
+        "AmplifiedPosition",
+        await amplifier.positionImplementation()
+      );
+      // Only the amplifier may initialize; an external caller is rejected.
+      await expect(
+        impl.initialize(alice.address, tickLow, tickHigh)
+      ).revertedWithCustomError(impl, "AccessDenied");
+    });
+
     it("should mint", async () => {
       await usdt.approve(
         await amplifier.getAddress(),

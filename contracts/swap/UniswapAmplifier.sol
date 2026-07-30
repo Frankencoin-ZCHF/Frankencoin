@@ -8,6 +8,7 @@ import "../utils/Ownable.sol";
 import "../utils/Math.sol";
 import "./utils/IUniswapV3MintCallback.sol";
 import "../erc20/SafeERC20.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
  * @title UniswapAmplifier
@@ -51,6 +52,9 @@ contract UniswapAmplifier {
 
     uint40 public immutable EXPIRATION;
     uint256 public immutable LIMIT;
+
+    /// @notice The AmplifiedPosition template that all positions are cloned from (EIP-1167 minimal proxies).
+    address public immutable positionImplementation;
 
     uint256 public totalBorrowed;
 
@@ -98,6 +102,10 @@ contract UniswapAmplifier {
             MINIMUM_TICK = tick - MAX_DOLLAR_DEPRECIATION_TICKS;
             MAXIMUM_TICK = tick + MAX_DOLLAR_APPRECIATION_TICKS;
         }
+
+        // Deploy the position template once. Its immutable AMP is this amplifier, so all clones read the
+        // correct amplifier from the template's code while carrying their own owner/ticks in storage.
+        positionImplementation = address(new AmplifiedPosition(this));
     }
 
     /// @notice Verifies that the provided ticks are within the amplifier's allowed band [MINIMUM_TICK, MAXIMUM_TICK].
@@ -224,10 +232,11 @@ contract UniswapAmplifier {
     /// @return Address of the newly created Position
     function createAmplifiedPosition(int24 tickLow, int24 tickHigh) public returns (address) {
         checkTicks(tickLow, tickHigh);
-        AmplifiedPosition amplifier = new AmplifiedPosition(this, msg.sender, tickLow, tickHigh);
-        positionCreationDate[address(amplifier)] = block.timestamp;
-        emit AmplifiedPositionCreated(address(amplifier));
-        return address(amplifier);
+        address position = Clones.clone(positionImplementation);
+        AmplifiedPosition(position).initialize(msg.sender, tickLow, tickHigh);
+        positionCreationDate[position] = block.timestamp;
+        emit AmplifiedPositionCreated(position);
+        return position;
     }
 
     modifier onlyPosition() {
@@ -245,12 +254,15 @@ interface IFrankencoinMinter {
  * An amplified position belonging to a specific owner.
  */
 contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
+    // The amplifier is baked into the template's code, so every clone reads the correct amplifier even
+    // though it is a minimal proxy delegatecalling into this template.
     UniswapAmplifier immutable AMP;
 
-    // A position is bound to a single tick range, fixed at construction. Liquidity (L) is only comparable
+    // A position is bound to a single tick range, set once at initialization. Liquidity (L) is only comparable
     // within one range, so aggregating L across different ranges would corrupt the proportional repay accounting.
-    int24 public immutable tickLow;
-    int24 public immutable tickHigh;
+    // These cannot be immutable because clones carry their own values in storage.
+    int24 public tickLow;
+    int24 public tickHigh;
 
     uint256 public borrowed;
 
@@ -260,11 +272,20 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     event Mint(uint128 liquidityAdded, uint256 token0, uint256 token1, uint256 borrowed);
     event Burn(uint128 liquidityRemoved, uint256 token0, uint256 token1, uint256 repaid);
 
-    constructor(UniswapAmplifier parent, address owner, int24 tickLow_, int24 tickHigh_) {
+    /// @notice Only runs on the template. Clones are created via Clones.clone and configured through initialize.
+    constructor(UniswapAmplifier parent) {
         AMP = parent;
+    }
+
+    /// @notice Configures a freshly cloned position. Callable exactly once, and only by the amplifier.
+    /// @dev The owner == address(0) check doubles as the re-initialization guard: a fresh clone has no owner yet,
+    ///      and _setOwner rejects the zero address, so it can never be initialized twice.
+    function initialize(address owner_, int24 tickLow_, int24 tickHigh_) external {
+        // `owner` is the Ownable state variable: nonzero means already initialized.
+        if (owner != address(0) || msg.sender != address(AMP)) revert AccessDenied(msg.sender);
         tickLow = tickLow_;
         tickHigh = tickHigh_;
-        _setOwner(owner);
+        _setOwner(owner_);
     }
 
     /// @notice The total liquidity of this position as recorded by the pool.
