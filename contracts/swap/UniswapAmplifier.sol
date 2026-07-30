@@ -14,8 +14,6 @@ import "../erc20/SafeERC20.sol";
  *
  * Factory contract to create amplified uniswap positions for a hardcoded pool. Amplified positions are positions for which
  * the ZCHF part of the trading pair is borrowed from the Frankencoin protocol and only the other token is provided by the owner.
- * With the ZCHF side borrowed and only half of its value required as dollar collateral, the owner provides about a third
- * of the position's value, roughly tripling the fee income per unit of own capital.
  *
  * The range of the amplified position must be in a range of roughly 25% around the anchor price when the amplifier was deployed
  * (actually -13.93%/+10.52%). Another important parameter is the minimum amount of dollars that must be provided for a given amount
@@ -24,9 +22,9 @@ import "../erc20/SafeERC20.sol";
  * 
  * The parameters must be chosen with care. Exploiting it is easier than one might think. An attacker might manipulate the price
  * of the dollar upwards in the uniswap pool to the upper end of the allowed range, initiate a narrow position and immediately
- * buy the minted ZCHF at the lowest allowed price (anchor -10.52%), then manipulate the pool price back to the market price.
- * Consequently, the amplifier becomes exploitable as soon as the market price falls more than about 41% below the anchor price.
- * See exploitableAt() for the exact threshold at the current parameters.
+ * buy the minted ZCHF at the lowest allowed price (i.e. -9.52% or 1000 TICKS below the anchor in dollar terms), then manipulate
+ * the pool price back to the market price. Consequently, the amplifier becomes exploitable as soon as the market price falls more
+ * than about 41% below the anchor price. See exploitableAt() for the exact threshold at the current parameters.
  *
  **/
 contract UniswapAmplifier {
@@ -58,6 +56,7 @@ contract UniswapAmplifier {
 
     mapping(address => uint256) public positionCreationDate;
 
+    error InvalidUniswapPool();
     error AccessDenied();
     error AmplifierExpired();
     error LimitExceeded(uint256 newValue, uint256 limit);
@@ -93,6 +92,7 @@ contract UniswapAmplifier {
             MINIMUM_TICK = tick - MAX_DOLLAR_APPRECIATION_TICKS;
             MAXIMUM_TICK = tick + MAX_DOLLAR_DEPRECIATION_TICKS;
         } else {
+            if (UNISWAP_POOL.token1() != zchf_) revert InvalidUniswapPool();
             USD = IERC20(UNISWAP_POOL.token0());
             PRICE_ANCHOR_X96 = Math.mulDiv(Q96, Q96, price);
             MINIMUM_TICK = tick - MAX_DOLLAR_DEPRECIATION_TICKS;
@@ -119,8 +119,8 @@ contract UniswapAmplifier {
      * the attacker launches the attack slightly below the exploitable price, they might make a profit of 100'000 ZCHF with the
      * amplifier ending up with 9,900,000 CHF worth of USD. Should this ever happen, the Frankencoin community can either hope
      * for the dollar price to recover, at which point it becomes profitable for the attacker to repay the borrowed ZCHF and get
-     * the USD back, or they could do an expiredPublicBurn after the expiration of the amplifier with the missing ZCHF coming
-     * out of the equity pool.
+     * the USD back, or they could create a custom new minter that performs an expiredPublicBurn after the expiration
+     * with the missing ZCHF coming out of the equity pool.
      */
     function exploitableAt() public view returns (uint256) {
         // Worst case (narrow position at the strong-dollar floor): P* = P_floor + collateral, in USD per ZCHF, where
@@ -160,7 +160,7 @@ contract UniswapAmplifier {
         return Math.mulDiv(sqrtPriceX96, sqrtPriceX96, Q96);
     }
 
-    /// @notice Slippage guard: reverts unless the live pool price is within 0.1% of the expected price.
+    /// @notice Slippage guard: reverts unless the expected price is within 0.1% of the live pool price.
     /// @dev With a fixed liquidity amount and range, both token amounts of a mint or burn are a deterministic
     ///      function of the price. Pinning the price to a tight band therefore bounds the amounts on both
     ///      sides at once, protecting mints and burns against sandwiching.
@@ -176,8 +176,7 @@ contract UniswapAmplifier {
 
     /// @notice Borrows ZCHF into the pool against the owner's dollars.
     /// @dev The position's range must require enough dollars that the owner is usually better off repaying than
-    ///      walking away. For example, at an initial price of 0.85 CHF/USD, borrowing 85 CHF needs a range that
-    ///      also requires at least 50 USD, i.e. half of the borrowed value as dollar collateral.
+    ///      walking away. Check getMinimumDollars for the amount of dollars needed.
     ///      Requires the owner to have approved this contract for the pairing token.
     /// @param owner User to take the pairing tokens from
     /// @param token0Amount Amount of token0 to send to the pool
@@ -220,8 +219,8 @@ contract UniswapAmplifier {
     }
 
     /// @notice Creates a new amplified position with the msg.sender as owner, bound to the given tick range.
-    /// @param tickLow Lower limit of ticks, must be within +/- 20% of the initial price
-    /// @param tickHigh Upper limit of ticks, must be within +/- 20% of the initial price
+    /// @param tickLow Must be within what checkTicks() allows.
+    /// @param tickHigh Must be within what checkTicks() allows.
     /// @return Address of the newly created Position
     function createAmplifiedPosition(int24 tickLow, int24 tickHigh) public returns (address) {
         checkTicks(tickLow, tickHigh);
@@ -279,7 +278,7 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     /// @notice Mints the provided amount of liquidity into this position's range.
     /// @dev This function only succeeds if the caller has sufficient dollars on his address and if there is an allowance in place.
     /// @param amount Amount of liquidity to add
-    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the expected price is not within 0.1% (slippage guard) of the pool price.
     /// Set expectedPriceX96 to 0 to skip the slippage guard.
     function mint(uint128 amount, uint256 expectedPriceX96) external onlyOwner {
         AMP.checkPrice(expectedPriceX96);
@@ -308,7 +307,7 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     }
 
     /// @notice Once the amplifier has expired, let anyone burn positions and collect the underlying tokens.
-    /// @dev As long as the dollar has not declined more than about 24% to 33% below the anchor price (depending
+    /// @dev As long as the market price of the dollar has not declined too much below the anchor price (depending
     ///      on where the position's range sits within the allowed band), this can be called profitably at the
     ///      expense of the position owner. Beyond that threshold, winding down is unprofitable and the debt
     ///      may remain unpaid.
