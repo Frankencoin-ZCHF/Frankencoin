@@ -321,7 +321,7 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     ///      ZCHF are taken from the owner's address. When burning X% of the position liquidity, X% of the borrowed Frankencoins must be returned.
     ///      At the same time, accrued fees are collected.
     /// @param burnedLiquidity Liquidity to burn
-    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the expected price is not within 0.1% (slippage guard) of the pool price.
     /// @return amounts of token0 and token1 returned
     function burn(uint128 burnedLiquidity, uint256 expectedPriceX96) external onlyOwner returns (uint256, uint256) {
         return _burn(burnedLiquidity, expectedPriceX96);
@@ -333,7 +333,7 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     ///      expense of the position owner. Beyond that threshold, winding down is unprofitable and the debt
     ///      may remain unpaid.
     /// @param burnedLiquidity Liquidity to burn
-    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the live price is off by more than 0.1% (slippage guard)
+    /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the expected price is not within 0.1% (slippage guard) of the pool price.
     /// @return amounts of token0 and token1 returned
     function expiredPublicBurn(uint128 burnedLiquidity, uint256 expectedPriceX96) external returns (uint256, uint256) {
         if (block.timestamp <= AMP.EXPIRATION()) revert NotExpired();
