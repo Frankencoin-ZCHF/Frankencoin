@@ -1,0 +1,13 @@
+{
+  "network": "optimism",
+  "chainId": "10",
+  "uniswapAmplifier": "0x15CE921192ad967Eb65ea1cc508DfA21120F0d8F",
+  "positionImplementation": "0xe839E25b52440DE580171B7a398E903c0E495e27",
+  "pool": "0xC8A2E29D58B91C37a9d8DC6ab2535EB0b42C8F4b",
+  "zchf": "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+  "zchfMinter": "0xD4dD9e2F021BB459D5A5f6c24C12fE09c5D45553",
+  "expiration": 1806537599,
+  "limit": "1000000000000000000000000",
+  "deploymentTx": "0xfcab9f42f4b4a470edc2c41e1e1546eb55b11af1b2b3c2a7977b00b356b67e76",
+  "priceAnchorX96": "97956534762172427"
+}

@@ -1,0 +1,13 @@
+{
+  "network": "mainnet",
+  "chainId": "1",
+  "uniswapAmplifier": "0xa1304E5Aaf83CDB7c2b367F50B99Bb0647ED8C58",
+  "positionImplementation": "0x8746159D385f84CB550ab5aE015c0dDf6909b8f2",
+  "pool": "0x8e4318e2cb1ae291254b187001a59a1f8ac78cef",
+  "zchf": "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
+  "zchfMinter": "0xB58E61C3098d85632Df34EecfB899A1Ed80921cB",
+  "expiration": 1806537599,
+  "limit": "2500000000000000000000000",
+  "deploymentTx": "0x0f48d1fe464cfc98ef99aaf4e548c5c6052cf69064c56e044f6974d7cd242e47",
+  "priceAnchorX96": "99231442269731262"
+}
