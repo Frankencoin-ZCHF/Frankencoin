@@ -332,6 +332,8 @@ contract AmplifiedPosition is Ownable, IUniswapV3MintCallback {
     ///      on where the position's range sits within the allowed band), this can be called profitably at the
     ///      expense of the position owner. Beyond that threshold, winding down is unprofitable and the debt
     ///      may remain unpaid.
+    ///      For the test amplifier, we intentionally let a position expire. It took nine days for a bot to pick up the
+    ///      free money in transaction 0x9b188d16802794f83370c30f2705b7d5de2e9226f8117519060403239465584d.
     /// @param burnedLiquidity Liquidity to burn
     /// @param expectedPriceX96 Expected pool price (token1/token0, Q96); reverts if the expected price is not within 0.1% (slippage guard) of the pool price.
     /// @return amounts of token0 and token1 returned
