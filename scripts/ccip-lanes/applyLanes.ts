@@ -95,7 +95,7 @@ async function main() {
   const filterSource = argv.find((a) => !a.startsWith("--") && argv.indexOf(a) === 0);
   const filterDest   = argv.find((a) => !a.startsWith("--") && argv.indexOf(a) === 1);
 
-  const jsonPath = path.join(__dirname, "applyLane.json");
+  const jsonPath = path.join(__dirname, "applyLanes.json");
   let lanes: LaneConfig[];
   try {
     lanes = JSON.parse(await fs.readFile(jsonPath, "utf-8"));

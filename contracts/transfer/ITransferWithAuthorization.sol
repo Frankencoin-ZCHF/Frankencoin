@@ -15,6 +15,9 @@ interface ITransferWithAuthorization {
     event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
     event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
 
+    /// @dev Emitted when the EIP-712 domain may have changed (ERC-5267).
+    event EIP712DomainChanged();
+
     // -------------------------------------------------------------------------
     // Errors
     // -------------------------------------------------------------------------
@@ -24,6 +27,7 @@ interface ITransferWithAuthorization {
     error AuthorizationExpired();
     error AuthorizationAlreadyUsed();
     error InvalidSignature();
+    error CallerMustBeDeployer();
     error CallerMustBePayee();
 
     // -------------------------------------------------------------------------
@@ -50,6 +54,18 @@ interface ITransferWithAuthorization {
     function balanceOf(address account) external view returns (uint256);
 
     function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+    /**
+     * @notice Returns the fields and values that describe the domain separator used for EIP-712 signing (ERC-5267).
+     * @return fields   Bitmap where bit i is set if domain field i is present (name=0, version=1, chainId=2, verifyingContract=3, salt=4).
+     * @return name     Domain name.
+     * @return version  Domain version.
+     * @return chainId  Chain ID.
+     * @return verifyingContract  Address of this contract.
+     * @return salt     Not used; always zero.
+     * @return extensions  Not used; always empty.
+     */
+    function eip712Domain() external view returns (bytes1 fields, string memory name, string memory version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] memory extensions);
 
     /// @notice Returns the state of an authorization
     /// @dev Nonces are randomly generated 32-byte data unique to the authorizer's address
