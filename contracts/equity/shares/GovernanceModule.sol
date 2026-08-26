@@ -6,11 +6,11 @@ import "../IGovernance.sol";
 contract GovernanceModule {
 
     IGovernance public immutable GOVERNANCE;
-    address private immutable MAINNET_FPS2;
+    address private immutable MAINNET_FCS;
 
-    constructor(IGovernance governance, address mainnetFPS2) {
+    constructor(IGovernance governance, address mainnetFCS) {
         GOVERNANCE = governance;
-        MAINNET_FPS2 = mainnetFPS2;
+        MAINNET_FCS = mainnetFCS;
     }
 
     modifier onlyQualified(address[] calldata helpers) {
@@ -20,7 +20,7 @@ contract GovernanceModule {
 
     function defaultHelper() internal view returns (address[] memory) {
         address[] memory helper = new address[](1);
-        helper[0] = MAINNET_FPS2;
+        helper[0] = MAINNET_FCS;
         return helper;
     }
 
