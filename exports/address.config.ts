@@ -57,6 +57,9 @@ export const ADDRESS: ChainAddressMap = {
     ccipRouter: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
     linkToken: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
 
+    // FCS
+    fcs: "0x00000000000000000000000000000000000000",
+
     // utils
     svZCHF: "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",

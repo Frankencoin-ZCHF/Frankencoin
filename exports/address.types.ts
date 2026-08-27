@@ -100,6 +100,9 @@ export type ChainAddressMainnet = {
   ccipRouter: Address;
   linkToken: Address;
 
+  // FCS
+  fcs: Address;
+
   // utils
   wFPS: Address; // wrapped FPS
   uniswapPoolV3ZCHFUSDT: Address;
