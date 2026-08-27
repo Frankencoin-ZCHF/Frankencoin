@@ -35,7 +35,7 @@ describe("FCS Tests", () => {
 
   // Make FCS "binding" (control > 2/3 of FPS1 votes) by wrapping the owner's directly-held FPS1 into FCS,
   // leaving FCS as effectively the sole FPS1 holder. Required for redemptions to be enabled.
-  async function bindFps2() {
+  async function bindFcs() {
     const ownerFps1 = await equity.balanceOf(owner.address);
     if (ownerFps1 > 0n) {
       await equity.approve(await fcs.getAddress(), ownerFps1);
@@ -230,7 +230,7 @@ describe("FCS Tests", () => {
       // First deposit and redeem to set the counter
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
 
       await fcs["redeem(address,uint256)"](owner.address, floatToDec18(100));
@@ -281,7 +281,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
     });
 
     it("should revert before FPS1 90-day holding period (redemptions disabled)", async () => {
@@ -370,7 +370,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -400,7 +400,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -441,7 +441,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
     });
 
     it("weightedRecentRedemptions should be 0 initially", async () => {
@@ -572,7 +572,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -810,7 +810,7 @@ describe("FCS Tests", () => {
     beforeEach(async () => {
       await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
       await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await bindFcs();
     });
 
     it("convertToShares should be inverse of ask price", async () => {
@@ -966,7 +966,7 @@ describe("FCS Tests", () => {
       const investAmount = floatToDec18(50_000);
       await zchf.approve(await fcs.getAddress(), investAmount);
       await fcs["deposit(uint256,address)"](investAmount, owner.address);
-      await bindFps2(); // required for redemptions to be enabled
+      await bindFcs(); // required for redemptions to be enabled
 
       const fcsBalance = await fcs.balanceOf(owner.address);
       expect(fcsBalance).to.be.greaterThan(0);
@@ -1004,7 +1004,7 @@ describe("FCS Tests", () => {
 
       expect(await fcs.balanceOf(alice.address)).to.equal(aliceFps1);
 
-      await bindFps2(); // wrap owner's remaining FPS1 so FCS controls > 2/3 of votes
+      await bindFcs(); // wrap owner's remaining FPS1 so FCS controls > 2/3 of votes
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Redeem FCS
@@ -1025,7 +1025,7 @@ describe("FCS Tests", () => {
       await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(20_000));
       await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(20_000), alice.address);
 
-      await bindFps2(); // wrap owner's remaining FPS1 so FCS is binding
+      await bindFcs(); // wrap owner's remaining FPS1 so FCS is binding
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Both redeem partial amounts
@@ -1046,7 +1046,7 @@ describe("FCS Tests", () => {
       await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
       expect(await fcs.ask()).to.equal(await equity.price());
 
-      await bindFps2(); // required for redemptions to be enabled
+      await bindFcs(); // required for redemptions to be enabled
       await evm_increaseTime(NINETY_DAYS + 60);
       await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
       expect(await fcs.ask()).to.equal(await equity.price());
