@@ -12,17 +12,24 @@ const SALT = ethers.id("TransferWithAuthorization-v1");
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  const { chainId } = await ethers.provider.getNetwork();
-  const chain = Number(chainId);
+  const execute = process.env.EXECUTE === "true";
 
-  console.log("Deployer:   ", deployer.address);
+  const privateKey = process.env.PRIVATE_KEY;
+  if (!privateKey) throw new Error("Missing PRIVATE_KEY in .env");
+  const deployer = new ethers.Wallet(privateKey, ethers.provider);
+  const { chainId } = await ethers.provider.getNetwork();
+  const chain   = Number(chainId);
+  const network = hre.network.name;
+
+  console.log(`\nUsage: EXECUTE=true npx hardhat run scripts/deployTransferWithAuthorization.ts --network <name>`);
+  console.log(`\nMode:       ${execute ? "EXECUTE" : "dry run  (pass --execute to send transactions)"}`);
+  console.log(`Network:    ${network} (chain ${chain})`);
+  console.log("Deployer:  ", deployer.address);
   console.log(
-    "Balance:    ",
+    "Balance:   ",
     ethers.formatEther(await ethers.provider.getBalance(deployer.address)),
     "ETH"
   );
-  console.log("Chain ID:   ", chain);
 
   // resolve asset address — mainnet uses native frankencoin, all others use the CCIP bridged token
   const chainAddresses = ADDRESS[chain as keyof typeof ADDRESS];
@@ -37,7 +44,7 @@ async function main() {
   console.log("Asset:      ", asset);
 
   // ── 1. predict address ────────────────────────────────────────────────────
-  const factory = await ethers.getContractFactory("TransferWithAuthorization");
+  const factory  = await ethers.getContractFactory("TransferWithAuthorization");
   const initCode = factory.bytecode; // no constructor args
 
   const predicted = ethers.getCreate2Address(
@@ -51,6 +58,8 @@ async function main() {
   const existingCode = await ethers.provider.getCode(predicted);
   if (existingCode !== "0x") {
     console.log("Already deployed — skipping deploy step.");
+  } else if (!execute) {
+    console.log("[dry run] Would deploy via Arachnid factory.");
   } else {
     // The Arachnid factory is raw assembly — no function selector.
     // Calldata layout: [salt (32 bytes)][initcode]
@@ -71,23 +80,32 @@ async function main() {
   }
 
   // ── 3. initialize if not yet done ─────────────────────────────────────────
-  const contract = await ethers.getContractAt(
-    "TransferWithAuthorization",
-    predicted
-  );
-  const currentAsset = await contract.asset();
-
-  if (currentAsset !== ethers.ZeroAddress) {
-    console.log("Already initialized with asset:", currentAsset);
+  const liveCode = await ethers.provider.getCode(predicted);
+  if (liveCode === "0x") {
+    // Contract not on-chain yet (dry run skipped deploy)
+    console.log("[dry run] Would initialize with asset:", asset);
   } else {
-    const tx = await contract.initialize(asset);
-    await tx.wait();
-    console.log("Initialized in tx:", tx.hash);
-    console.log("Initialized with asset:", asset);
+    const contract     = await ethers.getContractAt("TransferWithAuthorization", predicted, deployer);
+    const currentAsset = await contract.asset();
+
+    if (currentAsset !== ethers.ZeroAddress) {
+      console.log("Already initialized with asset:", currentAsset);
+    } else if (!execute) {
+      console.log("[dry run] Would initialize with asset:", asset);
+    } else {
+      const tx = await contract.initialize(asset);
+      await tx.wait();
+      console.log("Initialized in tx:", tx.hash);
+      console.log("Initialized with asset:", asset);
+
+      console.log("Waiting 30s for Etherscan to index the contract...");
+      await sleep(30_000);
+    }
   }
 
-  console.log("Waiting 30s for Etherscan to index the contract...");
-  await sleep(30_000);
+  if (!execute) {
+    console.log("\nDry run complete — no transactions sent. Pass --execute to deploy for real.\n");
+  }
 }
 
 main().catch((error) => {

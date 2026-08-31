@@ -56,6 +56,8 @@ export * from "./abis/swap/StablecoinBridgeV2";
 
 export * from "./abis/transfer/ITransferReference";
 export * from "./abis/transfer/TransferReference";
+export * from "./abis/transfer/ITransferWithAuthorization";
+export * from "./abis/transfer/TransferWithAuthorization";
 
 export * from "./abis/utils/OCR2Aggregator";
 export * from "./abis/utils/Ownable";

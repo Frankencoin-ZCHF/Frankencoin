@@ -59,6 +59,7 @@ export const ADDRESS: ChainAddressMap = {
 
     // utils
     svZCHF: "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [polygon.id]: {
     // identifier
@@ -76,6 +77,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0xB519BAE359727e69990C27241Bef29b394A0ACbD",
     ccipRouter: "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [arbitrum.id]: {
     // identifier
@@ -92,6 +94,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0xb41715e54e9f0827821A149AE8eC1aF70aa70180",
     ccipRouter: "0x141fa059441E0ca23ce184B6A78bafD2A517DdE8",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [optimism.id]: {
     // identifier
@@ -108,6 +111,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x6426324Af1b14Df3cd03b2d500529083c5ea61BC",
     ccipRouter: "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [base.id]: {
     // identifier
@@ -121,6 +125,9 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x6426324Af1b14Df3cd03b2d500529083c5ea61BC",
     ccipRouter: "0x881e3A65B4d4a04dD529061dd0071cf975F58bCD",
+
+    // utils
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [avalanche.id]: {
     // identifier
@@ -134,6 +141,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x8e7c2a697751a1cE7a8DB51f01B883A27c5c8325",
     ccipRouter: "0xF4c7E640EdA248ef95972845a62bdC74237805dB",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [gnosis.id]: {
     // identifier
@@ -150,6 +158,7 @@ export const ADDRESS: ChainAddressMap = {
 
     // custom
     svZCHF: "0x6165946250dd04740ab1409217e95a4f38374fe9",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [sonic.id]: {
     // identifier
@@ -163,5 +172,6 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x4E104918908293cd6A93E1A9bbe06C345d751235",
     ccipRouter: "0xB4e1Ff7882474BB93042be9AD5E1fA387949B860",
+    transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
 } as const;

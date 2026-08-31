@@ -20,8 +20,11 @@ import {ITransferWithAuthorization, IERC20} from "./ITransferWithAuthorization.s
  *   6. Once ZCHF.isMinter(address(this)) == true, the contract is live.
  */
 contract TransferWithAuthorization is ITransferWithAuthorization {
+    address private constant _deployer = 0x045a8395FE21CE34f0eC34d242c342ade4Ded5be;
+
     IERC20 public asset;
 
+    string private _name;
     bytes32 private _hashedName;
     bytes32 private _hashedVersion;
 
@@ -38,10 +41,13 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
     function initialize(IERC20 _asset) external {
+        if (_deployer != msg.sender) revert CallerMustBeDeployer();
         if (address(asset) != address(0)) revert AlreadyInitialized();
         asset = _asset;
-        _hashedName = keccak256(bytes(_asset.name()));
+        _name = _asset.name();
+        _hashedName = keccak256(bytes(_name));
         _hashedVersion = keccak256(bytes("1"));
+        emit EIP712DomainChanged();
     }
 
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
@@ -56,6 +62,12 @@ contract TransferWithAuthorization is ITransferWithAuthorization {
                     address(this)
                 )
             );
+    }
+
+    /// @inheritdoc ITransferWithAuthorization
+    function eip712Domain() external view returns (bytes1 fields, string memory name, string memory version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] memory extensions) {
+        // fields bitmap: name(0) | version(1) | chainId(2) | verifyingContract(3)
+        return (hex"0f", _name, "1", block.chainid, address(this), bytes32(0), new uint256[](0));
     }
 
     function balanceOf(address account) external view returns (uint256) {
