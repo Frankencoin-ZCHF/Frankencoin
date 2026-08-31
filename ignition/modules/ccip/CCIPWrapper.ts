@@ -1,20 +1,24 @@
-import { getChildFromSeed } from "../../../helper/wallet";
+// import { getChildFromSeed } from "../../../helper/wallet";
 import { ADDRESS } from "../../../exports/address.config";
 import { buildModule } from "@nomicfoundation/ignition-core";
 import { Address } from "viem";
 import { optimism } from "viem/chains";
 import { storeConstructorArgs } from "../../../helper/store.args";
+import { Wallet } from "ethers";
 
-const seed = process.env.DEPLOYER_SEED;
-if (!seed) throw new Error("Failed to import the seed string from .env");
+// const seed = process.env.DEPLOYER_SEED;
+// if (!seed) throw new Error("Failed to import the seed string from .env");
+// const deployer = getChildFromSeed(seed, 0);
 
-const w0 = getChildFromSeed(seed, 0); // deployer
+const privateKey = process.env.PRIVATE_KEY;
+if (!privateKey) throw new Error("Missing PRIVATE_KEY in .env");
+const deployer = new Wallet(privateKey);
 
 // Optimism only — the only side chain with an ERC4626 svZCHF vault deployed so far
 const ADDR = ADDRESS[optimism.id];
 
 export const config = {
-  deployer: w0.address,
+  deployer: deployer.address,
   ecosystem: ADDR,
 };
 
