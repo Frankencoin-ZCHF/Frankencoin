@@ -168,10 +168,9 @@ export type ChainAddressOptimism = {
   ccipRouter: Address;
 
   // utils
-  transferWithAuthorization: Address;
-
-  // custom
+  CCIPWrapper: Address;
   svZCHF: Address;
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressBase = {

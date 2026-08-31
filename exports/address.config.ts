@@ -117,6 +117,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipRouter: "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f",
 
     // utils
+    CCIPWrapper: "0x7FE0835e3ea1Ffa70843480945b4399c411Ad5F0",
     svZCHF: "0x20191448fcC813d34D0BDeae5Cdb1E89B3Fb7b8E",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
