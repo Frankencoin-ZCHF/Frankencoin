@@ -36,6 +36,9 @@
     "url": "https://github.com/Frankencoin-ZCHF/issues"
   },
   "homepage": "https://github.com/Frankencoin-ZCHF#readme",
+  "resolutions": {
+    "@types/minimatch": "5.1.2"
+  },
   "devDependencies": {
     "@chainlink/contracts-ccip": "1.5.1-beta.2",
     "@chainlink/local": "0.2.3",
