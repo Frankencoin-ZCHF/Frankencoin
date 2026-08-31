@@ -169,6 +169,9 @@ export type ChainAddressOptimism = {
 
   // utils
   transferWithAuthorization: Address;
+
+  // custom
+  svZCHF: Address;
 };
 
 export type ChainAddressBase = {
