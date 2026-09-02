@@ -135,6 +135,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipRouter: "0x881e3A65B4d4a04dD529061dd0071cf975F58bCD",
 
     // utils
+    svZCHF: "0xa09EBdf8A01b9ef04149319D64F83b9C01a5b585",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [avalanche.id]: {

@@ -187,6 +187,7 @@ export type ChainAddressBase = {
   ccipRouter: Address;
 
   // utils
+  svZCHF: Address;
   transferWithAuthorization: Address;
 };
 
@@ -221,10 +222,8 @@ export type ChainAddressGnosis = {
   ccipRouter: Address;
 
   // utils
-  transferWithAuthorization: Address;
-
-  // custom
   svZCHF: Address;
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressSonic = {
