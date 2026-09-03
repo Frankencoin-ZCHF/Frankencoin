@@ -168,6 +168,8 @@ const config: HardhatUserConfig = {
       optimism: etherscan!,
       base: etherscan!,
       avalanche: etherscan!,
+      gnosis:    etherscan!,
+      sonic:     etherscan!,
     },
     customChains: [
       {
@@ -216,6 +218,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.etherscan.io/v2/api?chainid=43114",
           browserURL: "https://snowtrace.io",
+        },
+      },
+      {
+        network: "gnosis",
+        chainId: 100,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api?chainid=100",
+          browserURL: "https://gnosisscan.io",
+        },
+      },
+      {
+        network: "sonic",
+        chainId: 146,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api?chainid=146",
+          browserURL: "https://sonicscan.io",
         },
       },
     ],
