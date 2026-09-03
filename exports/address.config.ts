@@ -85,6 +85,8 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0xB519BAE359727e69990C27241Bef29b394A0ACbD",
     ccipRouter: "0x849c5ED5a80F5B408Dd4969b78c2C8fdf0565Bfe",
+
+    // utils
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
 
     // FCS
@@ -108,6 +110,8 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0xb41715e54e9f0827821A149AE8eC1aF70aa70180",
     ccipRouter: "0x141fa059441E0ca23ce184B6A78bafD2A517DdE8",
+
+    // utils
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
 
     // FCS
@@ -131,6 +135,10 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x6426324Af1b14Df3cd03b2d500529083c5ea61BC",
     ccipRouter: "0x3206695CaE29952f4b0c22a169725a865bc8Ce0f",
+
+    // utils
+    CCIPWrapper: "0x7FE0835e3ea1Ffa70843480945b4399c411Ad5F0",
+    svZCHF: "0x20191448fcC813d34D0BDeae5Cdb1E89B3Fb7b8E",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
 
     // FCS
@@ -159,6 +167,7 @@ export const ADDRESS: ChainAddressMap = {
     minterGovernance: "0x4655529a4bf8c26a97c2b7f6c044b69a2f98e73c",
 
     // utils
+    svZCHF: "0xa09EBdf8A01b9ef04149319D64F83b9C01a5b585",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
   [avalanche.id]: {
@@ -202,7 +211,7 @@ export const ADDRESS: ChainAddressMap = {
     ccipGovernance: "0x3b5f2ab37bd0679645289726146a5f653bfdcb52",
     minterGovernance: "0x4655529a4bf8c26a97c2b7f6c044b69a2f98e73c",
 
-    // custom
+    // utils
     svZCHF: "0x6165946250dd04740ab1409217e95a4f38374fe9",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
   },
@@ -218,6 +227,8 @@ export const ADDRESS: ChainAddressMap = {
     ccipBridgedGovernance: "0x4fF458f3Aa2c5cd970891909d72CF029939313ab",
     ccipBridgedSavings: "0x4E104918908293cd6A93E1A9bbe06C345d751235",
     ccipRouter: "0xB4e1Ff7882474BB93042be9AD5E1fA387949B860",
+
+    // utils
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
 
     // FCS

@@ -194,6 +194,8 @@ export type ChainAddressOptimism = {
   minterGovernance: Address;
 
   // utils
+  CCIPWrapper: Address;
+  svZCHF: Address;
   transferWithAuthorization: Address;
 };
 
@@ -217,6 +219,7 @@ export type ChainAddressBase = {
   minterGovernance: Address;
 
   // utils
+  svZCHF: Address;
   transferWithAuthorization: Address;
 };
 
@@ -263,10 +266,8 @@ export type ChainAddressGnosis = {
   minterGovernance: Address;
 
   // utils
-  transferWithAuthorization: Address;
-
-  // custom
   svZCHF: Address;
+  transferWithAuthorization: Address;
 };
 
 export type ChainAddressSonic = {
