@@ -1,0 +1,1 @@
+module.exports = ["GovernanceFactoryAddress","0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2","0xB58E61C3098d85632Df34EecfB899A1Ed80921cB"];

@@ -14,4 +14,5 @@ export function storeConstructorArgs(deployment: string, args: any[], timestamp:
 			})
 		)};`
 	);
+	return dir + file;
 }

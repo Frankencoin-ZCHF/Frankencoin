@@ -100,6 +100,14 @@ export type ChainAddressMainnet = {
   ccipRouter: Address;
   linkToken: Address;
 
+  // FCS
+  fcs: Address;
+  governanceFactory: Address;
+  mainnetVotes: Address;
+  interestGovernance: Address;
+  minterGovernance: Address;
+  ccipGovernance: Address;
+
   // utils
   wFPS: Address; // wrapped FPS
   uniswapPoolV3ZCHFUSDT: Address;
@@ -127,6 +135,12 @@ export type ChainAddressPolygon = {
   ccipBridgedSavings: Address;
   ccipRouter: Address;
 
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
+
   // utils
   transferWithAuthorization: Address;
 };
@@ -147,6 +161,12 @@ export type ChainAddressArbitrum = {
   ccipBridgedSavings: Address;
   ccipRouter: Address;
 
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
+
   // utils
   transferWithAuthorization: Address;
 };
@@ -166,6 +186,12 @@ export type ChainAddressOptimism = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+  
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
 
   // utils
   transferWithAuthorization: Address;
@@ -183,6 +209,12 @@ export type ChainAddressBase = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+  
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
 
   // utils
   transferWithAuthorization: Address;
@@ -200,6 +232,12 @@ export type ChainAddressAvalanche = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+  
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
 
   // utils
   transferWithAuthorization: Address;
@@ -217,6 +255,12 @@ export type ChainAddressGnosis = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+  
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
 
   // utils
   transferWithAuthorization: Address;
@@ -237,6 +281,12 @@ export type ChainAddressSonic = {
   ccipBridgedGovernance: Address;
   ccipBridgedSavings: Address;
   ccipRouter: Address;
+  
+  // FCS
+  governanceFactory: Address;
+  bridgedVotes: Address;
+  ccipGovernance: Address;
+  minterGovernance: Address;
 
   // utils
   transferWithAuthorization: Address;
