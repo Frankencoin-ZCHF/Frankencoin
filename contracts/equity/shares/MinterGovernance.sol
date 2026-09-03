@@ -32,10 +32,10 @@ contract MinterGovernance is GovernanceModule {
     error PeriodTooShort();
 
     /**
-     * Instantiate this contract with references to the Frankencoin and FPS2 governance contracts.
-     * Caller must make sure that fps2 delegates to this contract, so that qualified FPS2 holders can use the denyMinter function.
+     * Instantiate this contract with references to the Frankencoin and FCS governance contracts.
+     * Caller must make sure that fcs delegates to this contract, so that qualified FCS holders can use the denyMinter function.
      */
-    constructor(IFrankencoin zchf_, IGovernance fps1Gov, IGovernance fps2Gov, address delegate, address helper) GovernanceModule(fps2Gov, helper) {
+    constructor(IFrankencoin zchf_, IGovernance fps1Gov, IGovernance fcsGov, address delegate, address helper) GovernanceModule(fcsGov, helper) {
         ZCHF = zchf_;
         fps1Gov.delegateVoteTo(delegate);
     }
@@ -93,13 +93,13 @@ contract MinterGovernance is GovernanceModule {
     function denyUnannouncedMinter(address minter) external {
         if (announcements[minter] != 0) revert MinterCorrectlyAnnounced();
         uint256 reward = checkReward(minter);
-        ZCHF.denyMinter(minter, defaultHelper(), "FPS2");
+        ZCHF.denyMinter(minter, defaultHelper(), "FCS");
         ZCHF.transfer(msg.sender, reward); // reward the caller with 10% of the reward pool for helping to enforce the announcement requirement
         emit Rewarded(msg.sender, reward, address(ZCHF));
     }
 
     /**
-     * Allows qualified FPS2 holders to deny a minter, regardless of whether it was announced or not.
+     * Allows qualified FCS holders to deny a minter, regardless of whether it was announced or not.
      * No reward is paid out in this case. If you want a reward, call denyUnannouncedMinter instead.
      */
     function denyMinter(address minter, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {
@@ -114,9 +114,9 @@ contract MinterGovernance is GovernanceModule {
     // ==================== Position governance ====================
 
     /**
-     * @notice Deny a v1 or v2 minting position on behalf of qualified FPS2 holders. In practice only relevant on mainnet.
+     * @notice Deny a v1 or v2 minting position on behalf of qualified FCS holders. In practice only relevant on mainnet.
      * @param position  The position contract to deny
-     * @param helpers   FPS2 holders who delegate their votes to the caller
+     * @param helpers   FCS holders who delegate their votes to the caller
      * @param message   Reason for the denial
      */
     function denyPosition(address position, address[] calldata helpers, string calldata message) external onlyQualified(helpers) {

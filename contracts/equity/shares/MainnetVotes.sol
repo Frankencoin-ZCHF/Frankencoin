@@ -8,27 +8,27 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {SyncVote, SyncMessage} from "../IGovernance.sol";
 
-interface IFPS2Votes {
+interface IFCSVotes {
     function votes(address holder) external view returns (uint256);
     function totalVotes() external view returns (uint256);
 }
 
 /**
- * Mainnet FPS2 vote registry and CCIP sender to sync votes and delegates to other chains.
+ * Mainnet FCS vote registry and CCIP sender to sync votes and delegates to other chains.
  */
 contract MainnetVotes is Governance, CCIPSender {
 
-    IFPS2Votes public immutable VOTES;
+    IFCSVotes public immutable VOTES;
 
     address private constant LINK_TOKEN = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
 
-    event FPS2VotesSynced(uint64 chain, address indexed receiver, address[] syncedVoters);
+    event FCSVotesSynced(uint64 chain, address indexed receiver, address[] syncedVoters);
 
     constructor(
-        address fps2_,
+        address fcs_,
         IRouterClient router_
     ) CCIPSender(router_, LINK_TOKEN) {
-        VOTES = IFPS2Votes(fps2_);
+        VOTES = IFCSVotes(fcs_);
     }
 
     /**
@@ -46,37 +46,37 @@ contract MainnetVotes is Governance, CCIPSender {
     }
 
     /**
-     * @notice Sync FPS2 holder votes and delegations to a bridged chain.
+     * @notice Sync FCS holder votes and delegations to a bridged chain.
      * @param chain     The CCIP chain selector of the destination chain
-     * @param receiver  The BridgedFPS2Governance address on the destination chain
-     * @param voters    The FPS2 holders whose votes to sync
+     * @param receiver  The BridgedFCSGovernance address on the destination chain
+     * @param voters    The FCS holders whose votes to sync
      */
-    function pushFPS2Votes(uint64 chain, address receiver, address[] calldata voters) external payable {
-        pushFPS2Votes(chain, _toReceiver(receiver), voters, "");
+    function pushFCSVotes(uint64 chain, address receiver, address[] calldata voters) external payable {
+        pushFCSVotes(chain, _toReceiver(receiver), voters, "");
     }
 
-    function pushFPS2Votes(uint64 chain, address receiver, address[] calldata voters, Client.EVMExtraArgsV2 calldata extraArgs) external payable {
-        pushFPS2Votes(chain, _toReceiver(receiver), voters, Client._argsToBytes(extraArgs));
+    function pushFCSVotes(uint64 chain, address receiver, address[] calldata voters, Client.EVMExtraArgsV2 calldata extraArgs) external payable {
+        pushFCSVotes(chain, _toReceiver(receiver), voters, Client._argsToBytes(extraArgs));
     }
 
-    function pushFPS2Votes(uint64 chain, bytes memory receiver, address[] calldata voters, bytes memory extraArgs) public payable {
-        SyncMessage memory syncMessage = _buildFPS2SyncMessage(voters);
+    function pushFCSVotes(uint64 chain, bytes memory receiver, address[] calldata voters, bytes memory extraArgs) public payable {
+        SyncMessage memory syncMessage = _buildFCSSyncMessage(voters);
         Client.EVM2AnyMessage memory message = _constructMessage(receiver, abi.encode(syncMessage), new Client.EVMTokenAmount[](0), extraArgs);
         _send(chain, message);
-        emit FPS2VotesSynced(chain, abi.decode(receiver, (address)), voters);
+        emit FCSVotesSynced(chain, abi.decode(receiver, (address)), voters);
     }
 
-    function getFPS2SyncFee(uint64 chain, address receiver, address[] calldata voters, bool useNativeToken) external view returns (uint256) {
-        return getFPS2SyncFee(chain, _toReceiver(receiver), voters, useNativeToken, "");
+    function getFCSSyncFee(uint64 chain, address receiver, address[] calldata voters, bool useNativeToken) external view returns (uint256) {
+        return getFCSSyncFee(chain, _toReceiver(receiver), voters, useNativeToken, "");
     }
 
-    function getFPS2SyncFee(uint64 chain, bytes memory receiver, address[] calldata voters, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
-        SyncMessage memory syncMessage = _buildFPS2SyncMessage(voters);
+    function getFCSSyncFee(uint64 chain, bytes memory receiver, address[] calldata voters, bool nativeToken, bytes memory extraArgs) public view returns (uint256) {
+        SyncMessage memory syncMessage = _buildFCSSyncMessage(voters);
         Client.EVM2AnyMessage memory message = _constructMessage(receiver, abi.encode(syncMessage), new Client.EVMTokenAmount[](0), nativeToken, extraArgs);
         return _calculateFee(chain, message);
     }
 
-    function _buildFPS2SyncMessage(address[] calldata voters) private view returns (SyncMessage memory) {
+    function _buildFCSSyncMessage(address[] calldata voters) private view returns (SyncMessage memory) {
         SyncVote[] memory syncVotes = new SyncVote[](voters.length);
         for (uint256 i = 0; i < voters.length; i++) {
             syncVotes[i] = SyncVote(voters[i], votes(voters[i]), delegates[voters[i]]);

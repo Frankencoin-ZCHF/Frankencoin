@@ -9,16 +9,16 @@ import "../../erc20/ERC20.sol";
 import "../../erc20/IERC4626.sol";
 
 /**
- * Equips the FPS2 token with minting and redemption functionality that is compatible with the ERC-4626 standard.
+ * Equips the FCS token with minting and redemption functionality that is compatible with the ERC-4626 standard.
  *
- * While FPS2 wraps FPS1 tokens, minting and redemption is done directly in ZCHF, making this effectively a ZCHF vault token.
+ * While FCS wraps FPS1 tokens, minting and redemption is done directly in ZCHF, making this effectively a ZCHF vault token.
  *
  * To discourage large-scale redemptions, the redemption price drops fast on redemptions, leading to a potentially large spread.
  *
  * This spread is closed linearly over the course of a week. For large redemptions, it is recommended to spread the redemptions into
  * tranches that are executed over a longer period of time.
  */
-abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
+abstract contract FCSMintRedeem is ERC20, MathUtil, IERC4626 {
     // How long it takes for the price to fully recover (linearly) after a redemption
     uint256 public constant RECOVERY_PERIOD = 7 days;
 
@@ -45,9 +45,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * Total assets attributable to the FPS2 holders collectively.
+     * Total assets attributable to the FCS holders collectively.
      * 
-     * This is the share of the total equity capital held by FPS2 holders, which is proportional to their share of the total FPS1 supply.
+     * This is the share of the total equity capital held by FCS holders, which is proportional to their share of the total FPS1 supply.
      */
     function totalAssets() public view returns (uint256) {
         // No overflow risk in any realistic scenario. Equity capital would need to exceed the value of all the assets in the world.
@@ -60,7 +60,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
      * This is the inverse method of 'convertToAssets' and based on the current price of Frankencoin Pool Shares (FPS).
      *
      * It disregards slippage, fees, redemption discounts and other factors that would apply when actually minting or
-     * redeeming FPS2 tokens.
+     * redeeming FCS tokens.
      */
     function convertToShares(uint256 assets) public view returns (uint256) {
         return _divD18(assets, FPS1.price());
@@ -78,7 +78,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * The marginal price when buying FPS2 with ZCHF.
+     * The marginal price when buying FCS with ZCHF.
      *
      * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
@@ -87,7 +87,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice The marginal redemption price of one FPS2 in ZCHF, reflecting the current discount.
+     * @notice The marginal redemption price of one FCS in ZCHF, reflecting the current discount.
      *
      * Note that FPS1 has a built-in fee of 0.3%, which is not reflected in this price.
      */
@@ -113,18 +113,18 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * Deposit ZCHF and receive FPS2 shares. In the background, FPS1 are bought and wrapped.
+     * Deposit ZCHF and receive FCS shares. In the background, FPS1 are bought and wrapped.
      */
     function deposit(uint256 assets, address recipient) public returns (uint256 shares) {
         return _deposit(recipient, assets);
     }
 
     /**
-     * Deposit ZCHF to receive FPS2 tokens with frontrunning protection.
+     * Deposit ZCHF to receive FCS tokens with frontrunning protection.
      *
      * @param amount          ZCHF to invest
-     * @param expectedShares  Minimum FPS2 shares expected
-     * @return The number of FPS2 shares minted
+     * @param expectedShares  Minimum FCS shares expected
+     * @return The number of FCS shares minted
      */
     function depositExpected(uint256 amount, address recipient, uint256 expectedShares) external returns (uint256) {
         uint256 shares = _deposit(recipient, amount);
@@ -142,7 +142,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * There is no hard limit for the number of FPS2.
+     * There is no hard limit for the number of FCS.
      */
     function maxMint(address) public pure returns (uint256) {
         return type(uint256).max;
@@ -153,7 +153,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Mint exactly the requested FPS2 shares by depositing the necessary ZCHF.
+     * @notice Mint exactly the requested FCS shares by depositing the necessary ZCHF.
      * To fulfill ERC-4626 specs, this function will always result in the caller receiving exactly 'shares'
      * shares, even if the underlying mechanism yields slightly more than requested due to rounding. In that
      * case, the excess dust amount is left in this contract as a micro-donation from the caller.
@@ -171,7 +171,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * Calculates the Frankencoins needed to buy the given number of FPS2 shares. The returned value
+     * Calculates the Frankencoins needed to buy the given number of FCS shares. The returned value
      * is guaranteed to be sufficient to mint the requested number of shares, but may be slightly higher
      * than necessary due to rounding.
      */
@@ -226,7 +226,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Withdraw at least the requested ZCHF by burning the necessary FPS2 shares.
+     * @notice Withdraw at least the requested ZCHF by burning the necessary FCS shares.
      * The required shares are found via binary search on the discount curve.
      * It is possible for the returned amount to slightly overshoot by a dust amount of ZCHF due to rounding.
      */
@@ -239,7 +239,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     error RedemptionLimitExceeded(uint256 limit);
 
     /**
-     * @notice Binary search for the minimum FPS2 shares to redeem in order to receive at least the given ZCHF amount.
+     * @notice Binary search for the minimum FCS shares to redeem in order to receive at least the given ZCHF amount.
      */
     function _findSharesForAssets(uint256 assets) internal view returns (uint256) {
         if (assets == 0) return 0;
@@ -265,7 +265,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * The maximum amount the owner can redeem at the moment or 0 if redemptions are disabled.
-     * This is the same as the owner's FPS2 balance.
+     * This is the same as the owner's FCS balance.
      */
     function maxRedeem(address owner) public view returns (uint256) {
         return redemptionsEnabled() ? balanceOf(owner) : 0;
@@ -280,7 +280,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Burn FPS2 shares from owner and send ZCHF proceeds to receiver.
+     * @notice Burn FCS shares from owner and send ZCHF proceeds to receiver.
      * If caller is not owner, requires ERC-20 allowance.
      */
     function redeem(uint256 shares, address receiver, address owner) public returns (uint256) {
@@ -288,9 +288,9 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
     }
 
     /**
-     * @notice Redeem FPS2 for ZCHF.
+     * @notice Redeem FCS for ZCHF.
      * @param target  Address to receive the ZCHF proceeds
-     * @param shares  Number of FPS2 shares to redeem
+     * @param shares  Number of FCS shares to redeem
      * @return The effective ZCHF proceeds sent to target
      */
     function redeem(address target, uint256 shares) public returns (uint256) {
@@ -362,7 +362,7 @@ abstract contract FPS2MintRedeem is ERC20, MathUtil, IERC4626 {
 
     /**
      * @notice The current discount factor that would apply when redeeming the given number of shares.
-     * @param shares  Number of FPS2 shares to redeem (use 0 for the marginal discount)
+     * @param shares  Number of FCS shares to redeem (use 0 for the marginal discount)
      * @return The discount factor with 18 decimals (1e18 = no discount, 0 = full discount)
      */
     function currentDiscount(uint256 shares) public view returns (uint256) {

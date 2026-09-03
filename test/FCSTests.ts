@@ -5,7 +5,7 @@ import { evm_increaseTime } from "./helper";
 import {
   Equity,
   Frankencoin,
-  FPS2,
+  FCS,
   MinterGovernance,
   MainnetVotes,
   TestGovernanceFactory,
@@ -17,29 +17,29 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 const NINETY_DAYS = 90 * 86400;
 const THIRTY_DAYS = 30 * 86400;
 
-describe("FPS2 Tests", () => {
+describe("FCS Tests", () => {
   let owner: HardhatEthersSigner;
   let alice: HardhatEthersSigner;
   let bob: HardhatEthersSigner;
 
-  let fps2: FPS2;
+  let fcs: FCS;
   let equity: Equity;
   let zchf: Frankencoin;
   let xchf: TestToken;
   let bridge: StablecoinBridge;
   let minterGov: MinterGovernance;
-  // The IGovernance vote contract (reads FPS2 votes, provides checkQualified/delegateVoteTo/votesDelegated)
+  // The IGovernance vote contract (reads FCS votes, provides checkQualified/delegateVoteTo/votesDelegated)
   let mainnetVotes: MainnetVotes;
-  // Address FPS2 delegates its FPS1 votes to (the governance cluster helper == InterestGovernance)
+  // Address FCS delegates its FPS1 votes to (the governance cluster helper == InterestGovernance)
   let govHelper: string;
 
-  // Make FPS2 "binding" (control > 2/3 of FPS1 votes) by wrapping the owner's directly-held FPS1 into FPS2,
-  // leaving FPS2 as effectively the sole FPS1 holder. Required for redemptions to be enabled.
-  async function bindFps2() {
+  // Make FCS "binding" (control > 2/3 of FPS1 votes) by wrapping the owner's directly-held FPS1 into FCS,
+  // leaving FCS as effectively the sole FPS1 holder. Required for redemptions to be enabled.
+  async function bindFcs() {
     const ownerFps1 = await equity.balanceOf(owner.address);
     if (ownerFps1 > 0n) {
-      await equity.approve(await fps2.getAddress(), ownerFps1);
-      await fps2.wrap(ownerFps1);
+      await equity.approve(await fcs.getAddress(), ownerFps1);
+      await fcs.wrap(ownerFps1);
     }
   }
 
@@ -79,17 +79,17 @@ describe("FPS2 Tests", () => {
 
     // Deploy a test governance factory wired to the local Frankencoin/Equity. The production
     // GovernanceFactory/InnerFactory hardcode mainnet addresses and branch on chainid, so they
-    // cannot wire to a fresh local FPS1 (which is required for FPS2 to become "binding").
+    // cannot wire to a fresh local FPS1 (which is required for FCS to become "binding").
     const testFactoryFactory = await ethers.getContractFactory("TestGovernanceFactory");
     const testFactory: TestGovernanceFactory = await testFactoryFactory.deploy(
       await zchf.getAddress(),
       await equity.getAddress()
     );
 
-    // FPS2's constructor calls factory.deploy(this), which deploys the governance cluster and
-    // delegates FPS2's FPS1 votes to the returned helper.
-    const fps2Factory = await ethers.getContractFactory("FPS2");
-    fps2 = await fps2Factory.deploy(
+    // FCS's constructor calls factory.deploy(this), which deploys the governance cluster and
+    // delegates FCS's FPS1 votes to the returned helper.
+    const fcsFactory = await ethers.getContractFactory("FCS");
+    fcs = await fcsFactory.deploy(
       await testFactory.getAddress(),
       await equity.getAddress(), // fps1Gov
       await zchf.getAddress()
@@ -98,54 +98,54 @@ describe("FPS2 Tests", () => {
     // MinterGovernance module exposes suggestMinter/denyMinter for the governance tests.
     minterGov = await ethers.getContractAt("MinterGovernance", await testFactory.minterGov());
     mainnetVotes = await ethers.getContractAt("MainnetVotes", await testFactory.governance());
-    govHelper = await testFactory.interestGov(); // the helper FPS2 delegates its FPS1 votes to
+    govHelper = await testFactory.interestGov(); // the helper FCS delegates its FPS1 votes to
   });
 
   // ==================== Initialization ====================
 
   describe("initialization", () => {
     it("should have correct name and symbol", async () => {
-      expect(await fps2.name()).to.equal("Frankencoin Pool Shares 2");
-      expect(await fps2.symbol()).to.equal("FPS2");
+      expect(await fcs.name()).to.equal("Frankencoin Shares");
+      expect(await fcs.symbol()).to.equal("FCS");
     });
 
     it("should have 18 decimals", async () => {
-      expect(await fps2.decimals()).to.equal(18);
+      expect(await fcs.decimals()).to.equal(18);
     });
 
     it("should reference the correct FPS1 and ZCHF contracts", async () => {
-      expect(await fps2.FPS1()).to.equal(await equity.getAddress());
-      expect(await fps2.ZCHF()).to.equal(await zchf.getAddress());
+      expect(await fcs.FPS1()).to.equal(await equity.getAddress());
+      expect(await fcs.ZCHF()).to.equal(await zchf.getAddress());
     });
 
     it("asset() should return ZCHF address", async () => {
-      expect(await fps2.asset()).to.equal(await zchf.getAddress());
+      expect(await fcs.asset()).to.equal(await zchf.getAddress());
     });
 
     it("ask() should match FPS1 price", async () => {
-      expect(await fps2.ask()).to.equal(await equity.price());
+      expect(await fcs.ask()).to.equal(await equity.price());
     });
 
     it("bid() should revert with zero supply (division by zero in discount)", async () => {
       // discount divides by (currentSupply + recentRedemptions), which is 0 when empty
-      await expect(fps2.bid()).to.be.reverted;
+      await expect(fcs.bid()).to.be.reverted;
     });
 
     it("bid() should equal ask() when no recent redemptions and supply > 0", async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(10_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      await zchf.approve(await fcs.getAddress(), floatToDec18(10_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
       // discount(0, 0) = 1.0, so bid = price * 1.0 = ask
-      expect(await fps2.bid()).to.be.approximately(await fps2.ask(), floatToDec18(0.01));
+      expect(await fcs.bid()).to.be.approximately(await fcs.ask(), floatToDec18(0.01));
     });
 
     it("should have zero total supply and total assets initially", async () => {
-      expect(await fps2.totalSupply()).to.equal(0);
-      expect(await fps2.totalAssets()).to.equal(0);
+      expect(await fcs.totalSupply()).to.equal(0);
+      expect(await fcs.totalAssets()).to.equal(0);
     });
 
     it("should have delegated FPS1 votes to the governance helper", async () => {
-      const fps2Address = await fps2.getAddress();
-      const delegatee = await equity.delegates(fps2Address);
+      const fcsAddress = await fcs.getAddress();
+      const delegatee = await equity.delegates(fcsAddress);
       expect(delegatee).to.equal(govHelper);
     });
   });
@@ -153,94 +153,94 @@ describe("FPS2 Tests", () => {
   // ==================== ERC-4626 Deposit ====================
 
   describe("deposit (ERC-4626)", () => {
-    it("should mint FPS2 shares equal to FPS1 shares received", async () => {
+    it("should mint FCS shares equal to FPS1 shares received", async () => {
       const amount = floatToDec18(10_000);
-      await zchf.approve(await fps2.getAddress(), amount);
+      await zchf.approve(await fcs.getAddress(), amount);
 
       const expectedShares = await equity.calculateShares(amount);
-      await fps2["deposit(uint256,address)"](amount, owner.address);
+      await fcs["deposit(uint256,address)"](amount, owner.address);
 
-      const fps2Balance = await fps2.balanceOf(owner.address);
-      const fpsHeld = await equity.balanceOf(await fps2.getAddress());
-      expect(fps2Balance).to.equal(fpsHeld);
-      expect(fps2Balance).to.be.approximately(expectedShares, floatToDec18(0.01));
+      const fcsBalance = await fcs.balanceOf(owner.address);
+      const fpsHeld = await equity.balanceOf(await fcs.getAddress());
+      expect(fcsBalance).to.equal(fpsHeld);
+      expect(fcsBalance).to.be.approximately(expectedShares, floatToDec18(0.01));
     });
 
     it("should deposit to a different receiver", async () => {
       const amount = floatToDec18(10_000);
-      await zchf.approve(await fps2.getAddress(), amount);
-      await fps2["deposit(uint256,address)"](amount, alice.address);
+      await zchf.approve(await fcs.getAddress(), amount);
+      await fcs["deposit(uint256,address)"](amount, alice.address);
 
-      expect(await fps2.balanceOf(owner.address)).to.equal(0);
-      expect(await fps2.balanceOf(alice.address)).to.be.greaterThan(0);
+      expect(await fcs.balanceOf(owner.address)).to.equal(0);
+      expect(await fcs.balanceOf(alice.address)).to.be.greaterThan(0);
     });
 
     it("should emit Deposit event", async () => {
       const amount = floatToDec18(10_000);
-      await zchf.approve(await fps2.getAddress(), amount);
-      await expect(fps2["deposit(uint256,address)"](amount, owner.address))
-        .to.emit(fps2, "Deposit");
+      await zchf.approve(await fcs.getAddress(), amount);
+      await expect(fcs["deposit(uint256,address)"](amount, owner.address))
+        .to.emit(fcs, "Deposit");
     });
 
     it("should revert without ZCHF approval", async () => {
       await expect(
-        fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address)
+        fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address)
       ).to.be.reverted;
     });
 
     it("depositExpected should revert if shares too low", async () => {
       const amount = floatToDec18(10_000);
-      await zchf.approve(await fps2.getAddress(), amount);
+      await zchf.approve(await fcs.getAddress(), amount);
       await expect(
-        fps2.depositExpected(amount, owner.address, floatToDec18(999_999))
+        fcs.depositExpected(amount, owner.address, floatToDec18(999_999))
       ).to.be.revertedWithoutReason();
     });
 
     it("depositExpected should succeed when shares met", async () => {
       const amount = floatToDec18(10_000);
-      await zchf.approve(await fps2.getAddress(), amount);
+      await zchf.approve(await fcs.getAddress(), amount);
       const expectedShares = await equity.calculateShares(amount);
-      await fps2.depositExpected(amount, owner.address, expectedShares);
+      await fcs.depositExpected(amount, owner.address, expectedShares);
 
-      expect(await fps2.balanceOf(owner.address)).to.be.greaterThanOrEqual(expectedShares);
+      expect(await fcs.balanceOf(owner.address)).to.be.greaterThanOrEqual(expectedShares);
     });
 
     it("previewDeposit should match actual deposit", async () => {
       const amount = floatToDec18(10_000);
-      const preview = await fps2.previewDeposit(amount);
+      const preview = await fcs.previewDeposit(amount);
 
-      await zchf.approve(await fps2.getAddress(), amount);
-      await fps2["deposit(uint256,address)"](amount, owner.address);
-      const actual = await fps2.balanceOf(owner.address);
+      await zchf.approve(await fcs.getAddress(), amount);
+      await fcs["deposit(uint256,address)"](amount, owner.address);
+      const actual = await fcs.balanceOf(owner.address);
 
       expect(actual).to.be.approximately(preview, floatToDec18(0.01));
     });
 
-    it("totalSupply should equal FPS1 held by FPS2 after multiple deposits", async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
-      await fps2["deposit(uint256,address)"](floatToDec18(20_000), owner.address);
+    it("totalSupply should equal FPS1 held by FCS after multiple deposits", async () => {
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      await fcs["deposit(uint256,address)"](floatToDec18(20_000), owner.address);
 
-      expect(await fps2.totalSupply()).to.equal(
-        await equity.balanceOf(await fps2.getAddress())
+      expect(await fcs.totalSupply()).to.equal(
+        await equity.balanceOf(await fcs.getAddress())
       );
     });
 
     it("should reduce the net redemption counter", async () => {
       // First deposit and redeem to set the counter
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(100));
-      const recentAfterRedeem = await fps2.weightedRecentRedemptions();
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(100));
+      const recentAfterRedeem = await fcs.weightedRecentRedemptions();
       expect(recentAfterRedeem).to.be.greaterThan(0);
 
       // New deposit should reduce the counter
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(50_000), alice.address);
-      expect(await fps2.weightedRecentRedemptions()).to.be.lessThan(recentAfterRedeem);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(50_000), alice.address);
+      expect(await fcs.weightedRecentRedemptions()).to.be.lessThan(recentAfterRedeem);
     });
   });
 
@@ -249,29 +249,29 @@ describe("FPS2 Tests", () => {
   describe("mint (ERC-4626)", () => {
     it("should mint exact shares and return assets used", async () => {
       const targetShares = floatToDec18(100);
-      const assetsNeeded = await fps2.previewMint(targetShares);
-      await zchf.approve(await fps2.getAddress(), assetsNeeded * 2n); // extra buffer
+      const assetsNeeded = await fcs.previewMint(targetShares);
+      await zchf.approve(await fcs.getAddress(), assetsNeeded * 2n); // extra buffer
 
-      await fps2.mint(targetShares, owner.address);
+      await fcs.mint(targetShares, owner.address);
       // Should have received at least targetShares
-      expect(await fps2.balanceOf(owner.address)).to.be.greaterThanOrEqual(targetShares);
+      expect(await fcs.balanceOf(owner.address)).to.be.greaterThanOrEqual(targetShares);
     });
 
     it("should emit Deposit event", async () => {
       const targetShares = floatToDec18(100);
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await expect(fps2.mint(targetShares, owner.address)).to.emit(fps2, "Deposit");
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await expect(fcs.mint(targetShares, owner.address)).to.emit(fcs, "Deposit");
     });
 
     it("previewMint should approximate actual assets needed", async () => {
       const targetShares = floatToDec18(100);
-      const preview = await fps2.previewMint(targetShares);
+      const preview = await fcs.previewMint(targetShares);
 
-      await zchf.approve(await fps2.getAddress(), preview * 2n);
+      await zchf.approve(await fcs.getAddress(), preview * 2n);
       // The actual assets taken should be close to preview
       // (exact match is hard due to binary search approximation)
-      await fps2.mint(targetShares, owner.address);
-      expect(await fps2.balanceOf(owner.address)).to.be.greaterThanOrEqual(targetShares);
+      await fcs.mint(targetShares, owner.address);
+      expect(await fcs.balanceOf(owner.address)).to.be.greaterThanOrEqual(targetShares);
     });
   });
 
@@ -279,16 +279,16 @@ describe("FPS2 Tests", () => {
 
   describe("redeem (ERC-4626)", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
     });
 
     it("should revert before FPS1 90-day holding period (redemptions disabled)", async () => {
-      // FPS2 is binding, but its FPS1 holding is younger than 90 days, so redemptions are disabled.
+      // FCS is binding, but its FPS1 holding is younger than 90 days, so redemptions are disabled.
       await expect(
-        fps2["redeem(uint256,address,address)"](floatToDec18(1), owner.address, owner.address)
-      ).to.be.revertedWithCustomError(fps2, "RedemptionsDisabled");
+        fcs["redeem(uint256,address,address)"](floatToDec18(1), owner.address, owner.address)
+      ).to.be.revertedWithCustomError(fcs, "RedemptionsDisabled");
     });
 
     it("should succeed after 90-day holding period", async () => {
@@ -296,7 +296,7 @@ describe("FPS2 Tests", () => {
 
       const shares = floatToDec18(1);
       const balBefore = await zchf.balanceOf(owner.address);
-      await fps2["redeem(uint256,address,address)"](shares, owner.address, owner.address);
+      await fcs["redeem(uint256,address,address)"](shares, owner.address, owner.address);
       const balAfter = await zchf.balanceOf(owner.address);
       expect(balAfter).to.be.greaterThan(balBefore);
     });
@@ -305,45 +305,45 @@ describe("FPS2 Tests", () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
       const shares = floatToDec18(1);
-      const ownerSharesBefore = await fps2.balanceOf(owner.address);
+      const ownerSharesBefore = await fcs.balanceOf(owner.address);
       const aliceBalBefore = await zchf.balanceOf(alice.address);
 
-      await fps2["redeem(uint256,address,address)"](shares, alice.address, owner.address);
+      await fcs["redeem(uint256,address,address)"](shares, alice.address, owner.address);
 
-      expect(await fps2.balanceOf(owner.address)).to.equal(ownerSharesBefore - shares);
+      expect(await fcs.balanceOf(owner.address)).to.equal(ownerSharesBefore - shares);
       expect(await zchf.balanceOf(alice.address)).to.be.greaterThan(aliceBalBefore);
     });
 
     it("should require allowance when caller != owner", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
       await expect(
-        fps2.connect(alice)["redeem(uint256,address,address)"](floatToDec18(1), alice.address, owner.address)
+        fcs.connect(alice)["redeem(uint256,address,address)"](floatToDec18(1), alice.address, owner.address)
       ).to.be.reverted;
     });
 
     it("should succeed with allowance when caller != owner", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2.approve(alice.address, floatToDec18(1));
-      await fps2.connect(alice)["redeem(uint256,address,address)"](floatToDec18(1), alice.address, owner.address);
+      await fcs.approve(alice.address, floatToDec18(1));
+      await fcs.connect(alice)["redeem(uint256,address,address)"](floatToDec18(1), alice.address, owner.address);
       expect(await zchf.balanceOf(alice.address)).to.be.greaterThan(floatToDec18(200_000));
     });
 
     it("should emit Withdraw event", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
       await expect(
-        fps2["redeem(uint256,address,address)"](floatToDec18(1), owner.address, owner.address)
-      ).to.emit(fps2, "Withdraw");
+        fcs["redeem(uint256,address,address)"](floatToDec18(1), owner.address, owner.address)
+      ).to.emit(fcs, "Withdraw");
     });
 
     it("previewRedeem should approximate actual proceeds", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
       const shares = floatToDec18(1);
-      const preview = await fps2.previewRedeem(shares);
+      const preview = await fcs.previewRedeem(shares);
 
       const balBefore = await zchf.balanceOf(owner.address);
-      await fps2["redeem(uint256,address,address)"](shares, owner.address, owner.address);
+      await fcs["redeem(uint256,address,address)"](shares, owner.address, owner.address);
       const actual = (await zchf.balanceOf(owner.address)) - balBefore;
 
       expect(actual).to.be.approximately(preview, preview / 100n);
@@ -351,16 +351,16 @@ describe("FPS2 Tests", () => {
 
     it("maxRedeem should return owner's balance", async () => {
       await evm_increaseTime(NINETY_DAYS + 60); // redemptions must be enabled (binding + matured holding)
-      expect(await fps2.maxRedeem(owner.address)).to.equal(await fps2.balanceOf(owner.address));
+      expect(await fcs.maxRedeem(owner.address)).to.equal(await fcs.balanceOf(owner.address));
     });
 
     it("totalSupply decreases by burned shares", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      const supplyBefore = await fps2.totalSupply();
+      const supplyBefore = await fcs.totalSupply();
       const shares = floatToDec18(1);
-      await fps2["redeem(uint256,address,address)"](shares, owner.address, owner.address);
-      expect(await fps2.totalSupply()).to.equal(supplyBefore - shares);
+      await fcs["redeem(uint256,address,address)"](shares, owner.address, owner.address);
+      expect(await fcs.totalSupply()).to.equal(supplyBefore - shares);
     });
   });
 
@@ -368,29 +368,29 @@ describe("FPS2 Tests", () => {
 
   describe("redeem (custom overloads)", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
     it("redeem(target, shares) should send proceeds to target", async () => {
       const balBefore = await zchf.balanceOf(alice.address);
-      await fps2["redeem(address,uint256)"](alice.address, floatToDec18(1));
+      await fcs["redeem(address,uint256)"](alice.address, floatToDec18(1));
       expect(await zchf.balanceOf(alice.address)).to.be.greaterThan(balBefore);
     });
 
     it("redeemExpected should revert if proceeds below minimum", async () => {
       await expect(
-        fps2.redeemExpected(owner.address, floatToDec18(1), floatToDec18(999_999))
+        fcs.redeemExpected(owner.address, floatToDec18(1), floatToDec18(999_999))
       ).to.be.revertedWithoutReason();
     });
 
     it("redeemExpected should succeed when proceeds meet minimum", async () => {
       const shares = floatToDec18(1);
-      const expected = await fps2.previewRedeem(shares);
+      const expected = await fcs.previewRedeem(shares);
       // Use 90% of expected as minimum to account for execution difference
-      await fps2.redeemExpected(owner.address, shares, expected * 9n / 10n);
+      await fcs.redeemExpected(owner.address, shares, expected * 9n / 10n);
     });
   });
 
@@ -398,27 +398,27 @@ describe("FPS2 Tests", () => {
 
   describe("withdraw (ERC-4626)", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
     it("should burn the right amount of shares for requested assets", async () => {
       const assets = floatToDec18(100);
-      const expectedShares = await fps2.previewWithdraw(assets);
-      const supplyBefore = await fps2.totalSupply();
+      const expectedShares = await fcs.previewWithdraw(assets);
+      const supplyBefore = await fcs.totalSupply();
 
-      await fps2.withdraw(assets, owner.address, owner.address);
+      await fcs.withdraw(assets, owner.address, owner.address);
 
-      const supplyAfter = await fps2.totalSupply();
+      const supplyAfter = await fcs.totalSupply();
       expect(supplyBefore - supplyAfter).to.be.approximately(expectedShares, expectedShares / 100n);
     });
 
     it("should deliver approximately the requested assets to receiver", async () => {
       const assets = floatToDec18(100);
       const balBefore = await zchf.balanceOf(alice.address);
-      await fps2.withdraw(assets, alice.address, owner.address);
+      await fcs.withdraw(assets, alice.address, owner.address);
       const received = (await zchf.balanceOf(alice.address)) - balBefore;
       // Binary search finds shares in view context; actual execution may differ slightly
       expect(received).to.be.approximately(assets, assets / 100n);
@@ -426,11 +426,11 @@ describe("FPS2 Tests", () => {
 
     it("maxWithdraw should return effective proceeds for the withdrawable amount", async () => {
       // withdraw is capped at 10% of supply, so maxWithdraw = previewRedeem(min(10% cap, balance)).
-      const cap = (await fps2.totalSupply()) / 10n;
-      const balance = await fps2.balanceOf(owner.address);
+      const cap = (await fcs.totalSupply()) / 10n;
+      const balance = await fcs.balanceOf(owner.address);
       const amount = cap < balance ? cap : balance;
-      const maxW = await fps2.maxWithdraw(owner.address);
-      const preview = await fps2.previewRedeem(amount);
+      const maxW = await fcs.maxWithdraw(owner.address);
+      const preview = await fcs.previewRedeem(amount);
       expect(maxW).to.equal(preview);
     });
   });
@@ -439,32 +439,32 @@ describe("FPS2 Tests", () => {
 
   describe("spread mechanism", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
     });
 
     it("weightedRecentRedemptions should be 0 initially", async () => {
-      expect(await fps2.weightedRecentRedemptions()).to.equal(0);
+      expect(await fcs.weightedRecentRedemptions()).to.equal(0);
     });
 
     it("discount should be ~1.0 with no recent redemptions and small planned redemption", async () => {
-      const d = await fps2.discount(0, floatToDec18(1));
+      const d = await fcs.discount(0, floatToDec18(1));
       // Should be very close to 1e18
       expect(d).to.be.greaterThan(floatToDec18(0.99));
     });
 
     it("discount should decrease with larger planned redemption", async () => {
-      const supply = await fps2.totalSupply();
-      const dSmall = await fps2.discount(0, supply / 100n);
-      const dLarge = await fps2.discount(0, supply / 2n);
+      const supply = await fcs.totalSupply();
+      const dSmall = await fcs.discount(0, supply / 100n);
+      const dLarge = await fcs.discount(0, supply / 2n);
       expect(dLarge).to.be.lessThan(dSmall);
     });
 
     it("discount should decrease with more recent redemptions", async () => {
-      const supply = await fps2.totalSupply();
-      const dNoRecent = await fps2.discount(0, floatToDec18(1));
-      const dWithRecent = await fps2.discount(supply / 2n, floatToDec18(1));
+      const supply = await fcs.totalSupply();
+      const dNoRecent = await fcs.discount(0, floatToDec18(1));
+      const dWithRecent = await fcs.discount(supply / 2n, floatToDec18(1));
       expect(dWithRecent).to.be.lessThan(dNoRecent);
     });
 
@@ -475,7 +475,7 @@ describe("FPS2 Tests", () => {
       const rawProceeds = await equity.calculateProceeds(shares);
 
       const balBefore = await zchf.balanceOf(owner.address);
-      await fps2["redeem(address,uint256)"](owner.address, shares);
+      await fcs["redeem(address,uint256)"](owner.address, shares);
       const received = (await zchf.balanceOf(owner.address)) - balBefore;
 
       expect(received).to.be.lessThan(rawProceeds);
@@ -486,10 +486,10 @@ describe("FPS2 Tests", () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
       const equityBefore = await zchf.balanceOf(await equity.getAddress());
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
       const equityAfter = await zchf.balanceOf(await equity.getAddress());
 
-      // FPS1 redeems sends ZCHF out, but FPS2 sends the spread back
+      // FPS1 redeems sends ZCHF out, but FCS sends the spread back
       // Net change on equity should reflect the spread returned
       // (equity loses rawProceeds from redeem, but gains spread back)
       // Just verify equity received something back (the spread)
@@ -500,49 +500,49 @@ describe("FPS2 Tests", () => {
     it("weightedRecentRedemptions should increase after redeem", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
-      expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
+      expect(await fcs.weightedRecentRedemptions()).to.be.greaterThan(0);
     });
 
     it("weightedRecentRedemptions should decay linearly over 7 days", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
-      const recentFull = await fps2.weightedRecentRedemptions();
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
+      const recentFull = await fcs.weightedRecentRedemptions();
 
       // After 3.5 days -> roughly half
       await evm_increaseTime(3.5 * 86400);
-      const recentHalf = await fps2.weightedRecentRedemptions();
+      const recentHalf = await fcs.weightedRecentRedemptions();
       expect(recentHalf).to.be.approximately(recentFull / 2n, recentFull / 50n);
 
       // After 7 days total -> zero
       await evm_increaseTime(3.5 * 86400);
-      expect(await fps2.weightedRecentRedemptions()).to.equal(0);
+      expect(await fcs.weightedRecentRedemptions()).to.equal(0);
     });
 
     it("investing should reduce the net redemption counter", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(100));
-      const recentAfterRedeem = await fps2.weightedRecentRedemptions();
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(100));
+      const recentAfterRedeem = await fcs.weightedRecentRedemptions();
       expect(recentAfterRedeem).to.be.greaterThan(0);
 
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(50_000), alice.address);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(50_000), alice.address);
 
-      expect(await fps2.weightedRecentRedemptions()).to.be.lessThan(recentAfterRedeem);
+      expect(await fcs.weightedRecentRedemptions()).to.be.lessThan(recentAfterRedeem);
     });
 
     it("large investment should zero the counter", async () => {
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
-      expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
+      expect(await fcs.weightedRecentRedemptions()).to.be.greaterThan(0);
 
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(100_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(100_000), alice.address);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(100_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(100_000), alice.address);
 
-      expect(await fps2.weightedRecentRedemptions()).to.equal(0);
+      expect(await fcs.weightedRecentRedemptions()).to.equal(0);
     });
 
     it("should recover capacity after 7 days and sell at near-full price again", async () => {
@@ -550,17 +550,17 @@ describe("FPS2 Tests", () => {
 
       // First sell (small amount)
       const smallSell = floatToDec18(1);
-      await fps2["redeem(address,uint256)"](owner.address, smallSell);
-      expect(await fps2.weightedRecentRedemptions()).to.be.greaterThan(0);
+      await fcs["redeem(address,uint256)"](owner.address, smallSell);
+      expect(await fcs.weightedRecentRedemptions()).to.be.greaterThan(0);
 
       // Wait 7 days for full recovery
       await evm_increaseTime(7 * 86400);
-      expect(await fps2.weightedRecentRedemptions()).to.equal(0);
+      expect(await fcs.weightedRecentRedemptions()).to.equal(0);
 
       // Second sell should get near-full price (no recent redemptions)
       const rawProceeds = await equity.calculateProceeds(smallSell);
       const balBefore = await zchf.balanceOf(owner.address);
-      await fps2["redeem(address,uint256)"](owner.address, smallSell);
+      await fcs["redeem(address,uint256)"](owner.address, smallSell);
       const received = (await zchf.balanceOf(owner.address)) - balBefore;
       expect(received).to.be.greaterThan(rawProceeds * 90n / 100n);
     });
@@ -570,9 +570,9 @@ describe("FPS2 Tests", () => {
 
   describe("path independence", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -584,15 +584,15 @@ describe("FPS2 Tests", () => {
 
       // Scenario A: sell 2 at once
       const balBeforeA = await zchf.balanceOf(alice.address);
-      await fps2["redeem(address,uint256)"](alice.address, twoShares);
+      await fcs["redeem(address,uint256)"](alice.address, twoShares);
       const proceedsA = (await zchf.balanceOf(alice.address)) - balBeforeA;
 
       await ethers.provider.send("evm_revert", [snapshot]);
 
       // Scenario B: sell 1, then 1
       const balBeforeB = await zchf.balanceOf(alice.address);
-      await fps2["redeem(address,uint256)"](alice.address, oneShare);
-      await fps2["redeem(address,uint256)"](alice.address, oneShare);
+      await fcs["redeem(address,uint256)"](alice.address, oneShare);
+      await fcs["redeem(address,uint256)"](alice.address, oneShare);
       const proceedsB = (await zchf.balanceOf(alice.address)) - balBeforeB;
 
       // Small difference is expected due to Equity's non-linear pricing
@@ -609,61 +609,61 @@ describe("FPS2 Tests", () => {
       await equity.connect(alice).invest(floatToDec18(50_000), 0);
     });
 
-    it("should wrap FPS1 into FPS2 1:1", async () => {
+    it("should wrap FPS1 into FCS 1:1", async () => {
       const fps1Balance = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), fps1Balance);
-      await fps2.connect(alice).wrap(fps1Balance);
+      await equity.connect(alice).approve(await fcs.getAddress(), fps1Balance);
+      await fcs.connect(alice).wrap(fps1Balance);
 
-      expect(await fps2.balanceOf(alice.address)).to.equal(fps1Balance);
+      expect(await fcs.balanceOf(alice.address)).to.equal(fps1Balance);
       expect(await equity.balanceOf(alice.address)).to.equal(0);
     });
 
-    it("should credit FPS1 votes to FPS2 on wrap", async () => {
+    it("should credit FPS1 votes to FCS on wrap", async () => {
       await evm_increaseTime(100); // accumulate some votes
 
       const votesBefore = await equity.votes(alice.address);
       expect(votesBefore).to.be.greaterThan(0);
 
       const fps1Balance = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), fps1Balance);
-      await fps2.connect(alice).wrap(fps1Balance);
+      await equity.connect(alice).approve(await fcs.getAddress(), fps1Balance);
+      await fcs.connect(alice).wrap(fps1Balance);
 
-      // FPS2 votes should reflect the transferred FPS1 votes
-      const fps2Votes = await fps2.votes(alice.address);
-      expect(fps2Votes).to.be.greaterThan(0);
+      // FCS votes should reflect the transferred FPS1 votes
+      const fcsVotes = await fcs.votes(alice.address);
+      expect(fcsVotes).to.be.greaterThan(0);
     });
 
-    it("should unwrap FPS2 back to FPS1 when not binding", async () => {
+    it("should unwrap FCS back to FPS1 when not binding", async () => {
       const fps1Balance = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), fps1Balance);
-      await fps2.connect(alice).wrap(fps1Balance);
+      await equity.connect(alice).approve(await fcs.getAddress(), fps1Balance);
+      await fcs.connect(alice).wrap(fps1Balance);
 
-      expect(await fps2.isBinding()).to.be.false;
+      expect(await fcs.isBinding()).to.be.false;
 
-      await fps2.connect(alice).unwrap(fps1Balance);
-      expect(await fps2.balanceOf(alice.address)).to.equal(0);
+      await fcs.connect(alice).unwrap(fps1Balance);
+      expect(await fcs.balanceOf(alice.address)).to.equal(0);
       expect(await equity.balanceOf(alice.address)).to.equal(fps1Balance);
     });
 
     it("should emit Wrapped and Unwrapped events", async () => {
       const fps1Balance = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), fps1Balance);
+      await equity.connect(alice).approve(await fcs.getAddress(), fps1Balance);
 
-      await expect(fps2.connect(alice).wrap(fps1Balance))
-        .to.emit(fps2, "Wrapped")
+      await expect(fcs.connect(alice).wrap(fps1Balance))
+        .to.emit(fcs, "Wrapped")
         .withArgs(alice.address, fps1Balance);
 
-      await expect(fps2.connect(alice).unwrap(fps1Balance))
-        .to.emit(fps2, "Unwrapped")
+      await expect(fcs.connect(alice).unwrap(fps1Balance))
+        .to.emit(fcs, "Unwrapped")
         .withArgs(alice.address, fps1Balance);
     });
 
-    // Note: the current design intentionally relaxed the "cannot unwrap while binding" rule (see FPS2.unwrap).
+    // Note: the current design intentionally relaxed the "cannot unwrap while binding" rule (see FCS.unwrap).
     // Unwrapping is now only gated by the FIFO/holding-duration check, not by the binding state.
 
     it("should require FPS1 approval to wrap", async () => {
       await expect(
-        fps2.connect(alice).wrap(floatToDec18(1))
+        fcs.connect(alice).wrap(floatToDec18(1))
       ).to.be.reverted;
     });
   });
@@ -672,56 +672,56 @@ describe("FPS2 Tests", () => {
 
   describe("vote tracking", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
     });
 
     it("should accumulate votes over time", async () => {
-      const votesBefore = await fps2.votes(owner.address);
+      const votesBefore = await fcs.votes(owner.address);
       await evm_increaseTime(100);
-      const votesAfter = await fps2.votes(owner.address);
+      const votesAfter = await fcs.votes(owner.address);
       expect(votesAfter).to.be.greaterThan(votesBefore);
     });
 
     it("totalVotes should equal sum of individual votes", async () => {
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(10_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(10_000), alice.address);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(10_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(10_000), alice.address);
 
       await evm_increaseTime(100);
 
-      const totalVotes = await fps2.totalVotes();
-      const ownerVotes = await fps2.votes(owner.address);
-      const aliceVotes = await fps2.votes(alice.address);
+      const totalVotes = await fcs.totalVotes();
+      const ownerVotes = await fcs.votes(owner.address);
+      const aliceVotes = await fcs.votes(alice.address);
       expect(totalVotes).to.be.approximately(ownerVotes + aliceVotes, totalVotes / 1000n);
     });
 
     it("relativeVotes should return 1e18 for sole holder", async () => {
       await evm_increaseTime(100);
-      expect(await fps2.relativeVotes(owner.address)).to.equal(BigInt(1e18));
+      expect(await fcs.relativeVotes(owner.address)).to.equal(BigInt(1e18));
     });
 
     it("holdingDuration should track correctly", async () => {
       const waitTime = 500;
       await evm_increaseTime(waitTime);
-      const duration = await fps2.holdingDuration(owner.address);
+      const duration = await fcs.holdingDuration(owner.address);
       expect(duration).to.be.approximately(BigInt(waitTime), 5n);
     });
 
     it("cap should limit votes after HOLDING_DURATION_CAP (365 days)", async () => {
       await evm_increaseTime(366 * 86400); // > 1 year
 
-      const votesBefore = await fps2.votes(owner.address);
-      await fps2.cap(owner.address);
-      const votesAfter = await fps2.votes(owner.address);
+      const votesBefore = await fcs.votes(owner.address);
+      await fcs.cap(owner.address);
+      const votesAfter = await fcs.votes(owner.address);
       expect(votesAfter).to.be.lessThan(votesBefore);
     });
 
     it("cap should be no-op if holding duration <= 365 days", async () => {
       await evm_increaseTime(100 * 86400); // 100 days < 365
 
-      const votesBefore = await fps2.votes(owner.address);
-      await fps2.cap(owner.address);
-      const votesAfter = await fps2.votes(owner.address);
+      const votesBefore = await fcs.votes(owner.address);
+      await fcs.cap(owner.address);
+      const votesAfter = await fcs.votes(owner.address);
       // Votes may change slightly due to time passing in the tx, but cap shouldn't reduce them
       expect(votesAfter).to.be.greaterThanOrEqual(votesBefore);
     });
@@ -731,11 +731,11 @@ describe("FPS2 Tests", () => {
 
   describe("delegation and governance", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
 
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(10_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(10_000), alice.address);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(10_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(10_000), alice.address);
     });
 
     it("should allow delegating votes", async () => {
@@ -769,26 +769,26 @@ describe("FPS2 Tests", () => {
 
   describe("shoot", () => {
     it("should destroy target's FPS1 votes when binding", async () => {
-      // Wrap majority of FPS1 into FPS2
+      // Wrap majority of FPS1 into FCS
       const ownerFps1 = await equity.balanceOf(owner.address);
-      await equity.approve(await fps2.getAddress(), ownerFps1);
-      await fps2.wrap(ownerFps1);
+      await equity.approve(await fcs.getAddress(), ownerFps1);
+      await fcs.wrap(ownerFps1);
 
       // Alice invests directly in FPS1 (small amount)
       await zchf.connect(alice).approve(await equity.getAddress(), floatToDec18(1_000));
       await equity.connect(alice).invest(floatToDec18(1_000), 0);
 
-      // Also invest through FPS2 to ensure binding (>50% of FPS1)
-      await zchf.approve(await fps2.getAddress(), floatToDec18(100_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(100_000), owner.address);
+      // Also invest through FCS to ensure binding (>50% of FPS1)
+      await zchf.approve(await fcs.getAddress(), floatToDec18(100_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(100_000), owner.address);
 
-      if (await fps2.isBinding()) {
+      if (await fcs.isBinding()) {
         const targetVotesBefore = await equity.votes(alice.address);
         expect(targetVotesBefore).to.be.greaterThan(0);
 
         await evm_increaseTime(100); // accumulate votes
 
-        await fps2.shoot(alice.address);
+        await fcs.shoot(alice.address);
 
         const targetVotesAfter = await equity.votes(alice.address);
         expect(targetVotesAfter).to.be.lessThan(targetVotesBefore);
@@ -797,60 +797,60 @@ describe("FPS2 Tests", () => {
 
     it("should revert when not binding", async () => {
       await expect(
-        fps2.shoot(alice.address)
-      ).to.be.revertedWithCustomError(fps2, "NotBinding");
+        fcs.shoot(alice.address)
+      ).to.be.revertedWithCustomError(fcs, "NotBinding");
     });
   });
 
-  // restructureCapTable was intentionally removed from FPS2 (see the note in FPS2.sol); no test needed.
+  // restructureCapTable was intentionally removed from FCS (see the note in FCS.sol); no test needed.
 
   // ==================== ERC-4626 View Consistency ====================
 
   describe("ERC-4626 view functions", () => {
     beforeEach(async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
-      await bindFps2();
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(50_000), owner.address);
+      await bindFcs();
     });
 
     it("convertToShares should be inverse of ask price", async () => {
       const assets = floatToDec18(1_000);
-      const shares = await fps2.convertToShares(assets);
-      const askPrice = await fps2.ask();
+      const shares = await fcs.convertToShares(assets);
+      const askPrice = await fcs.ask();
       // shares = assets / ask
       expect(shares).to.be.approximately(assets * BigInt(1e18) / askPrice, floatToDec18(0.01));
     });
 
     it("convertToAssets should use bid price", async () => {
       const shares = floatToDec18(1);
-      const assets = await fps2.convertToAssets(shares);
-      const bidPrice = await fps2.bid();
+      const assets = await fcs.convertToAssets(shares);
+      const bidPrice = await fcs.bid();
       expect(assets).to.be.approximately(shares * bidPrice / BigInt(1e18), floatToDec18(0.01));
     });
 
     it("maxDeposit should return max uint256", async () => {
-      expect(await fps2.maxDeposit(owner.address)).to.equal(ethers.MaxUint256);
+      expect(await fcs.maxDeposit(owner.address)).to.equal(ethers.MaxUint256);
     });
 
     it("maxMint should return max uint256", async () => {
-      expect(await fps2.maxMint(owner.address)).to.equal(ethers.MaxUint256);
+      expect(await fcs.maxMint(owner.address)).to.equal(ethers.MaxUint256);
     });
 
-    it("totalAssets should reflect the FPS2 share of total equity", async () => {
-      // totalAssets = ZCHF.equity() * FPS2.totalSupply() / FPS1.totalSupply()
+    it("totalAssets should reflect the FCS share of total equity", async () => {
+      // totalAssets = ZCHF.equity() * FCS.totalSupply() / FPS1.totalSupply()
       const expectedAssets =
-        ((await zchf.equity()) * (await fps2.totalSupply())) / (await equity.totalSupply());
-      expect(await fps2.totalAssets()).to.equal(expectedAssets);
+        ((await zchf.equity()) * (await fcs.totalSupply())) / (await equity.totalSupply());
+      expect(await fcs.totalAssets()).to.equal(expectedAssets);
     });
   });
 
   // ==================== MinterGovernance ====================
 
-  describe("MinterGovernance (via FPS2Governance)", () => {
+  describe("MinterGovernance (via FCSGovernance)", () => {
     beforeEach(async () => {
-      // Invest through FPS2 so it has FPS1 voting power
-      await zchf.approve(await fps2.getAddress(), floatToDec18(100_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(100_000), owner.address);
+      // Invest through FCS so it has FPS1 voting power
+      await zchf.approve(await fcs.getAddress(), floatToDec18(100_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(100_000), owner.address);
       await evm_increaseTime(NINETY_DAYS + 60);
     });
 
@@ -892,7 +892,7 @@ describe("FPS2 Tests", () => {
     });
 
     it("denyUnannouncedMinter should veto unannounced minter", async () => {
-      // Suggest minter directly on Frankencoin (bypassing FPS2Gov)
+      // Suggest minter directly on Frankencoin (bypassing FCSGov)
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(1_000);
       await zchf.connect(alice).approve(await zchf.getAddress(), fee);
@@ -935,13 +935,13 @@ describe("FPS2 Tests", () => {
       ).to.be.revertedWithCustomError(minterGov, "MinterCorrectlyAnnounced");
     });
 
-    it("denyMinter should require qualified FPS2 holder", async () => {
+    it("denyMinter should require qualified FCS holder", async () => {
       const minter = ethers.Wallet.createRandom().address;
       const fee = floatToDec18(5_000);
       await zchf.approve(await minterGov.getAddress(), fee);
       await minterGov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
 
-      // Bob has no FPS2 votes; NotQualified is raised by the governance vote contract
+      // Bob has no FCS votes; NotQualified is raised by the governance vote contract
       await expect(
         minterGov.connect(bob).denyMinter(minter, [], "veto")
       ).to.be.revertedWithCustomError(mainnetVotes, "NotQualified");
@@ -953,7 +953,7 @@ describe("FPS2 Tests", () => {
       await zchf.approve(await minterGov.getAddress(), fee);
       await minterGov.suggestMinter(minter, NINETY_DAYS, fee, "announced");
 
-      // Owner has FPS2 votes and should be qualified
+      // Owner has FCS votes and should be qualified
       await minterGov.denyMinter(minter, [], "veto");
       expect(await zchf.minters(minter)).to.equal(0);
     });
@@ -964,92 +964,92 @@ describe("FPS2 Tests", () => {
   describe("integration", () => {
     it("full lifecycle: deposit -> wait -> redeem with spread", async () => {
       const investAmount = floatToDec18(50_000);
-      await zchf.approve(await fps2.getAddress(), investAmount);
-      await fps2["deposit(uint256,address)"](investAmount, owner.address);
-      await bindFps2(); // required for redemptions to be enabled
+      await zchf.approve(await fcs.getAddress(), investAmount);
+      await fcs["deposit(uint256,address)"](investAmount, owner.address);
+      await bindFcs(); // required for redemptions to be enabled
 
-      const fps2Balance = await fps2.balanceOf(owner.address);
-      expect(fps2Balance).to.be.greaterThan(0);
+      const fcsBalance = await fcs.balanceOf(owner.address);
+      expect(fcsBalance).to.be.greaterThan(0);
 
-      // Invariant: FPS2 supply == FPS1 held
-      expect(await fps2.totalSupply()).to.equal(
-        await equity.balanceOf(await fps2.getAddress())
+      // Invariant: FCS supply == FPS1 held
+      expect(await fcs.totalSupply()).to.equal(
+        await equity.balanceOf(await fcs.getAddress())
       );
 
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Redeem 1%
-      const sellAmount = fps2Balance / 100n;
+      const sellAmount = fcsBalance / 100n;
       const balBefore = await zchf.balanceOf(owner.address);
-      await fps2["redeem(address,uint256)"](owner.address, sellAmount);
+      await fcs["redeem(address,uint256)"](owner.address, sellAmount);
       const balAfter = await zchf.balanceOf(owner.address);
 
       expect(balAfter - balBefore).to.be.greaterThan(0);
-      expect(await fps2.totalSupply()).to.equal(fps2Balance - sellAmount);
+      expect(await fcs.totalSupply()).to.equal(fcsBalance - sellAmount);
 
       // Invariant still holds
-      expect(await fps2.totalSupply()).to.equal(
-        await equity.balanceOf(await fps2.getAddress())
+      expect(await fcs.totalSupply()).to.equal(
+        await equity.balanceOf(await fcs.getAddress())
       );
     });
 
     it("wrap -> redeem -> spread goes to equity", async () => {
-      // Alice invests in FPS1 directly, then wraps into FPS2
+      // Alice invests in FPS1 directly, then wraps into FCS
       await zchf.connect(alice).approve(await equity.getAddress(), floatToDec18(50_000));
       await equity.connect(alice).invest(floatToDec18(50_000), 0);
 
       const aliceFps1 = await equity.balanceOf(alice.address);
-      await equity.connect(alice).approve(await fps2.getAddress(), aliceFps1);
-      await fps2.connect(alice).wrap(aliceFps1);
+      await equity.connect(alice).approve(await fcs.getAddress(), aliceFps1);
+      await fcs.connect(alice).wrap(aliceFps1);
 
-      expect(await fps2.balanceOf(alice.address)).to.equal(aliceFps1);
+      expect(await fcs.balanceOf(alice.address)).to.equal(aliceFps1);
 
-      await bindFps2(); // wrap owner's remaining FPS1 so FPS2 controls > 2/3 of votes
+      await bindFcs(); // wrap owner's remaining FPS1 so FCS controls > 2/3 of votes
       await evm_increaseTime(NINETY_DAYS + 60);
 
-      // Redeem FPS2
+      // Redeem FCS
       const redeemAmount = aliceFps1 / 10n;
-      await fps2.connect(alice)["redeem(address,uint256)"](alice.address, redeemAmount);
+      await fcs.connect(alice)["redeem(address,uint256)"](alice.address, redeemAmount);
 
-      // FPS2 supply should match FPS1 held
-      expect(await fps2.totalSupply()).to.equal(
-        await equity.balanceOf(await fps2.getAddress())
+      // FCS supply should match FPS1 held
+      expect(await fcs.totalSupply()).to.equal(
+        await equity.balanceOf(await fcs.getAddress())
       );
     });
 
     it("multiple users depositing and redeeming", async () => {
       // Owner and Alice both deposit
-      await zchf.approve(await fps2.getAddress(), floatToDec18(30_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(30_000), owner.address);
+      await zchf.approve(await fcs.getAddress(), floatToDec18(30_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(30_000), owner.address);
 
-      await zchf.connect(alice).approve(await fps2.getAddress(), floatToDec18(20_000));
-      await fps2.connect(alice)["deposit(uint256,address)"](floatToDec18(20_000), alice.address);
+      await zchf.connect(alice).approve(await fcs.getAddress(), floatToDec18(20_000));
+      await fcs.connect(alice)["deposit(uint256,address)"](floatToDec18(20_000), alice.address);
 
-      await bindFps2(); // wrap owner's remaining FPS1 so FPS2 is binding
+      await bindFcs(); // wrap owner's remaining FPS1 so FCS is binding
       await evm_increaseTime(NINETY_DAYS + 60);
 
       // Both redeem partial amounts
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(10));
-      await fps2.connect(alice)["redeem(address,uint256)"](alice.address, floatToDec18(5));
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(10));
+      await fcs.connect(alice)["redeem(address,uint256)"](alice.address, floatToDec18(5));
 
-      // Invariant: FPS2 supply == FPS1 held
-      expect(await fps2.totalSupply()).to.equal(
-        await equity.balanceOf(await fps2.getAddress())
+      // Invariant: FCS supply == FPS1 held
+      expect(await fcs.totalSupply()).to.equal(
+        await equity.balanceOf(await fcs.getAddress())
       );
     });
 
     it("price consistency: ask matches FPS1 price throughout", async () => {
-      await zchf.approve(await fps2.getAddress(), floatToDec18(50_000));
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
-      expect(await fps2.ask()).to.equal(await equity.price());
+      await zchf.approve(await fcs.getAddress(), floatToDec18(50_000));
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      expect(await fcs.ask()).to.equal(await equity.price());
 
-      await fps2["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
-      expect(await fps2.ask()).to.equal(await equity.price());
+      await fcs["deposit(uint256,address)"](floatToDec18(10_000), owner.address);
+      expect(await fcs.ask()).to.equal(await equity.price());
 
-      await bindFps2(); // required for redemptions to be enabled
+      await bindFcs(); // required for redemptions to be enabled
       await evm_increaseTime(NINETY_DAYS + 60);
-      await fps2["redeem(address,uint256)"](owner.address, floatToDec18(1));
-      expect(await fps2.ask()).to.equal(await equity.price());
+      await fcs["redeem(address,uint256)"](owner.address, floatToDec18(1));
+      expect(await fcs.ask()).to.equal(await equity.price());
     });
   });
 });

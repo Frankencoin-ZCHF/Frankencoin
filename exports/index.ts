@@ -1,6 +1,8 @@
 // chain addresses and helpers
 export * from "./address.config";
 export * from "./address.types";
+export * from "./blocknumber.config";
+export * from "./blocknumber.types";
 
 // abi exports
 export * from "./abis/bridge/CCIPAdmin";
@@ -9,12 +11,19 @@ export * from "./abis/bridge/ITokenPool";
 
 export * from "./abis/equity/BridgeAccounting";
 export * from "./abis/equity/BridgedGovernance";
+export * from "./abis/equity/BridgedVotes";
+export * from "./abis/equity/CCIPGovernance";
 export * from "./abis/equity/Equity";
+export * from "./abis/equity/FCS";
 export * from "./abis/equity/FPSUnlock";
 export * from "./abis/equity/FPSWrapper";
 export * from "./abis/equity/Governance";
+export * from "./abis/equity/GovernanceFactory";
 export * from "./abis/equity/GovernanceSender";
 export * from "./abis/equity/IGovernance";
+export * from "./abis/equity/InterestGovernance";
+export * from "./abis/equity/MainnetVotes";
+export * from "./abis/equity/MinterGovernance";
 
 export * from "./abis/erc20/CrossChainERC20";
 export * from "./abis/erc20/CrossChainReference";

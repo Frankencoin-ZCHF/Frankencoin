@@ -9,13 +9,13 @@ import {ITokenPool} from "../../bridge/ITokenPool.sol";
 import {RateLimiter} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/RateLimiter.sol";
 
 /**
- * Allows qualified FPS2 holders to participate CCIP governance like qualified FPS1 holders.
+ * Allows qualified FCS holders to participate CCIP governance like qualified FPS1 holders.
  */
 contract CCIPGovernance is GovernanceModule, ICCIPAdmin {
 
     ICCIPAdmin public immutable CCIP_ADMIN;
 
-    constructor(IGovernance gov, address mainnetFPS2_, ICCIPAdmin ccipAdmin_) GovernanceModule(gov, mainnetFPS2_) {
+    constructor(IGovernance gov, address mainnetFCS_, ICCIPAdmin ccipAdmin_) GovernanceModule(gov, mainnetFCS_) {
         CCIP_ADMIN = ccipAdmin_;
     }
 
