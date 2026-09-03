@@ -1,6 +1,8 @@
 // chain addresses and helpers
 export * from "./address.config";
 export * from "./address.types";
+export * from "./blocknumber.config";
+export * from "./blocknumber.types";
 
 // abi exports
 export * from "./abis/bridge/CCIPAdmin";
