@@ -68,6 +68,13 @@ New investments also reduce the weighted recent redemption counter, helping the 
 
 FCS can be redeemed for ZCHF at any time -- there is no 90-day holding requirement like in FPS1. However, the redemption price (the "bid") is subject to a discount that depends on recent redemption activity.
 
+**FCS redemption fees are not the same as FPS1 redemption fees.** When someone redeems FCS, two fee layers apply, stacked on top of each other:
+
+1. **FPS1's own built-in redemption fee.** Under the hood, `FCS._redeem` calls `FPS1.redeem`, which applies FPS1's native 0.3% fee plus its cubic bonding-curve pricing (`calculateProceeds` in `Equity.sol`) to convert the underlying FPS1 shares into ZCHF. This is the same fee a plain FPS1 holder pays when redeeming directly.
+2. **FCS's own recent-redemption discount**, described below, is applied on top of the FPS1 proceeds via `calculateEffectiveProceeds`.
+
+Because of this second layer, redeeming FCS is strictly more expensive than redeeming an equivalent amount of FPS1 directly whenever there has been recent redemption activity (i.e. whenever `weightedRecentRedemptions() > 0`). The `bid()` and `ask()` view functions only reflect the mid-price (`FPS1.price()`) and the FCS-specific discount; they do not include FPS1's built-in 0.3% fee, so the actual proceeds from `redeem`/`previewRedeem` will always be somewhat lower than `bid()` alone would suggest.
+
 **How the discount works:**
 
 The contract tracks the volume of recent redemptions. This counter decays linearly to zero over a 7-day recovery period. When someone redeems, the effective proceeds are:
@@ -100,10 +107,8 @@ Consider 10,000 FCS in circulation backed by 4,000,000 ZCHF in equity (FPS price
 
 FCS holds FPS1 tokens on behalf of its holders. Each FCS is backed 1:1 by an FPS1 token in the contract. The FPS1 voting power of the FCS contract is delegated to the governance contract, which exercises it on behalf of FCS holders.
 
-FCS becomes **binding** when the contract controls more than 2/3 of all FPS1 votes, i.e. when a sufficient number of FPS holders joined the new contract for a sufficient amount of time. Once binding:
+FCS becomes **binding** when the contract controls more than 2/3 of all FPS1 votes, i.e. when a sufficient number of FPS holders joined the new contract for a sufficient amount of time. Once binding, anyone can use the `shoot` function to destroy the votes of FPS1 holders who remain outside the agreement, preventing them from taking part in governance or redeeming their FPS1.
 
-- Holders cannot unwrap their FCS back to FPS1 any longer (they are committed to the agreement).
-- Anyone can use the `shoot` function to destroy the votes of FPS1 holders who remain outside the agreement, preventing them from taking part in the governance or redeeming their FPS1.
-- Holders can still redeem FCS for ZCHF at any time (subject to the discount), but they cannot extract the underlying FPS1 tokens.
+Unwrapping FCS back into FPS1 (via `unwrap`) is allowed regardless of whether the contract is binding, but only for holders with an above-average holding duration (a FIFO-style restriction). This prevents an attacker from wrapping and unwrapping FCS in a loop to destroy the votes the FCS contract holds in FPS1. In an earlier design, unwrapping was blocked entirely while binding; this was relaxed to allow a smoother transition to a future replacement contract if one is ever needed. Unwrapping still puts a holder in a strictly worse position: they lose FCS-style redemption (no more waiting period, discount-based pricing) and temporarily lose all voting power, and once outside FCS they are exposed to being `shoot` if the contract is binding.
 
 FCS can become unbinding again if enough FCS are redeemed or enough new FPS1 are minted outside the contract, pushing the vote share below 2/3.
