@@ -65,6 +65,10 @@ export const ADDRESS: ChainAddressMap = {
     minterGovernance: "0x4655529a4bf8c26a97c2b7f6c044b69a2f98e73c",
     ccipGovernance: "0x3b5f2ab37bd0679645289726146a5f653bfdcb52",
 
+    // amplifier
+    uniswapAmplifier: "0xa1304E5Aaf83CDB7c2b367F50B99Bb0647ED8C58",
+    uniswapAmplifierPositionImplementation: "0x8746159D385f84CB550ab5aE015c0dDf6909b8f2",
+
     // utils
     svZCHF: "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
@@ -146,6 +150,10 @@ export const ADDRESS: ChainAddressMap = {
     bridgedVotes: "0x3bc9575c1e41322de656ef93ef5cad9be9e90dcd",
     ccipGovernance: "0x3b5f2ab37bd0679645289726146a5f653bfdcb52",
     minterGovernance: "0x4655529a4bf8c26a97c2b7f6c044b69a2f98e73c",
+
+    // amplifier
+    uniswapAmplifier: "0x15CE921192ad967Eb65ea1cc508DfA21120F0d8F",
+    uniswapAmplifierPositionImplementation: "0xe839E25b52440DE580171B7a398E903c0E495e27",
   },
   [base.id]: {
     // identifier

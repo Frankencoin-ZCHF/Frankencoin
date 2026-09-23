@@ -16,6 +16,18 @@ export type ChainBlockNumberMainnet = {
   // identifier
   chainId: typeof mainnet.id;
 
+  // core
+  frankencoin: number;
+  mintingHubV1: number;
+  mintingHubV2: number;
+  transferReference: number;
+  savingsReferral: number;
+  uniswapPoolV3ZCHFUSDT: number;
+
+  // ccip — ccipAdmin and ccipBridgeAccounting share a deploy tx
+  ccipAdmin: number;
+  ccipBridgeAccounting: number;
+
   // FCS
   // FCS's constructor deploys mainnetVotes/interestGovernance/minterGovernance/ccipGovernance
   // in the same transaction, so they share fcs' block.
@@ -25,6 +37,9 @@ export type ChainBlockNumberMainnet = {
   interestGovernance: number;
   minterGovernance: number;
   ccipGovernance: number;
+
+  // amplifier (mainnet + optimism only)
+  uniswapAmplifier: number;
 };
 
 export type ChainBlockNumberSide = {
@@ -38,6 +53,10 @@ export type ChainBlockNumberSide = {
     | typeof gnosis.id
     | typeof sonic.id;
 
+  // core
+  ccipBridgedFrankencoin: number;
+  ccipBridgedSavings: number;
+
   // FCS
   // minterGovernance/ccipGovernance/bridgedVotes are created inside the
   // GovernanceFactory.deploy(fcsmainnet) transaction, not the GovernanceFactory deployment itself.
@@ -45,6 +64,9 @@ export type ChainBlockNumberSide = {
   minterGovernance: number;
   ccipGovernance: number;
   bridgedVotes: number;
+
+  // amplifier — optimism only, the sole L2 deployment
+  uniswapAmplifier?: number;
 };
 
 export type ChainBlockNumberMap = {

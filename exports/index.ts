@@ -30,6 +30,7 @@ export * from "./abis/erc20/CrossChainReference";
 export * from "./abis/erc20/ERC20";
 export * from "./abis/erc20/ERC20PermitLight";
 export * from "./abis/erc20/IERC20";
+export * from "./abis/erc20/IERC4626";
 export * from "./abis/erc20/IERC677Receiver";
 
 export * from "./abis/MintingHubV1/MintingHubV1";
@@ -62,6 +63,8 @@ export * from "./abis/stablecoin/IFrankencoin";
 
 export * from "./abis/swap/StablecoinBridgeV1";
 export * from "./abis/swap/StablecoinBridgeV2";
+export * from "./abis/swap/UniswapAmplifier";
+export * from "./abis/swap/AmplifiedPosition";
 
 export * from "./abis/transfer/ITransferReference";
 export * from "./abis/transfer/TransferReference";

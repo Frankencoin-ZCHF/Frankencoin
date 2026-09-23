@@ -108,6 +108,10 @@ export type ChainAddressMainnet = {
   minterGovernance: Address;
   ccipGovernance: Address;
 
+  // amplifier
+  uniswapAmplifier: Address;
+  uniswapAmplifierPositionImplementation: Address;
+
   // utils
   wFPS: Address; // wrapped FPS
   uniswapPoolV3ZCHFUSDT: Address;
@@ -192,6 +196,10 @@ export type ChainAddressOptimism = {
   bridgedVotes: Address;
   ccipGovernance: Address;
   minterGovernance: Address;
+
+  // amplifier
+  uniswapAmplifier: Address;
+  uniswapAmplifierPositionImplementation: Address;
 
   // utils
   CCIPWrapper: Address;
