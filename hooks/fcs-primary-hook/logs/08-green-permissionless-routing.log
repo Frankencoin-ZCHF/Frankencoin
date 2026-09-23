@@ -1,0 +1,13 @@
+Compiling 99 files with Solc 0.8.26
+Solc 0.8.26 finished in 3.26s
+Compiler run successful!
+
+Ran 5 tests for test/PrimaryHook.t.sol:PrimaryHookTest
+[PASS] test_buyFromEmptyManager() (gas: 429859)
+[PASS] test_externalPrefundedRouterCanBuy() (gas: 1337798)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50495)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96363)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 470367)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 745.40ms (2.75ms CPU time)
+
+Ran 1 test suite in 746.43ms (745.40ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

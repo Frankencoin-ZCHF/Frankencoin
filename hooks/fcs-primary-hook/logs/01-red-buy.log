@@ -1,0 +1,48 @@
+Compiling 93 files with Solc 0.8.26
+Solc 0.8.26 finished in 2.84s
+Compiler run successful with warnings:
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:138:13:
+    |
+138 |             int128 amountUnspecified =
+    |             ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:140:13:
+    |
+140 |             swapDelta = toBeforeSwapDelta(-params.amountSpecified.toInt128(), amountUnspecified);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:147:13:
+    |
+147 |             int128 amountUnspecified =
+    |             ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:149:13:
+    |
+149 |             swapDelta = toBeforeSwapDelta(-params.amountSpecified.toInt128(), amountUnspecified);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:152:9:
+    |
+152 |         return (IHooks.beforeSwap.selector, swapDelta, 0);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 1 test for test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: not implemented] test_buyFromEmptyManager() (gas: 67389)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 100.02ms (91.34µs CPU time)
+
+Ran 1 test suite in 102.00ms (100.02ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: not implemented] test_buyFromEmptyManager() (gas: 67389)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

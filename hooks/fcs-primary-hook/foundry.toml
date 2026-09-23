@@ -1,0 +1,22 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+cache_path = "cache"
+libs = ["lib"]
+solc = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+bytecode_hash = "none"
+ffi = false
+fs_permissions = [{ access = "read", path = "./" }]
+[fuzz]
+runs = 512
+[profile.ci.fuzz]
+runs = 2048
+[rpc_endpoints]
+mainnet = "https://ethereum-rpc.publicnode.com"
+[lint]
+lint_on_build = false

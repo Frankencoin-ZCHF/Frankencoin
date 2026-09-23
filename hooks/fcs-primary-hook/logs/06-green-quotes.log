@@ -1,0 +1,12 @@
+Compiling 2 files with Solc 0.8.26
+Solc 0.8.26 finished in 3.00s
+Compiler run successful!
+
+Ran 4 tests for test/PrimaryHook.t.sol:PrimaryHookTest
+[PASS] test_buyFromEmptyManager() (gas: 464672)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50431)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96245)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 505105)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 944.72ms (1.60ms CPU time)
+
+Ran 1 test suite in 952.07ms (944.72ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

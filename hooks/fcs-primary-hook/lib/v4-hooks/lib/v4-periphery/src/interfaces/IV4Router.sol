@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {PathKey} from "../libraries/PathKey.sol";
+import {IImmutableState} from "./IImmutableState.sol";
+
+/// @title IV4Router
+/// @notice Interface for the V4Router contract
+interface IV4Router is IImmutableState {
+    /// @notice Emitted when an exactInput swap does not receive its minAmountOut
+    error V4TooLittleReceived(uint256 minAmountOutReceived, uint256 amountReceived);
+    /// @notice Emitted when an exactOutput is asked for more than its maxAmountIn
+    error V4TooMuchRequested(uint256 maxAmountInRequested, uint256 amountRequested);
+    /// @notice Emitted when an exactInput swap does not receive its relative minAmountOut per hop (min price)
+    error V4TooLittleReceivedPerHop(uint256 hopIndex, uint256 minPrice, uint256 price);
+    /// @notice Emitted when an exactOutput is asked for more than its relative maxAmountIn per hop (min price)
+    error V4TooMuchRequestedPerHop(uint256 hopIndex, uint256 minPrice, uint256 price);
+    /// @notice Emitted when a single exactInput swap does not meet its relative price limit
+    error V4TooLittleReceivedPerHopSingle(uint256 minPrice, uint256 price);
+    /// @notice Emitted when a single exactOutput swap exceeds its relative price limit
+    error V4TooMuchRequestedPerHopSingle(uint256 minPrice, uint256 price);
+    /// @notice Emitted when the length of the per-hop minimum price array is not zero and not equal to the path length
+    error InvalidHopPriceLength();
+    /// @notice Emitted when an exactOutput swap (or hop) delivers less than the requested amount, e.g. a
+    ///         pool runs out of liquidity before the price limit. Exact output is all-or-nothing.
+    error V4ExactOutputUnfilled(uint256 amountOutRequested, uint256 amountOutReceived);
+
+    /// @notice Parameters for a single-hop exact-input swap
+    struct ExactInputSingleParams {
+        PoolKey poolKey;
+        bool zeroForOne;
+        uint128 amountIn;
+        uint128 amountOutMinimum;
+        uint256 minHopPriceX36;
+        bytes hookData;
+    }
+
+    /// @notice Parameters for a multi-hop exact-input swap
+    struct ExactInputParams {
+        Currency currencyIn;
+        PathKey[] path;
+        uint256[] minHopPriceX36;
+        uint128 amountIn;
+        uint128 amountOutMinimum;
+    }
+
+    /// @notice Parameters for a single-hop exact-output swap
+    struct ExactOutputSingleParams {
+        PoolKey poolKey;
+        bool zeroForOne;
+        uint128 amountOut;
+        uint128 amountInMaximum;
+        uint256 minHopPriceX36;
+        bytes hookData;
+    }
+
+    /// @notice Parameters for a multi-hop exact-output swap
+    struct ExactOutputParams {
+        Currency currencyOut;
+        PathKey[] path;
+        uint256[] minHopPriceX36;
+        uint128 amountOut;
+        uint128 amountInMaximum;
+    }
+}

@@ -1,0 +1,30 @@
+Compiling 1 files with Solc 0.8.26
+Solc 0.8.26 finished in 2.83s
+Compiler run successful with warnings:
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:147:13:
+    |
+147 |             int128 amountUnspecified =
+    |             ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:149:13:
+    |
+149 |             swapDelta = toBeforeSwapDelta(-params.amountSpecified.toInt128(), amountUnspecified);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 1 test for test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: WrappedError(0xDEF2Ee4bf4caCd41ba6fa0363a540570eB99e888, 0x575e24b4, 0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f6e6f7420696d706c656d656e7465640000000000000000000000000000000000, 0xa9e35b2f)] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 253143)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 879.41ms (240.15µs CPU time)
+
+Ran 1 test suite in 880.56ms (879.41ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: WrappedError(0xDEF2Ee4bf4caCd41ba6fa0363a540570eB99e888, 0x575e24b4, 0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f6e6f7420696d706c656d656e7465640000000000000000000000000000000000, 0xa9e35b2f)] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 253143)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

@@ -1,0 +1,73 @@
+Compiling 1 files with Solc 0.8.26
+Solc 0.8.26 finished in 4.30s
+Compiler run successful!
+
+Ran 5 tests for test/PrimaryHook.t.sol:PrimaryHookTest
+[PASS] test_buyFromEmptyManager() (gas: 429859)
+[PASS] test_externalPrefundedRouterCanBuy() (gas: 1337798)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50495)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96363)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 470367)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 805.41ms (1.93ms CPU time)
+
+Ran 45 tests for test/Security.t.sol:SecurityTest
+[PASS] testFuzz_buyExactInputNoStrandedCredit(uint96) (runs: 512, μ: 503047, ~: 504185)
+Logs:
+  Bound result 99999999999000000003640
+
+[PASS] testFuzz_donationsNeverAttributedToTrade(uint64,bool) (runs: 512, μ: 764815, ~: 774702)
+Logs:
+  Bound result 473106187216888
+
+[PASS] testFuzz_hookRejectsMalformedHookData(uint8) (runs: 512, μ: 1171265, ~: 1171061)
+[PASS] testFuzz_repeatedBothDirections(uint8) (runs: 512, μ: 3467468, ~: 2825235)
+Logs:
+  Bound result 10
+
+[PASS] testFuzz_sellExactInputNoStrandedCredit(uint96) (runs: 512, μ: 516979, ~: 517138)
+Logs:
+  Bound result 89999999990790250162
+
+[PASS] test_addLiquidityRejected() (gas: 1125132)
+[PASS] test_buyFromEmptyManager() (gas: 430051)
+[PASS] test_buySlippageRollsBackProtocolAndWallets() (gas: 1159707)
+[PASS] test_cannotSpendAnotherUsersApproval() (gas: 218599)
+[PASS] test_constructorRejectsInconsistentUnderlying() (gas: 11464)
+[PASS] test_constructorRejectsNoCodeFCS() (gas: 6113)
+[PASS] test_constructorRejectsNoCodeManager() (gas: 6124)
+[PASS] test_directHookCallbackIsUnauthorized() (gas: 47063)
+[PASS] test_exactOutputBuyRejectedExplicitly() (gas: 1129162)
+[PASS] test_exactOutputSellRejectedExplicitly() (gas: 1129373)
+[PASS] test_externalPrefundedRouterCanBuy() (gas: 1337907)
+[PASS] test_externalRouterTwoPrimaryHopsUsesIntermediateCredit() (gas: 1666769)
+[PASS] test_hookEnforcesDeadlineForExternalRouter() (gas: 1170956)
+[PASS] test_hookEnforcesNonzeroMinimumForExternalRouter() (gas: 1170891)
+[PASS] test_hookRejectsEmptyHookData() (gas: 1170097)
+[PASS] test_invalidPoolTokensRejected() (gas: 45027)
+[PASS] test_largePrimaryBuyDilutesFPSAgeAndClosesSellGate() (gas: 945542)
+[PASS] test_managerSpoofedCallbackWhenRouterInactiveIsRejected() (gas: 39179)
+[PASS] test_missingAllowanceReverts() (gas: 278515)
+[PASS] test_noLPInventoryAndSlot0DoesNotPricePrimary() (gas: 504512)
+[PASS] test_nonbindingGateClosesEvenWithPositivePreview() (gas: 618760)
+[PASS] test_nonzeroPoolFeeRejected() (gas: 47760)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50542)
+[PASS] test_quoteOversupplyAndZeroInputUnavailable() (gas: 31253)
+[PASS] test_quotePreviewFailureDoesNotRevert() (gas: 30441)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96366)
+[PASS] test_routerCallbackCannotDrainApprovals() (gas: 221983)
+[PASS] test_routerExpired() (gas: 180434)
+[PASS] test_routerRejectsInvalidRecipients() (gas: 119596)
+[PASS] test_routerRejectsOverflowInput() (gas: 35095)
+[PASS] test_routerRejectsZeroInput() (gas: 34944)
+[PASS] test_routerRejectsZeroMinimum() (gas: 35609)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 470421)
+[PASS] test_sellSlippageRollsBackRedemptionDiscountAndSupply() (gas: 733166)
+[PASS] test_separateRecipientReceivesOnlyTradeOutput() (gas: 517225)
+[PASS] test_staleBuyQuoteRevertsAfterCompetingInvestment() (gas: 847102)
+[PASS] test_tinyInputCannotSilentlyDonate() (gas: 465148)
+[PASS] test_unfundedRouterCannotRelyOnSingletonInventory() (gas: 1190167)
+[PASS] test_unfundedRouterRejectedWithEmptyManager() (gas: 1269020)
+[PASS] test_wrongTickSpacingRejected() (gas: 47055)
+Suite result: ok. 45 passed; 0 failed; 0 skipped; finished in 2.71s (1.94s CPU time)
+
+Ran 2 test suites in 2.71s (3.51s CPU time): 50 tests passed, 0 failed, 0 skipped (50 total tests)

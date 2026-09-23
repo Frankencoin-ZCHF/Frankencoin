@@ -1,0 +1,6 @@
+{
+  "src/FCSPrimaryHook.sol": "5132035c7f1e962475e7c58883f53651a690d32cb7725460954fb1c88a94815e",
+  "src/FCSPrimaryRouter.sol": "81fbc8f7d643d00901e0e0bf11a56b695239a5f766dd59dd88ae91f792cf2a97",
+  "src/interfaces/IFCS.sol": "53e619be29bc2efd99658acc8838e7bbaefbdcf88ee917cc21fa932ea6be3a9e",
+  "src/base/BaseTokenWrapperHook.sol": "61b1cc16e8aad86f0679b18e6790f37ff0f0751eb0f5b0022e6b0a22c575e982"
+}

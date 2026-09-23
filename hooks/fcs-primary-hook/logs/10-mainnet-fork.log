@@ -1,0 +1,12 @@
+Compiling 1 files with Solc 0.8.26
+Solc 0.8.26 finished in 2.46s
+Compiler run successful!
+
+Ran 4 tests for test/MainnetFork.t.sol:MainnetForkTest
+[PASS] testFork_currentSellGateRejectsBoughtSharesAtomically() (gas: 567981)
+[PASS] testFork_liveBuyWithDeployedManagerAndFCS() (gas: 480476)
+[PASS] testFork_positiveSellPreviewButCurrentlyUnavailable() (gas: 70935)
+[PASS] testFork_zeroOutputQuoteIsUnavailable() (gas: 28096)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.78s (316.99ms CPU time)
+
+Ran 1 test suite in 1.79s (1.78s CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

@@ -1,0 +1,21 @@
+Compiling 8 files with Solc 0.8.26
+Solc 0.8.26 finished in 3.35s
+Compiler run successful with warnings:
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:147:13:
+    |
+147 |             int128 amountUnspecified =
+    |             ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (5740): Unreachable code.
+   --> lib/v4-hooks/src/base/BaseTokenWrapperHook.sol:149:13:
+    |
+149 |             swapDelta = toBeforeSwapDelta(-params.amountSpecified.toInt128(), amountUnspecified);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 1 test for test/PrimaryHook.t.sol:PrimaryHookTest
+[PASS] test_buyFromEmptyManager() (gas: 464703)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.01s (486.80µs CPU time)
+
+Ran 1 test suite in 1.02s (1.01s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

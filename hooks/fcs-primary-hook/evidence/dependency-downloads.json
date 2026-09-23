@@ -1,0 +1,58 @@
+[
+  {
+    "name": "v4-hooks",
+    "commit": "e4eabe526f9b516fff78d98ba781251747f0fd6e",
+    "url": "https://codeload.github.com/Uniswap/v4-hooks-public/tar.gz/e4eabe526f9b516fff78d98ba781251747f0fd6e",
+    "archiveSha256": "ee3c9eca50bf9e666f7b3b0f55a654448b2b6629e291d1bcddfd7e1403a2d2db",
+    "files": 100
+  },
+  {
+    "name": "v4-core",
+    "commit": "d153b048868a60c2403a3ef5b2301bb247884d46",
+    "url": "https://codeload.github.com/Uniswap/v4-core/tar.gz/d153b048868a60c2403a3ef5b2301bb247884d46",
+    "archiveSha256": "f0a79ffcdcc899440d09cd2d517fbf8476df27a6f65170455e33f95f2974636d",
+    "files": 84
+  },
+  {
+    "name": "v4-periphery",
+    "commit": "07336f2144f522874e2c3c85e04d1d3f8d5fa471",
+    "url": "https://codeload.github.com/Uniswap/v4-periphery/tar.gz/07336f2144f522874e2c3c85e04d1d3f8d5fa471",
+    "archiveSha256": "e7cf07772ee0d64823d26b08fe99c0d992a7bf531bb4d0adf381d436c2903edf",
+    "files": 70
+  },
+  {
+    "name": "forge-std",
+    "commit": "60acb7aaadcce2d68e52986a0a66fe79f07d138f",
+    "url": "https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f",
+    "archiveSha256": "6c93ddd696e03e2c53e32b7c61e07188316c4905008ccdee8e42a14a347a8437",
+    "files": 30
+  },
+  {
+    "name": "openzeppelin",
+    "commit": "45f032d1bcf1a88b7bc90154d7eef76c87bf9d45",
+    "url": "https://codeload.github.com/OpenZeppelin/openzeppelin-contracts/tar.gz/45f032d1bcf1a88b7bc90154d7eef76c87bf9d45",
+    "archiveSha256": "fff9a8a54f592228afaf14d68939aaf8395f2174e3a10c711f4e946b36bbff4b",
+    "files": 366
+  },
+  {
+    "name": "solmate",
+    "commit": "4b47a19038b798b4a33d9749d25e570443520647",
+    "url": "https://codeload.github.com/transmissions11/solmate/tar.gz/4b47a19038b798b4a33d9749d25e570443520647",
+    "archiveSha256": "9aa78449f8bc10931520500ec24734f089af9ac875a3334d8b512f8727241667",
+    "files": 60
+  },
+  {
+    "name": "permit2",
+    "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+    "url": "https://codeload.github.com/Uniswap/permit2/tar.gz/cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+    "archiveSha256": "1f0da63e66c69fa85f2a68af7f598aca8f3354f87e7703aa3abe6522685e9f04",
+    "files": 17
+  },
+  {
+    "name": "frankencoin",
+    "commit": "8b4c4ab67bb361b91d58c474b87f4608fc4c0566",
+    "url": "https://codeload.github.com/Frankencoin-ZCHF/Frankencoin/tar.gz/8b4c4ab67bb361b91d58c474b87f4608fc4c0566",
+    "archiveSha256": "afc25ec53cd776111c6fe932e102cd0779539c8deb3f222e13ed625b53897c50",
+    "files": 102
+  }
+]

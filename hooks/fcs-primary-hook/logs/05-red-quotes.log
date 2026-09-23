@@ -1,0 +1,20 @@
+Compiling 2 files with Solc 0.8.26
+Solc 0.8.26 finished in 2.90s
+Compiler run successful!
+
+Ran 2 tests for test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: assertion failed] test_quoteBuyMatchesAmountSpecificPreview() (gas: 8702)
+[FAIL: assertion failed] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 35613)
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 330.83ms (269.26µs CPU time)
+
+Ran 1 test suite in 332.02ms (330.83ms CPU time): 0 tests passed, 2 failed, 0 skipped (2 total tests)
+
+Failing tests:
+Encountered 2 failing tests in test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: assertion failed] test_quoteBuyMatchesAmountSpecificPreview() (gas: 8702)
+[FAIL: assertion failed] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 35613)
+
+Encountered a total of 2 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 2 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

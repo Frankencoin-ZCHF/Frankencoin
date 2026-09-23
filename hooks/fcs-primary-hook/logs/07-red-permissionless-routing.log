@@ -1,0 +1,18 @@
+Compiling 2 files with Solc 0.8.26
+Solc 0.8.26 finished in 3.25s
+Compiler run successful!
+
+Ran 1 test for test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: WrappedError(0xa3c1feEfFA861D31FbdE6570AeEc676B7f492888, 0x575e24b4, 0x82b42900, 0xa9e35b2f)] test_externalPrefundedRouterCanBuy() (gas: 1144220)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 961.18ms (312.76µs CPU time)
+
+Ran 1 test suite in 966.89ms (961.18ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/PrimaryHook.t.sol:PrimaryHookTest
+[FAIL: WrappedError(0xa3c1feEfFA861D31FbdE6570AeEc676B7f492888, 0x575e24b4, 0x82b42900, 0xa9e35b2f)] test_externalPrefundedRouterCanBuy() (gas: 1144220)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

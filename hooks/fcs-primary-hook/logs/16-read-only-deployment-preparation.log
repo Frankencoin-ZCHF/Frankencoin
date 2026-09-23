@@ -1,0 +1,21 @@
+No files changed, compilation skipped
+Warning: Detected artifacts built from source files that no longer exist. Run `forge clean` to make sure builds are in sync with project files.
+ - /home/ec2-user/clawd/projects/fcs-primary-hook/foundry-pp/DeployHelper116.sol
+ - /home/ec2-user/clawd/projects/fcs-primary-hook/foundry-pp/DeployHelper113.sol
+ - /home/ec2-user/clawd/projects/fcs-primary-hook/foundry-pp/DeployHelper76.sol
+ - /home/ec2-user/clawd/projects/fcs-primary-hook/foundry-pp/DeployHelper117.sol
+Script ran successfully.
+
+== Return ==
+predicted: address 0x7df9f03B190d581472695Db3a8A5b74e19B1E888
+salt: bytes32 0x00000000000000000000000000000000000000000000000000000000000022c7
+initCodeHash: bytes32 0x1452ed47f4c62180ad7d40fbd1b39c560eb74b263767e1be3ba4611e0028b18b
+
+== Logs ==
+  READ ONLY: no transactions generated or broadcast
+  Hook 0x7df9f03B190d581472695Db3a8A5b74e19B1E888
+  Router 0x57a366C0a07E5F7d1f0Ef01B692EfE703475dddb
+  CREATE2 salt
+  0x00000000000000000000000000000000000000000000000000000000000022c7
+  Initcode hash
+  0x1452ed47f4c62180ad7d40fbd1b39c560eb74b263767e1be3ba4611e0028b18b

@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "../IGovernance.sol";
+
+contract GovernanceModule {
+
+    IGovernance public immutable GOVERNANCE;
+    address private immutable MAINNET_FCS;
+
+    constructor(IGovernance governance, address mainnetFCS) {
+        GOVERNANCE = governance;
+        MAINNET_FCS = mainnetFCS;
+    }
+
+    modifier onlyQualified(address[] calldata helpers) {
+        GOVERNANCE.checkQualified(msg.sender, helpers);
+        _;
+    }
+
+    function defaultHelper() internal view returns (address[] memory) {
+        address[] memory helper = new address[](1);
+        helper[0] = MAINNET_FCS;
+        return helper;
+    }
+
+
+}

@@ -1,0 +1,36 @@
+{
+  "block": 26038677,
+  "quotes": [
+    {
+      "function": "previewDeposit(uint256)",
+      "amountIn": "1",
+      "amountOut": "0",
+      "error": null
+    },
+    {
+      "function": "previewDeposit(uint256)",
+      "amountIn": "1000000000000000000",
+      "amountOut": "792975374379568",
+      "error": null
+    },
+    {
+      "function": "previewDeposit(uint256)",
+      "amountIn": "1000000000000000000000",
+      "amountOut": "792901508858246948",
+      "error": null
+    },
+    {
+      "function": "previewDeposit(uint256)",
+      "amountIn": "10000000000000000000000",
+      "amountOut": "7922370859363152494",
+      "error": null
+    },
+    {
+      "function": "previewRedeem(uint256)",
+      "amountIn": "1000000000000000000",
+      "amountOut": "1243229609390445936114",
+      "error": null
+    }
+  ],
+  "note": "Redemption previews are not executable while binding and maturity gates are false."
+}

@@ -1,0 +1,91 @@
+{
+  "toolchain": {
+    "foundry": "v1.8.3",
+    "foundryCommit": "cae51ad458f6abb64852b7709eb784352429825d",
+    "solc": "0.8.26+commit.8a97fa7a",
+    "evm": "cancun",
+    "optimizerRuns": 200
+  },
+  "dependencies": [
+    {
+      "name": "v4-hooks",
+      "repository": "Uniswap/v4-hooks-public",
+      "commit": "e4eabe526f9b516fff78d98ba781251747f0fd6e",
+      "path": "lib/v4-hooks",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "v4-core",
+      "repository": "Uniswap/v4-core",
+      "commit": "d153b048868a60c2403a3ef5b2301bb247884d46",
+      "path": "lib/v4-hooks/lib/v4-core",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "v4-periphery",
+      "repository": "Uniswap/v4-periphery",
+      "commit": "07336f2144f522874e2c3c85e04d1d3f8d5fa471",
+      "path": "lib/v4-hooks/lib/v4-periphery",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "forge-std",
+      "repository": "foundry-rs/forge-std",
+      "commit": "60acb7aaadcce2d68e52986a0a66fe79f07d138f",
+      "path": "lib/v4-hooks/lib/forge-std",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "openzeppelin",
+      "repository": "OpenZeppelin/openzeppelin-contracts",
+      "commit": "45f032d1bcf1a88b7bc90154d7eef76c87bf9d45",
+      "path": "lib/v4-hooks/lib/openzeppelin-contracts",
+      "include": [
+        "contracts/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "solmate",
+      "repository": "transmissions11/solmate",
+      "commit": "4b47a19038b798b4a33d9749d25e570443520647",
+      "path": "lib/v4-hooks/lib/v4-core/lib/solmate",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "permit2",
+      "repository": "Uniswap/permit2",
+      "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+      "path": "lib/v4-hooks/lib/v4-periphery/lib/permit2",
+      "include": [
+        "src/",
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "frankencoin",
+      "repository": "Frankencoin-ZCHF/Frankencoin",
+      "commit": "8b4c4ab67bb361b91d58c474b87f4608fc4c0566",
+      "path": "lib/frankencoin",
+      "include": [
+        "contracts/",
+        "LICENSE"
+      ]
+    }
+  ]
+}

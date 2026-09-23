@@ -1,0 +1,38 @@
+--- upstream/e4eabe5/BaseTokenWrapperHook.sol
++++ src/base/BaseTokenWrapperHook.sol
+@@ -1,5 +1,9 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
++// Local adaptation of v4-hooks-public e4eabe526f9b516fff78d98ba781251747f0fd6e.
++// Only functional edits: make _beforeInitialize and _beforeSwap virtual to add
++// canonical-pool and mandatory hookData guards. Accounting algorithm unchanged.
++// Import of BaseHook redirected to the pinned dependency. See docs/UPSTREAM.md.
+ 
+ import {
+     toBeforeSwapDelta,
+@@ -12,7 +16,7 @@
+ import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+ import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+-import {BaseHook} from "./BaseHook.sol";
++import {BaseHook} from "v4-hooks/base/BaseHook.sol";
+ import {DeltaResolver} from "@uniswap/v4-periphery/src/base/DeltaResolver.sol";
+ import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
+ 
+@@ -91,7 +95,7 @@
+     /// @dev Ensures pool contains wrapper and underlying tokens with zero fee
+     /// @param poolKey The pool configuration including tokens and fee
+     /// @return The function selector if validation passes
+-    function _beforeInitialize(address, PoolKey calldata poolKey, uint160) internal view override returns (bytes4) {
++    function _beforeInitialize(address, PoolKey calldata poolKey, uint160) internal view virtual override returns (bytes4) {
+         // ensure pool tokens are the wrapper currency and underlying currency
+         bool isValidPair = wrapZeroForOne
+             ? (poolKey.currency0 == underlyingCurrency && poolKey.currency1 == wrapperCurrency)
+@@ -122,6 +126,7 @@
+     /// @return lpFeeOverride The fee override (always 0 for wrapper pools)
+     function _beforeSwap(address, PoolKey calldata, SwapParams calldata params, bytes calldata)
+         internal
++        virtual
+         override
+         returns (bytes4, BeforeSwapDelta swapDelta, uint24)
+     {

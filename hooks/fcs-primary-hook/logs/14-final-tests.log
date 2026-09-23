@@ -1,0 +1,91 @@
+Compiling 8 files with Solc 0.8.26
+Solc 0.8.26 finished in 5.45s
+Compiler run successful!
+
+Ran 5 tests for test/PrimaryHook.t.sol:PrimaryHookTest
+[PASS] test_buyFromEmptyManager() (gas: 429859)
+[PASS] test_externalPrefundedRouterCanBuy() (gas: 1337798)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50495)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96363)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 470367)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 334.33ms (1.88ms CPU time)
+
+Ran 5 tests for test/MainnetFork.t.sol:MainnetForkTest
+[PASS] testFork_currentSellGateRejectsBoughtSharesAtomically() (gas: 567981)
+[PASS] testFork_liveBuyWithDeployedManagerAndFCS() (gas: 480487)
+[PASS] testFork_positiveSellPreviewButCurrentlyUnavailable() (gas: 70946)
+[PASS] testFork_preparationMinesAndSimulatesDeployablePair() (gas: 150373298)
+[PASS] testFork_zeroOutputQuoteIsUnavailable() (gas: 28107)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.43s (1.82s CPU time)
+
+Ran 55 tests for test/Security.t.sol:SecurityTest
+[PASS] testFuzz_buyExactInputNoStrandedCredit(uint96) (runs: 512, μ: 503149, ~: 504207)
+Logs:
+  Bound result 99999999999003487384145
+
+[PASS] testFuzz_donationsNeverAttributedToTrade(uint64,bool) (runs: 512, μ: 765179, ~: 774724)
+Logs:
+  Bound result 1860
+
+[PASS] testFuzz_hookRejectsMalformedHookData(uint8) (runs: 512, μ: 1171280, ~: 1171083)
+[PASS] testFuzz_repeatedBothDirections(uint8) (runs: 512, μ: 3255796, ~: 2131198)
+Logs:
+  Bound result 4
+
+[PASS] testFuzz_sellExactInputNoStrandedCredit(uint96) (runs: 512, μ: 517002, ~: 517160)
+Logs:
+  Bound result 89999999990000039920
+
+[PASS] test_activeRequestRejectsReentrantUserEntry() (gas: 539042)
+[PASS] test_addLiquidityRejected() (gas: 1125132)
+[PASS] test_buyFromEmptyManager() (gas: 430051)
+[PASS] test_buySlippageRollsBackProtocolAndWallets() (gas: 1159729)
+[PASS] test_cannotSpendAnotherUsersApproval() (gas: 218666)
+[PASS] test_constructorRejectsInconsistentUnderlying() (gas: 11398)
+[PASS] test_constructorRejectsNoCodeFCS() (gas: 6135)
+[PASS] test_constructorRejectsNoCodeManager() (gas: 6146)
+[PASS] test_directHookCallbackIsUnauthorized() (gas: 47085)
+[PASS] test_donatedOutputCannotSatisfyMinimum() (gas: 627164)
+[PASS] test_exactOutputBuyRejectedExplicitly() (gas: 1129095)
+[PASS] test_exactOutputSellRejectedExplicitly() (gas: 1129307)
+[PASS] test_externalPrefundedRouterCanBuy() (gas: 1337929)
+[PASS] test_externalRouterTwoPrimaryHopsUsesIntermediateCredit() (gas: 1666769)
+[PASS] test_forgedVictimDuringActiveRequestCannotDrainApproval() (gas: 591393)
+[PASS] test_hookEnforcesDeadlineForExternalRouter() (gas: 1170956)
+[PASS] test_hookEnforcesNonzeroMinimumForExternalRouter() (gas: 1170913)
+[PASS] test_hookRejectsEmptyHookData() (gas: 1170097)
+[PASS] test_hookRejectsSignedBoundsBeforeNegation() (gas: 1176886)
+[PASS] test_invalidPoolTokensRejected() (gas: 45005)
+[PASS] test_largePrimaryBuyDilutesFPSAgeAndClosesSellGate() (gas: 945475)
+[PASS] test_managerSpoofedCallbackWhenRouterInactiveIsRejected() (gas: 39179)
+[PASS] test_missingAllowanceReverts() (gas: 278537)
+[PASS] test_noLPInventoryAndSlot0DoesNotPricePrimary() (gas: 504512)
+[PASS] test_nonbindingGateClosesEvenWithPositivePreview() (gas: 618827)
+[PASS] test_nonzeroPoolFeeRejected() (gas: 47804)
+[PASS] test_quoteBuyMatchesAmountSpecificPreview() (gas: 50542)
+[PASS] test_quoteDependencyFailuresAndOversizedOutput() (gas: 33372)
+[PASS] test_quoteInputOverflowIsUnavailable() (gas: 9419)
+[PASS] test_quoteOversupplyAndZeroInputUnavailable() (gas: 31275)
+[PASS] test_quotePreviewFailureDoesNotRevert() (gas: 30396)
+[PASS] test_quoteSellDoesNotUseEmptyHookMaxRedeem() (gas: 96366)
+[PASS] test_quotesAreStaticAndSideEffectFree() (gas: 400942)
+[PASS] test_redeemAboveTenPercentDoesNotUseWithdrawCap() (gas: 554309)
+[PASS] test_replayedValidLookingRequestCannotDrainApproval() (gas: 687367)
+[PASS] test_routerCallbackCannotDrainApprovals() (gas: 222005)
+[PASS] test_routerConstructorRejectsZeroHook() (gas: 8249)
+[PASS] test_routerExpired() (gas: 180412)
+[PASS] test_routerRejectsInvalidRecipients() (gas: 119618)
+[PASS] test_routerRejectsOverflowInput() (gas: 35117)
+[PASS] test_routerRejectsZeroInput() (gas: 34944)
+[PASS] test_routerRejectsZeroMinimum() (gas: 35631)
+[PASS] test_sellFromEmptyManager_realMatureBindingFCS() (gas: 470421)
+[PASS] test_sellSlippageRollsBackRedemptionDiscountAndSupply() (gas: 733166)
+[PASS] test_separateRecipientReceivesOnlyTradeOutput() (gas: 517237)
+[PASS] test_staleBuyQuoteRevertsAfterCompetingInvestment() (gas: 847124)
+[PASS] test_tinyInputCannotSilentlyDonate() (gas: 465170)
+[PASS] test_unfundedRouterCannotRelyOnSingletonInventory() (gas: 1190167)
+[PASS] test_unfundedRouterRejectedWithEmptyManager() (gas: 1269020)
+[PASS] test_wrongTickSpacingRejected() (gas: 47055)
+Suite result: ok. 55 passed; 0 failed; 0 skipped; finished in 3.40s (3.09s CPU time)
+
+Ran 3 test suites in 3.75s (6.17s CPU time): 65 tests passed, 0 failed, 0 skipped (65 total tests)
