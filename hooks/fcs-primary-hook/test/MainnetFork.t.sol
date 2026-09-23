@@ -35,7 +35,7 @@ contract MainnetForkTest is Test {
     address alice = address(0xA11CE);
 
     function setUp() public {
-        vm.createSelectFork(vm.envOr("MAINNET_RPC_URL", string("https://ethereum-rpc.publicnode.com")), FORK_BLOCK);
+        vm.createSelectFork(vm.envOr("MAINNET_RPC_URL", string("https://eth-mainnet.public.blastapi.io")), FORK_BLOCK);
         assertEq(block.chainid, 1);
         assertEq(FCS_ADDRESS.codehash, 0x9dacc056e5f2d59b75a9c9ae8a3cd5134abf7bfb675462f50c12ab777603cc62);
         assertEq(MANAGER_ADDRESS.codehash, 0x785f1014552b7ce7d5fb7d0c970ca60edee94fd00425d7ca21609acac7ce1293);

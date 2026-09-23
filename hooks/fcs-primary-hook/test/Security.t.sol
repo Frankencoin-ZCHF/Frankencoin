@@ -185,15 +185,17 @@ contract SecurityTest is PrimaryHookTest {
         ext.swap(key, _params(true, -1e18), abi.encode(uint256(1), block.timestamp - 1), true, false);
     }
 
-    function test_hookRejectsEmptyHookData() public {
+    function test_hookAcceptsEmptyHookDataAndDefersSlippageToRouter() public {
         ExternalRouter ext = _ext();
+        uint256 expected = fcs.previewDeposit(1e18);
         vm.prank(alice);
-        vm.expectRevert(_swapError(FCSPrimaryHook.InvalidHookData.selector));
-        ext.swap(key, _params(true, -1e18), "", true, false);
+        uint256 out = ext.swap(key, _params(true, -1e18), "", true, false);
+        assertEq(out, expected);
+        _clean();
     }
 
     function testFuzz_hookRejectsMalformedHookData(uint8 length) public {
-        vm.assume(length != 64);
+        vm.assume(length != 64 && length != 0);
         ExternalRouter ext = _ext();
         vm.prank(alice);
         vm.expectRevert(_swapError(FCSPrimaryHook.InvalidHookData.selector));
@@ -214,19 +216,47 @@ contract SecurityTest is PrimaryHookTest {
         ext.swap(key, _params(false, 1e18), abi.encode(uint256(1), block.timestamp), false, false);
     }
 
-    function test_unfundedRouterCannotRelyOnSingletonInventory() public {
+    /// @dev Standard Uniswap ordering: swap first, settle after. The hook bridges the gap with the
+    /// singleton's ambient inventory, which the caller's settlement restores before the unlock ends.
+    function test_swapThenSettleRouterBorrowsSingletonInventoryAndRepaysIt() public {
         ExternalRouter ext = _ext();
         zchf.transfer(address(manager), 100e18);
+        uint256 expected = fcs.previewDeposit(1e18);
+        uint256 beforeCash = zchf.balanceOf(alice);
+        uint256 beforeShares = fcs.balanceOf(alice);
         vm.prank(alice);
-        vm.expectRevert(_swapError(FCSPrimaryHook.InputNotPrefunded.selector));
-        ext.swap(key, _params(true, -1e18), abi.encode(uint256(1), block.timestamp), false, false);
-        assertEq(zchf.balanceOf(address(manager)), 100e18);
+        uint256 out = ext.swap(key, _params(true, -1e18), abi.encode(expected, block.timestamp), false, false);
+        assertEq(out, expected);
+        assertEq(zchf.balanceOf(alice), beforeCash - 1e18);
+        assertEq(fcs.balanceOf(alice), beforeShares + expected);
+        assertEq(zchf.balanceOf(address(manager)), 100e18, "borrowed float fully repaid");
+        assertEq(fcs.balanceOf(address(manager)), 0);
+        assertEq(zchf.balanceOf(address(hook)), 0);
     }
 
-    function test_unfundedRouterRejectedWithEmptyManager() public {
+    function test_swapThenSettleRevertsClearlyWhenSingletonLacksInventory() public {
+        ExternalRouter ext = _ext();
+        zchf.transfer(address(manager), 1e18 - 1);
+        vm.prank(alice);
+        vm.expectRevert(
+            _wrapped(
+                IHooks.beforeSwap.selector,
+                abi.encodeWithSelector(FCSPrimaryHook.InsufficientInventory.selector, 1e18, 1e18 - 1)
+            )
+        );
+        ext.swap(key, _params(true, -1e18), abi.encode(uint256(1), block.timestamp), false, false);
+        assertEq(zchf.balanceOf(address(manager)), 1e18 - 1);
+    }
+
+    function test_swapThenSettleRevertsWithEmptyManager() public {
         ExternalRouter ext = _ext();
         vm.prank(alice);
-        vm.expectRevert(_swapError(FCSPrimaryHook.InputNotPrefunded.selector));
+        vm.expectRevert(
+            _wrapped(
+                IHooks.beforeSwap.selector,
+                abi.encodeWithSelector(FCSPrimaryHook.InsufficientInventory.selector, 1e18, 0)
+            )
+        );
         ext.swap(key, _params(true, -1e18), abi.encode(uint256(1), block.timestamp), false, false);
         _clean();
     }

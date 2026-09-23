@@ -21,7 +21,7 @@ The fork tests assert both runtime hashes and the underlying/reserve identities.
 A read-only standard-library reproducer is included:
 
 ```sh
-python3 scripts/verify_fcs_deployment.py --rpc https://ethereum-rpc.publicnode.com --block 26038677
+python3 scripts/verify_fcs_deployment.py --rpc https://eth-mainnet.public.blastapi.io --block 26038677
 ```
 
-It queries Sourcify, Ethereum chain ID, the exact block, code, asset, reserve and gates; it has no wallet or signing/submission capability. Original verification was independently supplied by the parent review, with fresh mainnet fork assertions executed in this project. Etherscan returned HTTP 403; Sourcify exact matching plus direct RPC verified the deployment without it. The verified FCS's compiler target differs intentionally from this v4 hook project's Cancun compiler configuration.
+It queries Sourcify, Ethereum chain ID, the exact block, code, asset, reserve and gates; it has no wallet or signing/submission capability. The pinned block is historical, so the RPC must serve archive state; `ethereum-rpc.publicnode.com` (the original default) stopped doing so and the defaults were switched to `eth-mainnet.public.blastapi.io`, which served the block on 2026-09-23. Original verification was independently supplied by the parent review, with fresh mainnet fork assertions executed in this project. Etherscan returned HTTP 403; Sourcify exact matching plus direct RPC verified the deployment without it. The verified FCS's compiler target differs intentionally from this v4 hook project's Cancun compiler configuration.

@@ -1,5 +1,15 @@
 # Review closure
 
+> **Revision note (2026-09-23).** The baseline review and the closure below attach to the source
+> hashes in `evidence/baseline-review-manifest.json`. The hook was subsequently revised for
+> Uniswap Universal Router / V4 Quoter compatibility: the caller-prefunded-credit requirement
+> (`InputNotPrefunded`) was removed in favour of the standard swap-then-settle ordering with an
+> explicit `InsufficientInventory(required, available)` guard, and the 64-byte `hookData` became
+> optional (empty defers slippage/deadline to the caller's router). Router, base wrapper and
+> interface are unchanged. Current source hashes and the full re-executed suite are in
+> `evidence/final-test-summary.json`; see `docs/TESTING.md`. The revised hook has **not** been
+> independently re-reviewed; the audit gate before funded deployment still applies.
+
 The baseline independent review identified an indexing limitation and four specific coverage gaps. These are now addressed by the hook-level PrimaryExecution event and ReviewGaps tests, with final passing results recorded in evidence/final-test-summary.json.
 
 The parent compared production sources against the independent review fingerprints. Router, local wrapper base and IFCS interface are byte-for-byte unchanged. The sole hook change adds the PoolId import/using directive, event declaration, and event emission after successful transformation, settlement and minimum-output validation. No pricing, gating, approval, authorization or settlement algorithm was changed. Event input comes from the positive specified custom delta; output is the checked actual conversion output. Direction matches the existing wrap direction, and caller identity comes from the authenticated PoolManager callback.

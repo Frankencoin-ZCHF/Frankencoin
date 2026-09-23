@@ -58,6 +58,12 @@ contract ExternalRouter is IUnlockCallback {
             manager.settle();
         }
         BalanceDelta d = manager.swap(r.key, r.params, r.hookData);
+        if (!r.prefund) {
+            // Standard Uniswap swap-then-settle ordering: pay the input only after the swap.
+            manager.sync(input);
+            IERC20(Currency.unwrap(input)).transferFrom(r.payer, address(manager), uint256(-r.params.amountSpecified));
+            manager.settle();
+        }
         uint256 out = uint256(uint128(r.params.zeroForOne ? d.amount1() : d.amount0()));
         if (r.roundtrip) {
             bool z = !r.params.zeroForOne;

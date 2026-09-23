@@ -1,24 +1,55 @@
 # Final-source static-analysis triage
 
-Slither was run against production sources compiled with Solidity 0.8.26, excluding test/script/vendor findings. Static analysis is not a security audit. Do not interpret a finding count as a count of exploitable vulnerabilities, or a reviewed warning as proof of safety.
+Slither 0.11.6 was run against the current production sources (Foundry framework, Solidity 0.8.26,
+`--filter-paths "lib/|test/|script/" --exclude-dependencies`). Raw results are in
+`evidence/slither-final.json`; the SHA-256 of each scanned source file is in
+`evidence/slither-source-manifest.json` and matches `evidence/final-test-summary.json`. Static analysis
+is not a security audit. Do not interpret a finding count as a count of exploitable vulnerabilities, or a
+reviewed warning as proof of safety.
 
-## Arbitrary ERC20 transferFrom
+The scan completed with **26 detector results: 7 High, 2 Medium, 4 Low and 13 Informational** labels.
+These are analyzer classifications, not confirmed defects. Compared with the pre-revision scan (25) the
+only change is one additional informational dead-code label for the new `_requireInventory` helper; a
+Medium `uninitialized-local` label for the optional-hookData minimum was eliminated by initializing it
+explicitly, which did not change the compiled bytecode (identical initcode hash).
 
-The router callback contains a decoded payer, which triggers arbitrary-send-erc20. The entry point sets payer to msg.sender, commits the entire request hash before unlock, and the callback requires both the immutable PoolManager as caller and an exact matching active request. No public caller-selected payer API exists. Review the victim-allowance and unauthorized-callback regression tests before accepting this as a contextual false positive.
+## High: arbitrary ERC20 transferFrom (1)
 
-## Balance/reentrancy findings
+The router callback contains a decoded payer, which triggers arbitrary-send-erc20. The entry point sets
+payer to msg.sender, commits the entire request hash before unlock, and the callback requires both the
+immutable PoolManager as caller and an exact matching active request. No public caller-selected payer API
+exists. Review the victim-allowance and unauthorized-callback regression tests before accepting this as a
+contextual false positive.
 
-The hook deliberately measures balances around FCS deposit/redeem and settlement, preserving any pre-existing gifts and checking actual output against the reported amount. The intended deployment uses the verified immutable FCS and its actual ZCHF/FPS dependencies, whose relevant token transfers and primary calls have no arbitrary user callback. This trust assumption is essential: the constructor interface is not a certification of arbitrary ERC4626-like contracts. The bundled router also rejects a second swap while its request hash is active. Re-audit if any dependency or routing design changes.
+## High: balance/reentrancy findings (6)
 
-The router's request hash is cleared only after the synchronous manager unlock callback finishes. Slither does not model this intentional authenticated callback lifecycle; inspect the guard and tests rather than moving the reset before the callback and breaking authorization.
+The hook deliberately measures balances around FCS deposit/redeem and settlement, preserving any
+pre-existing gifts and checking actual output against the reported amount. In the revised design the hook
+also reads the PoolManager's token balance before `take` to fail early with `InsufficientInventory`. The
+intended deployment uses the verified immutable FCS and its actual ZCHF/FPS dependencies, whose relevant
+token transfers and primary calls have no arbitrary user callback. This trust assumption is essential: the
+constructor interface is not a certification of arbitrary ERC4626-like contracts. Re-audit if any
+dependency or routing design changes.
 
-## Other detections
+## Medium (2)
 
-- Strict equality to zero output is an intentional dust-rejection condition, not a dependence on an attacker-controlled exact account balance.
-- Timestamp checks implement user deadlines; block timestamps are not used for randomness. The underlying FCS has its own time-dependent protocol mechanics.
+- `incorrect-equality`: the strict `settle() != output` comparison is an intentional exact-settlement check
+  on the manager's return value, not a dependence on an attacker-controlled exact account balance.
+- `reentrancy-no-eth` in the bundled router: the request hash is cleared only after the synchronous manager
+  unlock callback finishes. Slither does not model this intentional authenticated callback lifecycle;
+  inspect the guard and tests rather than moving the reset before the callback and breaking authorization.
+
+## Low and Informational (17)
+
+- Timestamp checks implement user deadlines; block timestamps are not used for randomness. The underlying
+  FCS has its own time-dependent protocol mechanics.
+- Event emitted after external calls (`reentrancy-events`) is the intended post-settlement execution log.
 - Uppercase getters preserve the upstream FCS ABI and immutable-asset naming.
-- Inherited virtual conversion methods are reachable through BaseTokenWrapperHook; detector dead-code reports must not cause removal of live conversion paths.
-- Callback complexity reflects explicit settlement, authorization and delta checks; simplify only while preserving those checks.
-- The previously reported missing router-constructor zero check is fixed; it is absent from the final scan.
+- Dead-code labels cover internal overrides reached only through `BaseTokenWrapperHook`/`BaseHook`
+  dispatch (`_deposit`, `_withdraw`, `_settleOutput`, `_requireInventory`, `_supportsExactOutput`, `_pay`);
+  they are live paths and must not be removed.
+- Callback complexity reflects explicit settlement, authorization and delta checks; simplify only while
+  preserving those checks.
 
-The final scan completed successfully with 25 findings: 7 High, 2 Medium, 4 Low and 12 Informational detector labels. Those are analyzer classifications, not confirmed exploitable defect counts. The 7 High labels comprise one arbitrary-payer warning and six balance/reentrancy warnings discussed above. Raw results and source fingerprints are in evidence/slither-final.json and evidence/slither-source-manifest.json. Do not label this project Slither-clean. Independent security review remains required before funded deployment.
+Do not label this project Slither-clean. The revised hook has not been independently re-reviewed;
+independent security review remains required before funded deployment.

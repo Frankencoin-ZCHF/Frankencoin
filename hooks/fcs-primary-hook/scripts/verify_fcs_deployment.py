@@ -22,7 +22,7 @@ def fetch(url, payload=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--rpc', default='https://ethereum-rpc.publicnode.com')
+    parser.add_argument('--rpc', default='https://eth-mainnet.public.blastapi.io')
     parser.add_argument('--block', type=int, default=26038677)
     args = parser.parse_args()
     def rpc(method, params):

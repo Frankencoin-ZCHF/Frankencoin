@@ -1,5 +1,13 @@
-REVIEW ISSUES CLOSED — source implementation and all named review gaps verified.
+REVISED FOR UNIVERSAL ROUTER COMPATIBILITY — source, tests, evidence and docs regenerated together.
 
-Final parent CI run: 93 passed, zero failures/skips; 83 distinct names; 14336 fuzz trials. Hook event, contract-wallet payer, direct/adapter snapshots, stale sell and seven-day recovery coverage included. See docs/TESTING.md and evidence/final-test-summary.json.
+Final CI run: 127 test executions passed, zero failures/skips; 107 distinct names; 14,336 fuzz trials;
+4 stateful invariants over 1,920 handler calls; 11 pinned mainnet fork tests including the deployed
+Universal Router, Permit2 and V4 Quoter. See docs/TESTING.md and evidence/final-test-summary.json.
 
-No changes to deployed FCS, no broadcasts or external deployments. Exact-input only; immutable protocol redemption gates remain authoritative. Source release includes dependencies, tests, documentation and review evidence. External audit remains the funded-deployment gate.
+Hook follows the standard swap-then-settle ordering (input borrowed from PoolManager float, repaid in the
+same transaction, `InsufficientInventory` otherwise) and accepts empty or 64-byte hookData. Exact-input
+only; immutable protocol redemption gates remain authoritative; router/base/interface unchanged.
+
+No changes to deployed FCS, no broadcasts or external deployments. Uniswap app routing additionally
+requires Uniswap Labs allowlisting of the hook address and ZCHF/FCS float in the PoolManager.
+External audit remains the funded-deployment gate; the revision has not been independently re-reviewed.

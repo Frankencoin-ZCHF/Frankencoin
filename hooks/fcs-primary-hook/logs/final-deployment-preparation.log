@@ -1,18 +1,19 @@
-Compiling 57 files with Solc 0.8.26
-Solc 0.8.26 finished in 1.33s
-Compiler run successful!
+No files changed, compilation skipped
+Warning: Detected artifacts built from source files that no longer exist. Run `forge clean` to make sure builds are in sync with project files.
+ - C:/code/Frankencoin/hooks/fcs-primary-hook\foundry-pp/DeployHelper126.sol
+ - C:/code/Frankencoin/hooks/fcs-primary-hook\foundry-pp/DeployHelper125.sol
 Script ran successfully.
 
 == Return ==
-predicted: address 0x1d9DfDd98975Bde747087cEC8F981f25264ae888
-salt: bytes32 0x0000000000000000000000000000000000000000000000000000000000005251
-initCodeHash: bytes32 0x6e7542aa5402b859f8a105548841f8b794adf2d92dacb766d94853924a67d092
+predicted: address 0x747a076611A138ae063179800D43d8aE33b7E888
+salt: bytes32 0x00000000000000000000000000000000000000000000000000000000000019d7
+initCodeHash: bytes32 0x0568ad08bb19ec77003b54fc4ddf07894ac368041b8e6e1203cc70814f64bbca
 
 == Logs ==
   READ ONLY: no transactions generated or broadcast
-  Hook 0x1d9DfDd98975Bde747087cEC8F981f25264ae888
-  Router 0x46FCD013810d685c6b1d5Ef7f346BB73042db85F
+  Hook 0x747a076611A138ae063179800D43d8aE33b7E888
+  Router 0xc056Bb03EB2eF7F86f570AAB52C8Fba13B3E8566
   CREATE2 salt
-  0x0000000000000000000000000000000000000000000000000000000000005251
+  0x00000000000000000000000000000000000000000000000000000000000019d7
   Initcode hash
-  0x6e7542aa5402b859f8a105548841f8b794adf2d92dacb766d94853924a67d092
+  0x0568ad08bb19ec77003b54fc4ddf07894ac368041b8e6e1203cc70814f64bbca

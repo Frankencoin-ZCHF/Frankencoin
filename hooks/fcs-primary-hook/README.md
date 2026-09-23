@@ -8,12 +8,12 @@ A **local, tested, unaudited** exact-input primary-market adapter for the immuta
 
 ## Contents
 
-- `src/FCSPrimaryHook.sol`: exact-input ZCHF deposit / FCS redeem; immutable FCS, ZCHF, manager; per-operation balance accounting and mandatory hook-level slippage/deadline protection.
+- `src/FCSPrimaryHook.sol`: exact-input ZCHF deposit / FCS redeem; immutable FCS, ZCHF, manager; per-operation balance accounting; Universal Router compatible swap-then-settle ordering with optional hook-level slippage/deadline protection via 64-byte `hookData`.
 - `src/FCSPrimaryRouter.sol`: guarded single-pool convenience router, authenticated unlock callback, input prefunding, recipient/input bounds, deadline and minimum-output checks. No arbitrary payer or sweep route.
 - `src/base/BaseTokenWrapperHook.sol`: narrowly adapted upstream base (two added `virtual` modifiers); [exact patch and rationale](docs/UPSTREAM.md).
 - `script/PrepareMainnet.s.sol`: **read-only** chain/code-hash checks, CREATE2 salt/address mining and deployment calldata preparation. It contains no broadcast or deployment call.
-- `test/`: real PoolManager integration, genuine FCS/Equity fixture, adversarial callback transports and pinned mainnet fork tests.
-- `evidence/`, `logs/`: source/runtime verification and actual execution output, including expected TDD RED runs.
+- `test/`: real PoolManager integration, genuine FCS/Equity fixture, adversarial callback transports, stateful invariants, and pinned mainnet fork tests against the deployed FCS, PoolManager, Universal Router, Permit2 and V4 Quoter. See [test matrix](docs/TESTING.md).
+- `evidence/`, `logs/`: source/runtime verification and actual execution output. `final-*` files are the current revision; numbered logs record the earlier prefund-only design and its TDD RED runs.
 - `dependencies.lock.json`: exact dependency and toolchain revisions; dependencies can be bundled under `lib/` without Git metadata.
 
 ## Build and test
@@ -25,13 +25,13 @@ Requirements: Foundry **v1.8.3**, Solidity **0.8.26**, Cancun-capable EVM. The c
 python3 scripts/bootstrap_dependencies.py
 
 forge build --sizes
-forge test -vv                              # includes pinned mainnet forks
-forge test --no-match-contract MainnetForkTest -vv  # offline after compiler installation
+forge test -vv                              # includes pinned mainnet forks (FCS, PoolManager, Universal Router, V4 Quoter)
+forge test --no-match-contract Fork -vv     # offline after compiler installation
 FOUNDRY_PROFILE=ci forge test -vv            # 2048 runs per fuzz test
 forge fmt --check src/FCSPrimaryHook.sol src/FCSPrimaryRouter.sol src/interfaces/IFCS.sol test script
 ```
 
-`MAINNET_RPC_URL` optionally overrides the default `https://ethereum-rpc.publicnode.com`. Fork tests pin **26038677**, chain ID 1 and the verified FCS/PoolManager runtime hashes. They do not silently skip on RPC failure. The fork-only payer balance is funded with Foundry `deal`; FCS code, gates and timestamp are not patched.
+`MAINNET_RPC_URL` optionally overrides the default `https://eth-mainnet.public.blastapi.io`; the pinned block is historical, so the endpoint must serve archive state (plain full nodes such as `ethereum-rpc.publicnode.com` no longer do). Fork tests pin **26038677**, chain ID 1 and the verified FCS/PoolManager runtime hashes. They do not silently skip on RPC failure. The fork-only payer balance is funded with Foundry `deal`; FCS code, gates and timestamp are not patched.
 
 The local fixture deploys the real Frankencoin, Equity and FCS contracts, seeds primary capital, and advances time to create a binding/mature state. Only the governance-helper factory is inert; no pricing, settlement, voting-age or redemption logic is mocked. A separate hostile-manager fixture tests callback authorization only, not swap correctness.
 
@@ -51,14 +51,15 @@ uint256 actualOut = router.swapExactInput(
 );
 ```
 
-For external aggregators/unlock callers, the hook is **permissionless**, not restricted to the convenience router. Each hop MUST:
+For external aggregators/unlock callers, the hook is **permissionless**, not restricted to the convenience router, and follows the standard Uniswap v4 **swap-then-settle** ordering used by the Universal Router and the V4 Quoter. Each hop MUST:
 
-1. Own sufficient positive input credit in the PoolManager **before** `swap`. For a first hop call `sync(input)`, transfer the exact input to the manager, then `settle()`; for a subsequent hop, backed output credit from a previous swap is accepted.
-2. Use a negative `amountSpecified` (exact input), within `1..int128.max`.
-3. Supply exactly `abi.encode(uint256 minOut, uint256 deadline)` as the 64-byte `hookData`; zero minimum, missing/malformed data and expired deadlines revert **in the hook**, regardless of router.
-4. Take/settle all remaining currency deltas before returning from unlock.
+1. Use a negative `amountSpecified` (exact input), within `1..int128.max`.
+2. Either pass **empty** `hookData` (slippage and deadline are then the caller's router's responsibility, e.g. Universal Router `amountOutMinimum`/`deadline`), or exactly `abi.encode(uint256 minOut, uint256 deadline)` as 64 bytes for an additional hook-level check; any other length, a zero minimum or an expired deadline reverts **in the hook**.
+3. Settle the input debt and take the output before returning from unlock. Prefunding (settle before swap) is also accepted; a subsequent hop may be funded by backed output credit from a previous swap.
 
-An existing swap-then-settle router is **not automatically compatible**. A router using this hook must support upfront settlement/credit and per-hop hookData. Universal Router, Uniswap UI and aggregator discovery/inclusion are not supplied or implied by deployment. The integration test proves an independent router can perform two primary hops within one unlock using intermediate credit, without transferring that intermediate token out.
+**Inventory float.** During `swap` the hook borrows the input token from the PoolManager's physical balance (other pools' reserves or ERC-6909 claim deposits) to execute `FCS.deposit`/`FCS.redeem`, and the caller's later settlement repays it within the same transaction; the PoolManager refuses to end the unlock otherwise. A swap larger than the singleton's balance of the input token reverts with `InsufficientInventory(required, available)`. Callers that prefund never depend on float. To guarantee capacity for swap-then-settle routers, park ZCHF (and, once the sell side is open, FCS) in the PoolManager as ERC-6909 claims; the depositor keeps full ownership and can burn the claims at any time.
+
+Uniswap UI routing additionally requires Uniswap Labs to allowlist the hook address (it uses the `beforeSwapReturnDelta` flag). Fork tests drive the deployed mainnet Universal Router with its default encoding and the deployed V4 Quoter through the hook. Aggregator discovery/inclusion is not supplied or implied by deployment. The integration tests also prove an independent router can perform two primary hops within one unlock using intermediate credit, and can fund input with burned ERC-6909 claims.
 
 Primary pricing comes from `FCS.deposit` / `FCS.redeem`, not FCS `wrap` / `unwrap`, `convertToShares`, `convertToAssets`, `ask`, `bid`, pool `slot0` or `sqrtPriceLimitX96`. A zero native AMM fee does not remove FCS/FPS curve fees or redemption discounts. **Exact output is deliberately rejected in both directions.** The ERC4626 `withdraw` inversion cap is not applied to `redeem`; a regression test redeems more than 10% of FCS supply.
 
@@ -85,7 +86,7 @@ Quotes are advisory snapshots. A large deposit can dilute the **FCS contract's**
 
 ```sh
 forge script script/PrepareMainnet.s.sol:PrepareMainnet \
-  --rpc-url https://ethereum-rpc.publicnode.com \
+  --rpc-url https://eth-mainnet.public.blastapi.io \
   --fork-block-number 26038677 --gas-limit 1000000000 -vv
 ```
 
@@ -98,7 +99,7 @@ Changing compiler, optimizer settings, source or constructor arguments changes t
 ## Accounting and trust boundaries
 
 - Every operation snapshots input/output token balances, takes only its exact input, checks exact input consumption, computes the **new output balance delta**, verifies the protocol's returned amount, and settles precisely that output. Pre-existing token gifts at hook/router/manager are never counted as user output or slippage coverage.
-- The manager tracks and closes currency deltas; the convenience router additionally verifies the expected input debit/output credit and zero final deltas. The hook requires caller-owned prefunded credit even if the singleton has unrelated physical inventory.
+- The manager tracks and closes currency deltas; the convenience router additionally verifies the expected input debit/output credit and zero final deltas. The hook borrows the input from the singleton's physical balance during the swap and relies on the PoolManager's end-of-unlock solvency check for repayment, exactly like Uniswap's own token-wrapper hooks; this is a liveness dependency on float, not a custody risk.
 - No owner, upgrade path, fee collector, recovery or sweep function. Donations remain stranded by design; never send funds directly to hook/router. The sole hook allowance is ZCHF to immutable FCS; the router grants no token allowances.
 - These contracts target the verified non-rebasing, non-fee-on-transfer FCS/ZCHF implementations and the pinned trusted v4 PoolManager. They are **not** a generic hostile-ERC20/upgradeable-vault adapter. Malicious dependency replacement, arbitrary tokens, asynchronous settlement and hostile callback tokens are outside the supported trust model.
 - Callback caller plus active-request hash prevent forged payer requests; an active-request guard prevents reentrant user entry. The hook has manager-only callbacks and no unguarded swap branch. Protocol gates cannot be bypassed by an administrator.

@@ -1,38 +1,72 @@
-# Final verification after review-gap closure
+# Test matrix and final verification (revision: swap-then-settle compatible hook)
 
-The parent independently executed the complete CI profile: **93 passed, zero failed, zero skipped**; **83 distinct test names**. Inherited base tests execute in multiple suites and are not counted as distinct properties. 7 fuzz properties completed **14,336 trials** in total, at 2048 runs each.
+Authoritative results for the current sources: `evidence/final-ci-tests.json` (`forge test --json`,
+CI profile, includes the pinned mainnet fork suites; the invariant campaign's multi-megabyte call traces
+were removed from the file, every other field is verbatim) and `evidence/final-test-summary.json`
+(derived counts and the SHA-256 of every production source file). Human-readable output is in
+`logs/final-tests.log` (default profile, `-vv`) and `logs/final-ci-tests.log` (CI profile).
 
-Authoritative results: `evidence/final-ci-tests.json` and `evidence/final-test-summary.json`. Earlier numbered logs record development and the pre-review baseline; their earlier counts, sizes and predicted deployment addresses are superseded.
+Final CI run: **127 test executions passed, zero failed, zero skipped** across 7 suites; **107 distinct
+test names** (inherited base tests execute in several suites). 7 fuzz properties completed **14,336 trials**
+(2048 runs each). One stateful invariant campaign (4 invariants) ran 48 sequences of depth 40
+(1,920 handler calls, zero reverts). 11 tests run against a pinned mainnet fork.
 
-## Review gaps closed
+| Suite | Tests | What it proves |
+|---|---|---|
+| `PrimaryHookTest` | 5 | Genuine local FCS/Equity fixture: buy and sell through the bundled router from an empty PoolManager, quotes equal amount-specific previews. |
+| `SecurityTest` | 56 | Callback/payer attacks, malformed hookData, integer bounds, exact-output and LP rejection, donations, stale quotes, gate changes, swap-then-settle float borrowing and repayment, clear `InsufficientInventory` failures, fuzzed round trips. |
+| `ReviewGapsTest` | 28 | Hook-level `PrimaryExecution` event accuracy, contract-wallet payer, direct-vs-adapter execution from identical snapshots, seven-day discount recovery boundaries. |
+| `DeepTestingTest` | 21 | Hostile pool initialization prices, both token orderings, ERC-6909-claim-funded routes, LP-pool to primary multi-hop in one unlock, protocol fee inertness, nested-unlock rejection, bootstrap quote gap, dust sells. |
+| `PrimaryHookInvariants` | 6 (4 invariants) | Random users trade through the router while competing investors deposit, redeem, buy FPS and time advances: adapter/singleton hold nothing, FCS supply equals wrapped FPS, supply conservation, execution always equals the immediate quote. |
+| `MainnetForkTest` | 5 | Real deployed FCS and PoolManager at block 26038677: live buy, atomic sell rejection by the live gates, quotes, CREATE2 preparation executed in a disposable fork. |
+| `UniversalRouterForkTest` | 6 | Real deployed Universal Router, Permit2 and V4 Quoter: the Uniswap app's default `SWAP -> SETTLE_ALL -> TAKE_ALL` encoding with empty hookData buys FCS and repays the borrowed float; settle-first and OPEN_DELTA encodings; buy beyond singleton float fails with `InsufficientInventory`; live sell gates propagate; the quoter returns the primary preview. |
 
-`test/ReviewGaps.t.sol` exercises:
-- Accurate hook-level execution events for bundled and external routers, buys and sells, and two primary hops; pool identity, authenticated router, exact input and actual output are checked.
-- Min-output failures and disabled redemptions do not emit the successful hook execution event. Ethereum transaction rollback also discards committed logs on later transaction failure; Foundry trace logs should not be confused with receipts.
-- A real owner-controlled contract wallet initiates both directions. The wallet, not its EOA owner, is the payer and recipient; owner token balances remain untouched.
-- Direct FCS deposit/redeem versus adapter execution from identical reverted snapshots, including fuzzed amounts/routes. Outputs, wallets, supplies, reserve state, discounts, votes and gates are compared.
-- An intervening real redemption invalidates an old sell minimum; rejection preserves the intervening state, and a fresh minimum succeeds.
-- Redemption recovery immediately, halfway, one second before, exactly at and one second after seven days; actual quotes and executions, residual volume and the post-boundary plateau are checked.
+## Design revision covered by this run
 
-The original security suite remains enabled: empty real PoolManager inventory, genuine local FCS/Equity buy/sell, donations, dust, callback/payer attacks, malformed hookData, input/output bounds, exact-output and LP rejection, stale buys, gate changes, and multi-hop input credit.
+Earlier evidence (numbered logs `01`-`17`, `review-event-*.log`, `evidence/baseline-review-manifest.json`)
+documents the previous design, which required callers to settle input credit **before** the swap and to
+supply 64-byte hookData. Those rules made the pool unusable by the Universal Router and unquotable by the
+V4 Quoter. The revised hook follows the standard swap-then-settle ordering, borrowing the input from the
+PoolManager's physical balance for the duration of the transaction (repayment is enforced by the manager),
+and accepts empty hookData. The tests that asserted the old rules were rewritten to assert the new ones:
 
-## Real mainnet baseline
+- `test_unfundedRouterCannotRelyOnSingletonInventory` -> `test_swapThenSettleRouterBorrowsSingletonInventoryAndRepaysIt`
+- `test_unfundedRouterRejectedWithEmptyManager` -> `test_swapThenSettleRevertsWithEmptyManager` (+ one-wei-short variant)
+- `test_hookRejectsEmptyHookData` -> `test_hookAcceptsEmptyHookDataAndDefersSlippageToRouter`
+- `testFuzz_hookRejectsMalformedHookData` now excludes length 0 as well as 64
 
-Five fork tests pin block **26038677**, chain 1 and the FCS/PoolManager runtime hashes. Real deployed-contract buys pass, disabled sells revert atomically, quotes distinguish unavailability, and CREATE2 preparation is actually executed in a disposable fork. Only test payer funding and local hook deployment occur on the fork. Successful enabled sells use genuine locally deployed FCS/Equity with explicitly advanced maturity, not mocked mainnet eligibility.
+## Fixtures
 
-## TDD and reproducibility
+The local fixture deploys the real Frankencoin, Equity and FCS contracts (pinned commit), seeds primary
+capital and advances time to a binding/mature state. Only the governance-helper factory is inert. The
+`DeepTestingTest` stack builder can place the genuine FCS bytecode at a chosen address to force either
+token ordering and can leave the system un-bootstrapped. `ActionRouter` (test only) composes arbitrary
+PoolManager action sequences; `ExternalRouter` (test only) supports both prefund and swap-then-settle.
 
-`logs/review-event-red.log` shows the new execution-event test failing because the hook event was absent. `logs/review-event-green.log` shows it passing after implementation. The remaining gap tests validate existing protocol behavior; they are not represented as pre-existing production defects.
+Fork suites pin block **26038677**, chain ID 1 and the FCS/PoolManager runtime hashes, and do not skip
+on RPC failure. The pinned block requires an archive-capable RPC; the default is
+`https://eth-mainnet.public.blastapi.io` (override with `MAINNET_RPC_URL`). Only the test payer's ZCHF
+balance is dealt; FCS code, gates, timestamps and Uniswap contracts are live.
+
+## Reproduce
 
 ```sh
-FOUNDRY_PROFILE=ci forge test -vv
+forge build --sizes
+forge test -vv                                       # default profile, includes forks
+forge test --no-match-contract Fork -vv              # offline
+FOUNDRY_PROFILE=ci forge test --json > evidence/final-ci-tests.json
 forge fmt --check src/FCSPrimaryHook.sol src/FCSPrimaryRouter.sol src/interfaces/IFCS.sol test script
 ```
 
-The source archive includes vendored Solidity dependencies and licenses, but not build caches or Git metadata. A clean extracted archive is rebuilt and the full CI suite rerun before delivery. RPC access is needed for the pinned fork; installed Foundry/solc are prerequisites.
+`MANIFEST.sha256` lists the SHA-256 of every file in this directory (LF-normalized, as stored in git);
+`.gitattributes` pins LF so the manifest and `forge fmt --check` reproduce on Windows checkouts.
 
-## Deployment and review evidence
+## Deployment preparation
 
-`logs/final-deployment-preparation.log` contains the current-source, read-only CREATE2 predictions. `logs/final-build-sizes.log` records current compiled sizes. Predictions are **not deployed addresses**; edits or compiler changes invalidate them. No keys, broadcasts or mainnet writes were used.
+`logs/final-deployment-preparation.log` holds the current-source read-only CREATE2 plan (hook
+`0x747a076611A138ae063179800D43d8aE33b7E888`, router `0xc056Bb03EB2eF7F86f570AAB52C8Fba13B3E8566`).
+Predictions are **not deployed addresses**; any source, compiler or constructor change invalidates them.
+`logs/final-build-sizes.log` records compiled sizes. No keys, broadcasts or mainnet writes were used.
 
-See `BASELINE_REVIEW.md`, `REVIEW_CLOSURE.md`, and `STATIC_ANALYSIS.md`. Neither tests, focused review nor Slither are an external audit or formal verification. Arbitrary replacement tokens, general router integrations and every possible protocol state are not certified by this suite.
+Build/test success and static analysis are not an independent security audit. The revised hook has not
+been independently re-reviewed; see `docs/REVIEW_CLOSURE.md` and `docs/STATIC_ANALYSIS.md`.

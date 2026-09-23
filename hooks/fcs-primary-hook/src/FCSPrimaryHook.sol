@@ -5,7 +5,6 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
-import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -17,7 +16,6 @@ import {FCSPrimaryRouter} from "./FCSPrimaryRouter.sol";
 contract FCSPrimaryHook is BaseTokenWrapperHook {
     using SafeERC20 for IERC20;
     using BeforeSwapDeltaLibrary for BeforeSwapDelta;
-    using TransientStateLibrary for IPoolManager;
     using PoolIdLibrary for PoolKey;
     IFCS public immutable FCS;
     address public immutable ZCHF;
@@ -30,7 +28,9 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
     error InvalidMinimum();
     error Expired();
     error InvalidAmount();
-    error InputNotPrefunded();
+    /// @dev The PoolManager singleton does not physically hold enough of the input token to bridge
+    /// the swap-then-settle window. Float is provided by other pools' reserves or by ERC-6909 claims.
+    error InsufficientInventory(uint256 required, uint256 available);
     error InsufficientOutput(uint256 actual, uint256 minimum);
 
     /// @notice Actual primary execution amounts, including swaps through external routers.
@@ -68,8 +68,11 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
         return super._beforeInitialize(sender, key, price);
     }
 
-    /// @dev Permissionless integration: the manager authenticates sender; every route must
-    /// own prefunded input credit and supply per-hop (minimumOutput, deadline) as exactly 64 bytes.
+    /// @dev Permissionless integration compatible with the standard Uniswap v4 swap-then-settle flow
+    /// (Universal Router, V4 Quoter): the manager authenticates sender, the input is taken from the
+    /// singleton's existing inventory and the caller settles its debt afterwards; the manager enforces
+    /// repayment before the transaction can end. hookData is optional: empty defers slippage protection
+    /// to the caller's router; exactly 64 bytes abi.encode(minOut, deadline) adds a hook-level check.
     function _beforeSwap(address sender, PoolKey calldata key, SwapParams calldata params, bytes calldata hookData)
         internal
         override
@@ -77,12 +80,15 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
     {
         if (params.amountSpecified >= 0) revert ExactOutputNotSupported();
         if (params.amountSpecified < -int256(type(int128).max)) revert InvalidAmount();
-        if (hookData.length != 64) revert InvalidHookData();
-        (uint256 minimum, uint256 deadline) = abi.decode(hookData, (uint256, uint256));
-        if (minimum == 0) revert InvalidMinimum();
-        if (block.timestamp > deadline) revert Expired();
-        Currency input = params.zeroForOne ? key.currency0 : key.currency1;
-        if (poolManager.currencyDelta(sender, input) < -params.amountSpecified) revert InputNotPrefunded();
+        uint256 minimum = 0; // empty hookData: caller-side slippage only
+        if (hookData.length == 64) {
+            uint256 deadline;
+            (minimum, deadline) = abi.decode(hookData, (uint256, uint256));
+            if (minimum == 0) revert InvalidMinimum();
+            if (block.timestamp > deadline) revert Expired();
+        } else if (hookData.length != 0) {
+            revert InvalidHookData();
+        }
         (selector, delta, fee) = super._beforeSwap(sender, key, params, hookData);
         uint256 output = uint256(-int256(delta.getUnspecifiedDelta()));
         if (output < minimum) revert InsufficientOutput(output, minimum);
@@ -156,6 +162,7 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
     function _deposit(uint256 amount) internal override returns (uint256, uint256) {
         uint256 inputBefore = IERC20(ZCHF).balanceOf(address(this));
         uint256 outputBefore = FCS.balanceOf(address(this));
+        _requireInventory(IERC20(ZCHF), amount);
         _take(underlyingCurrency, address(this), amount);
         if (IERC20(ZCHF).balanceOf(address(this)) != inputBefore + amount) revert SettlementMismatch();
         uint256 reported = FCS.deposit(amount, address(this));
@@ -164,6 +171,13 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
         _settleOutput(wrapperCurrency, output);
         if (FCS.balanceOf(address(this)) != outputBefore) revert SettlementMismatch();
         return (amount, output);
+    }
+
+    /// @dev The input is borrowed from the singleton's physical balance until the caller settles
+    /// later in the same transaction. Fail with a clear reason instead of a bare token transfer error.
+    function _requireInventory(IERC20 token, uint256 amount) private view {
+        uint256 available = token.balanceOf(address(poolManager));
+        if (available < amount) revert InsufficientInventory(amount, available);
     }
 
     function _settleOutput(Currency currency, uint256 output) private {
@@ -176,6 +190,7 @@ contract FCSPrimaryHook is BaseTokenWrapperHook {
     function _withdraw(uint256 amount) internal override returns (uint256, uint256) {
         uint256 inputBefore = FCS.balanceOf(address(this));
         uint256 outputBefore = IERC20(ZCHF).balanceOf(address(this));
+        _requireInventory(FCS, amount);
         _take(wrapperCurrency, address(this), amount);
         if (FCS.balanceOf(address(this)) != inputBefore + amount) revert SettlementMismatch();
         // Genuine FCS enforces binding and FPS1.canRedeem(FCS); never bypass those gates.

@@ -6,7 +6,7 @@ The exact delta is preserved in `base-wrapper.patch`:
 
 1. Import `BaseHook` from the pinned upstream dependency instead of a sibling file.
 2. Add `virtual` to `_beforeInitialize` so the derived hook can enforce canonical tick spacing.
-3. Add `virtual` to `_beforeSwap` so the derived hook can enforce mandatory minOut/deadline and input-credit checks for **all** callers.
+3. Add `virtual` to `_beforeSwap` so the derived hook can enforce exact-input-only, optional 64-byte minOut/deadline `hookData` and singleton-inventory checks for **all** callers.
 4. Add a provenance comment. No base accounting, permission or conversion logic was changed.
 
 The upstream `_beforeSwap` is nonvirtual and does not forward sender/hookData into `_deposit`/`_withdraw`. An initial exclusively authorized convenience-router design prevented aggregator integration. The minimal adaptation allows a permissionless hook without an unguarded user path. Both exact-output branches remain explicitly disabled by the derived hook; no incomplete inverse preview implementation is enabled.

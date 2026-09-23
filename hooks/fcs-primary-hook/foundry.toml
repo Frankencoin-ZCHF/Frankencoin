@@ -17,6 +17,6 @@ runs = 512
 [profile.ci.fuzz]
 runs = 2048
 [rpc_endpoints]
-mainnet = "https://ethereum-rpc.publicnode.com"
+mainnet = "https://eth-mainnet.public.blastapi.io"
 [lint]
 lint_on_build = false

@@ -1,8 +1,23 @@
 {
-  "testExecutions": 93,
-  "distinctNames": 83,
+  "profile": "ci",
+  "toolchain": {
+    "foundry": "1.8.3",
+    "solc": "0.8.26",
+    "evm": "cancun"
+  },
+  "testExecutions": 127,
+  "distinctNames": 107,
   "status": {
-    "Success": 93
+    "Success": 127
+  },
+  "suites": {
+    "test/DeepTesting.t.sol:DeepTestingTest": 21,
+    "test/DeepTesting.t.sol:PrimaryHookInvariants": 6,
+    "test/MainnetFork.t.sol:MainnetForkTest": 5,
+    "test/PrimaryHook.t.sol:PrimaryHookTest": 5,
+    "test/ReviewGaps.t.sol:ReviewGapsTest": 28,
+    "test/Security.t.sol:SecurityTest": 56,
+    "test/UniversalRouterFork.t.sol:UniversalRouterForkTest": 6
   },
   "fuzz": [
     {
@@ -42,9 +57,18 @@
     }
   ],
   "fuzzTrials": 14336,
+  "invariants": [
+    {
+      "suite": "test/DeepTesting.t.sol:PrimaryHookInvariants",
+      "test": "invariant_adapterAndSingletonHoldNothing()",
+      "runs": 48,
+      "calls": 1920,
+      "reverts": 0
+    }
+  ],
   "forkBlock": 26038677,
   "sources": {
-    "src/FCSPrimaryHook.sol": "5132035c7f1e962475e7c58883f53651a690d32cb7725460954fb1c88a94815e",
+    "src/FCSPrimaryHook.sol": "39f67858415c2a4fdb4e26f246086394d5fe30f2c772269612668e4786e4c1f2",
     "src/FCSPrimaryRouter.sol": "81fbc8f7d643d00901e0e0bf11a56b695239a5f766dd59dd88ae91f792cf2a97",
     "src/interfaces/IFCS.sol": "53e619be29bc2efd99658acc8838e7bbaefbdcf88ee917cc21fa932ea6be3a9e",
     "src/base/BaseTokenWrapperHook.sol": "61b1cc16e8aad86f0679b18e6790f37ff0f0751eb0f5b0022e6b0a22c575e982"
