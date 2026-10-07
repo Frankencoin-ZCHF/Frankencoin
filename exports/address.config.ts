@@ -35,6 +35,7 @@ export const ADDRESS: ChainAddressMap = {
     mintingHubV2: "0xDe12B620A8a714476A97EfD14E6F7180Ca653557",
     positionFactoryV2: "0x728310FeaCa72dc46cD5BF7d739556D5668472BA",
     cloneHelper: "0x55cD2820735Db56ca0965BE224D71994265F8bee",
+    leverageGeneric: "0x80b9d6E54189881654A28727Dfa05aaCF83F94a2",
 
     // stablecoin swap bridges
     stablecoinBridgeXCHF: "0x7bbe8F18040aF0032f4C2435E7a76db6F1E346DF",
