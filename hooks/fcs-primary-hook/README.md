@@ -13,7 +13,7 @@ A **local, tested, unaudited** exact-input primary-market adapter for the immuta
 - `src/base/BaseTokenWrapperHook.sol`: narrowly adapted upstream base (two added `virtual` modifiers); [exact patch and rationale](docs/UPSTREAM.md).
 - `script/PrepareMainnet.s.sol`: **read-only** chain/code-hash checks, CREATE2 salt/address mining and deployment calldata preparation. It contains no broadcast or deployment call.
 - `test/`: real PoolManager integration, genuine FCS/Equity fixture, adversarial callback transports, stateful invariants, and pinned mainnet fork tests against the deployed FCS, PoolManager, Universal Router, Permit2 and V4 Quoter. See [test matrix](docs/TESTING.md).
-- `evidence/`, `logs/`: source/runtime verification and actual execution output. `final-*` files are the current revision; numbered logs record the earlier prefund-only design and its TDD RED runs.
+- `evidence/`, `logs/`: source/runtime verification and actual execution output. `final-*` files are the current revision; the earlier numbered logs and the raw Slither JSON are not tracked.
 - `dependencies.lock.json`: exact dependency and toolchain revisions; dependencies can be bundled under `lib/` without Git metadata.
 
 ## Build and test

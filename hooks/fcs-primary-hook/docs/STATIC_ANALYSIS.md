@@ -2,7 +2,7 @@
 
 Slither 0.11.6 was run against the current production sources (Foundry framework, Solidity 0.8.26,
 `--filter-paths "lib/|test/|script/" --exclude-dependencies`). Raw results are in
-`evidence/slither-final.json`; the SHA-256 of each scanned source file is in
+`evidence/slither-final.json` (not tracked in git; regenerate with Slither); the SHA-256 of each scanned source file is in
 `evidence/slither-source-manifest.json` and matches `evidence/final-test-summary.json`. Static analysis
 is not a security audit. Do not interpret a finding count as a count of exploitable vulnerabilities, or a
 reviewed warning as proof of safety.
