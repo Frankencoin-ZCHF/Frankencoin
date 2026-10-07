@@ -76,6 +76,7 @@ export type ChainAddressMainnet = {
   mintingHubV2: Address;
   positionFactoryV2: Address;
   cloneHelper: Address;
+  leverageGeneric: Address; // generic leverage executor (Enso router)
 
   // stablecoin swap bridges
   stablecoinBridgeXCHF: Address;
