@@ -1,4 +1,4 @@
-# Keep Solidity, docs and evidence LF so forge fmt --check and MANIFEST.sha256 are reproducible on every OS.
+# Keep Solidity, docs and evidence LF so forge fmt --check is reproducible on every OS.
 * text=auto eol=lf
 *.sol text eol=lf
 *.md text eol=lf

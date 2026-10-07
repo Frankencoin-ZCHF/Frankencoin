@@ -58,9 +58,6 @@ FOUNDRY_PROFILE=ci forge test --json > evidence/final-ci-tests.json
 forge fmt --check src/FCSPrimaryHook.sol src/FCSPrimaryRouter.sol src/interfaces/IFCS.sol test script
 ```
 
-`MANIFEST.sha256` lists the SHA-256 of every file in this directory (LF-normalized, as stored in git);
-`.gitattributes` pins LF so the manifest and `forge fmt --check` reproduce on Windows checkouts.
-
 ## Deployment preparation
 
 The read-only deployment preparation (`script/PrepareMainnet.s.sol`) produced the current-source read-only CREATE2 plan (hook
