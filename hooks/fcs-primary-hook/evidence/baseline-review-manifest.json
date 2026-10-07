@@ -1,0 +1,20 @@
+{
+  "repository": "/home/ec2-user/clawd/projects/fcs-primary-hook",
+  "sources": {
+    "src/FCSPrimaryHook.sol": "5e8a10b44aaa0dd27694190cd611c7032c58732208f3512c817a756d246cccc2",
+    "src/FCSPrimaryRouter.sol": "81fbc8f7d643d00901e0e0bf11a56b695239a5f766dd59dd88ae91f792cf2a97",
+    "src/base/BaseTokenWrapperHook.sol": "61b1cc16e8aad86f0679b18e6790f37ff0f0751eb0f5b0022e6b0a22c575e982",
+    "src/interfaces/IFCS.sol": "53e619be29bc2efd99658acc8838e7bbaefbdcf88ee917cc21fa932ea6be3a9e"
+  },
+  "sourcesUnchangedDuringTests": true,
+  "total": 65,
+  "distinctTestNames": 60,
+  "statusCounts": {
+    "Success": 65
+  },
+  "testSuites": {
+    "test/MainnetFork.t.sol:MainnetForkTest": 5,
+    "test/PrimaryHook.t.sol:PrimaryHookTest": 5,
+    "test/Security.t.sol:SecurityTest": 55
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "address": "0xDb861830D9Ae2d1fCF99fA0cfd3973de382B0B5b",
+  "chainId": "1",
+  "creationMatch": "exact_match",
+  "runtimeMatch": "exact_match",
+  "verifiedAt": "2026-08-28T08:38:30Z",
+  "compilation": {
+    "language": "Solidity",
+    "compiler": "solc",
+    "compilerVersion": "0.8.24+commit.e11b9ed9",
+    "compilerSettings": {
+      "metadata": {
+        "useLiteralContent": true
+      },
+      "optimizer": {
+        "runs": 200,
+        "enabled": true
+      },
+      "evmVersion": "paris"
+    },
+    "name": "FCS",
+    "fullyQualifiedName": "contracts/equity/shares/FCS.sol:FCS"
+  },
+  "deployment": {
+    "transactionHash": "0x5b7df19db201535b1a10f3e30a9d343cf2f78fcc645d059b6f5f3b84aeee70ec",
+    "blockNumber": "25852506",
+    "transactionIndex": "224",
+    "deployer": "0xDe23082005EF4e6Be6170Adb465d4C4a3a099148"
+  },
+  "proxyResolution": {
+    "isProxy": false,
+    "proxyType": null,
+    "implementations": []
+  },
+  "rpcBlock": 26038677,
+  "rpcCodeEqualsSourcifyOnchainCode": true,
+  "sources": [
+    {
+      "path": "contracts/equity/IEquity.sol",
+      "sha256": "5ed124ab38c7b3cc8944bea87b2ee0319ddd99cf251f8d3d1eb91c794eaa4e9c",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/equity/IGovernance.sol",
+      "sha256": "81f8fd8e100e3ff37dd63f746e2e37ad259f82d73c5b8ed39dff67ac07d85b37",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/equity/shares/AccumulatingVotesToken.sol",
+      "sha256": "21eca3e6077e5e98de4d1594d4b9348b6d6d8056d7b581dd630b21eeded3ff98",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/equity/shares/FCS.sol",
+      "sha256": "f7aa730334979843de51d28843c786d090a3c76cf306886f746d78edee5a6cc3",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/equity/shares/FCSMintRedeem.sol",
+      "sha256": "92b5bd373a347e95c157ffc2e1bbcb297b09a348cba2d8b4a7b2394e9fd39770",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/erc20/ERC20.sol",
+      "sha256": "734799724e7ffcad097004ac2e5a092418903817c61fc18ecb9388bab64eb512",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/erc20/IERC20.sol",
+      "sha256": "4d42a1057dd3d95664bd52c4ba8fabb77dd7e52735e0ba0a334bcf1b85b5d100",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/erc20/IERC4626.sol",
+      "sha256": "3e9d6c1d21655f01714eab088f1d3e5cf7436642e8d70502b1eb002010e5bdb7",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/stablecoin/IBasicFrankencoin.sol",
+      "sha256": "421ff7682c685b90d48fde76248797bdd4b436cdb5f37d85c0b0f71cf92c75c7",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/stablecoin/IFrankencoin.sol",
+      "sha256": "5717f1cd175d5f5791dc3746e9d9a208d7ae73ec49c74ea129097536088f78db",
+      "matches_github": true
+    },
+    {
+      "path": "contracts/utils/MathUtil.sol",
+      "sha256": "7e1bea4426ab270bffbbd3d063db887679a88a344b20e34e48056cbef5ffedc3",
+      "matches_github": true
+    }
+  ]
+}

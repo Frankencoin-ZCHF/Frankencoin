@@ -1,0 +1,25 @@
+{
+  "address": "0xdb861830d9ae2d1fcf99fa0cfd3973de382b0b5b",
+  "chainId": 1,
+  "block": 26038677,
+  "blockHash": "0x2a3b91922e5d86cc8b1b4496422e8b211dadf0fecf54f2c78ef2b9d3c2421863",
+  "codeMatchesVerifiedRuntime": true,
+  "asset": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+  "FPS1": "0x1ba26788dfde592fec8bcb0eaff472a42be341b2",
+  "isBinding": false,
+  "underlyingRedeemEligible": false,
+  "redemptionsEnabled": false,
+  "sourceSha256": {
+    "contracts/equity/IEquity.sol": "5ed124ab38c7b3cc8944bea87b2ee0319ddd99cf251f8d3d1eb91c794eaa4e9c",
+    "contracts/equity/IGovernance.sol": "81f8fd8e100e3ff37dd63f746e2e37ad259f82d73c5b8ed39dff67ac07d85b37",
+    "contracts/equity/shares/AccumulatingVotesToken.sol": "21eca3e6077e5e98de4d1594d4b9348b6d6d8056d7b581dd630b21eeded3ff98",
+    "contracts/equity/shares/FCS.sol": "f7aa730334979843de51d28843c786d090a3c76cf306886f746d78edee5a6cc3",
+    "contracts/equity/shares/FCSMintRedeem.sol": "92b5bd373a347e95c157ffc2e1bbcb297b09a348cba2d8b4a7b2394e9fd39770",
+    "contracts/erc20/ERC20.sol": "734799724e7ffcad097004ac2e5a092418903817c61fc18ecb9388bab64eb512",
+    "contracts/erc20/IERC20.sol": "4d42a1057dd3d95664bd52c4ba8fabb77dd7e52735e0ba0a334bcf1b85b5d100",
+    "contracts/erc20/IERC4626.sol": "3e9d6c1d21655f01714eab088f1d3e5cf7436642e8d70502b1eb002010e5bdb7",
+    "contracts/stablecoin/IBasicFrankencoin.sol": "421ff7682c685b90d48fde76248797bdd4b436cdb5f37d85c0b0f71cf92c75c7",
+    "contracts/stablecoin/IFrankencoin.sol": "5717f1cd175d5f5791dc3746e9d9a208d7ae73ec49c74ea129097536088f78db",
+    "contracts/utils/MathUtil.sol": "7e1bea4426ab270bffbbd3d063db887679a88a344b20e34e48056cbef5ffedc3"
+  }
+}

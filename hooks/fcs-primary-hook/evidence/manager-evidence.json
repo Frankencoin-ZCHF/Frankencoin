@@ -1,0 +1,10 @@
+{
+  "chainId": 1,
+  "block": 26038677,
+  "blockHash": "0x2a3b91922e5d86cc8b1b4496422e8b211dadf0fecf54f2c78ef2b9d3c2421863",
+  "blockTimestamp": 1790148323,
+  "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+  "poolManagerCodeBytes": 24009,
+  "poolManagerCodeHash": "0x785f1014552b7ce7d5fb7d0c970ca60edee94fd00425d7ca21609acac7ce1293",
+  "officialAddressSource": "https://docs.uniswap.org/contracts/v4/deployments"
+}
