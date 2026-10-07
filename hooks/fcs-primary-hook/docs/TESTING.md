@@ -4,7 +4,7 @@ Authoritative results for the current sources: `evidence/final-ci-tests.json` (`
 CI profile, includes the pinned mainnet fork suites; the invariant campaign's multi-megabyte call traces
 were removed from the file, every other field is verbatim) and `evidence/final-test-summary.json`
 (derived counts and the SHA-256 of every production source file). Human-readable output is in
-`logs/final-tests.log` (default profile, `-vv`) and `logs/final-ci-tests.log` (CI profile).
+the default profile (`-vv`) and CI profile test runs (logs not tracked).
 
 Final CI run: **127 test executions passed, zero failed, zero skipped** across 7 suites; **107 distinct
 test names** (inherited base tests execute in several suites). 7 fuzz properties completed **14,336 trials**
@@ -23,7 +23,7 @@ test names** (inherited base tests execute in several suites). 7 fuzz properties
 
 ## Design revision covered by this run
 
-Earlier evidence (numbered logs `01`-`17`, `review-event-*.log`, `evidence/baseline-review-manifest.json`)
+Earlier evidence (earlier logs, now removed, and `evidence/baseline-review-manifest.json`)
 documents the previous design, which required callers to settle input credit **before** the swap and to
 supply 64-byte hookData. Those rules made the pool unusable by the Universal Router and unquotable by the
 V4 Quoter. The revised hook follows the standard swap-then-settle ordering, borrowing the input from the
@@ -63,10 +63,10 @@ forge fmt --check src/FCSPrimaryHook.sol src/FCSPrimaryRouter.sol src/interfaces
 
 ## Deployment preparation
 
-`logs/final-deployment-preparation.log` holds the current-source read-only CREATE2 plan (hook
+The read-only deployment preparation (`script/PrepareMainnet.s.sol`) produced the current-source read-only CREATE2 plan (hook
 `0x747a076611A138ae063179800D43d8aE33b7E888`, router `0xc056Bb03EB2eF7F86f570AAB52C8Fba13B3E8566`).
 Predictions are **not deployed addresses**; any source, compiler or constructor change invalidates them.
-`logs/final-build-sizes.log` records compiled sizes. No keys, broadcasts or mainnet writes were used.
+Compiled sizes are reproducible with `forge build --sizes`. No keys, broadcasts or mainnet writes were used.
 
 Build/test success and static analysis are not an independent security audit. The revised hook has not
 been independently re-reviewed; see `docs/REVIEW_CLOSURE.md` and `docs/STATIC_ANALYSIS.md`.
