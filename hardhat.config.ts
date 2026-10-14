@@ -168,8 +168,8 @@ const config: HardhatUserConfig = {
       optimism: etherscan!,
       base: etherscan!,
       avalanche: etherscan!,
-      gnosis:    etherscan!,
-      sonic:     etherscan!,
+      gnosis: etherscan!,
+      sonic: etherscan!,
     },
     customChains: [
       {
