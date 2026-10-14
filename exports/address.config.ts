@@ -166,6 +166,10 @@ export const ADDRESS: ChainAddressMap = {
     ccipGovernance: "0x3b5f2ab37bd0679645289726146a5f653bfdcb52",
     minterGovernance: "0x4655529a4bf8c26a97c2b7f6c044b69a2f98e73c",
 
+    // stablecoin swap bridges
+    stablecoinBridgeVCHF: "0x543308f87694442e03e4C63b7A2F90e135d90998",
+    vchfToken: "0x1fcA74D9ef54a6AC80ffE7D3b14e76c4330Fd5D8",
+
     // utils
     svZCHF: "0xa09EBdf8A01b9ef04149319D64F83b9C01a5b585",
     transferWithAuthorization: "0xc477AaB50E3b641f27c4814c1906864464Ad70D5",
