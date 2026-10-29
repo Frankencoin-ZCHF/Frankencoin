@@ -324,6 +324,173 @@ export const runCollateralChecks = (cfg: CollateralCheckConfig) => {
         await position.adjust(0, total, cfg.position.liqPrice);
         expect(await token.balanceOf(positionAddr)).to.equal(total);
       });
+
+      describe("MintingHub flows: challenge, bid, forced sale", () => {
+        const DAY = 86_400;
+        const MINTED = floatToDec18(5_000);
+        let position: any;
+        let hubAddr: string;
+        let initial: bigint;
+        let phase: bigint;
+
+        // Everything the hub holds must be explained by open challenges or postponed returns, ZCHF never stays in the hub
+        const expectHubClean = async (pendingCollateral = 0n) => {
+          expect(await token.balanceOf(hubAddr)).to.equal(pendingCollateral);
+          expect(await zchf.balanceOf(hubAddr)).to.equal(0n);
+        };
+
+        const challenge = async (size: bigint) => {
+          await fresh(bob, size);
+          await token.connect(bob).approve(hubAddr, size);
+          await hub.connect(bob).challenge(positionAddr, size, 0);
+        };
+
+        beforeEach(async () => {
+          initial = cfg.position.initialCollateral;
+          await open(initial);
+          position = await ethers.getContractAt("Position", positionAddr, alice);
+          hubAddr = await hub.getAddress();
+          phase = await position.challengePeriod();
+          await evm_increaseTime(3 * DAY + 300);
+          await position.mint(alice.address, MINTED);
+          for (const s of [bob, carol]) {
+            await zchf.transfer(s.address, floatToDec18(100_000));
+            await zchf.connect(s).approve(hubAddr, ethers.MaxUint256);
+          }
+        });
+
+        it("challenge locks exactly the challenged collateral in the hub", async () => {
+          await challenge(initial);
+          expect(await token.balanceOf(bob.address)).to.equal(0n);
+          expect(await position.challengedAmount()).to.equal(initial);
+          await expectHubClean(initial);
+        });
+
+        it("averting a challenge (bid in phase 1) pays the challenger and releases exactly the size", async () => {
+          await challenge(initial);
+          await evm_increaseTime(60);
+          const bobZchf = await zchf.balanceOf(bob.address);
+          await hub.connect(carol).bid(0, initial, false);
+          expect(await zchf.balanceOf(bob.address)).to.equal(bobZchf + (initial * cfg.position.liqPrice) / 10n ** 18n);
+          expect(await token.balanceOf(carol.address)).to.equal(initial);
+          expect(await position.challengedAmount()).to.equal(0n);
+          expect(await token.balanceOf(positionAddr)).to.equal(initial);
+          await expectHubClean();
+        });
+
+        it("partially averting leaves the rest of the challenge open and accounted", async () => {
+          await challenge(initial);
+          await evm_increaseTime(60);
+          const part = 1000000000000000001n;
+          await hub.connect(carol).bid(0, part, false);
+          expect(await token.balanceOf(carol.address)).to.equal(part);
+          expect(await position.challengedAmount()).to.equal(initial - part);
+          await expectHubClean(initial - part);
+          await hub.connect(carol).bid(0, initial, false); // clamps to the rest
+          expect(await token.balanceOf(carol.address)).to.equal(initial);
+          await expectHubClean();
+        });
+
+        it("successful challenge of the whole position: bidder gets the collateral, challenger gets theirs back, debt is cleared", async () => {
+          await challenge(initial);
+          await evm_increaseTime(DAY + 60);
+          await hub.connect(carol).bid(0, initial, false);
+          expect(await token.balanceOf(bob.address)).to.equal(initial); // challenger collateral returned in full
+          expect(await token.balanceOf(carol.address)).to.equal(initial);
+          expect(await token.balanceOf(positionAddr)).to.equal(0n);
+          expect(await position.minted()).to.equal(0n);
+          expect(await position.challengedAmount()).to.equal(0n);
+          expect(await position.isClosed()).to.equal(true);
+          await expectHubClean();
+        });
+
+        it("successful partial challenge with an odd size leaves no dust anywhere", async () => {
+          const size = cfg.position.minCollateral + 1n;
+          await challenge(size);
+          await evm_increaseTime(DAY + 60);
+          await hub.connect(carol).bid(0, size, false);
+          expect(await token.balanceOf(bob.address)).to.equal(size);
+          expect(await token.balanceOf(carol.address)).to.equal(size);
+          expect(await token.balanceOf(positionAddr)).to.equal(initial - size);
+          expect(await position.challengedAmount()).to.equal(0n);
+          await expectHubClean();
+        });
+
+        it("late bid below the debt (bad debt) clears the position and leaves nothing in the hub", async () => {
+          await challenge(initial);
+          await evm_increaseTime((DAY * 19) / 10); // ~90% into phase 2, price ~10% of liq price
+          await hub.connect(carol).bid(0, initial, false);
+          expect(await token.balanceOf(carol.address)).to.equal(initial);
+          expect(await position.minted()).to.equal(0n);
+          await expectHubClean();
+        });
+
+        it("postponed collateral return is held exactly and can be claimed in full", async () => {
+          await challenge(initial);
+          await evm_increaseTime(DAY + 60);
+          await hub.connect(carol).bid(0, initial, true);
+          expect(await token.balanceOf(bob.address)).to.equal(0n);
+          expect(await hub.pendingReturns(cfg.token, bob.address)).to.equal(initial);
+          await expectHubClean(initial);
+          await hub.connect(bob).returnPostponedCollateral(cfg.token, bob.address);
+          expect(await token.balanceOf(bob.address)).to.equal(initial);
+          await expectHubClean();
+        });
+
+        describe("forced sale of an expired position", () => {
+          const expireAndAge = async (extra: bigint) => {
+            const expiration = await position.expiration();
+            await network.provider.send("evm_setNextBlockTimestamp", [Number(expiration + extra)]);
+            await network.provider.send("evm_mine");
+          };
+
+          it("buying everything repays the debt and moves all collateral to the buyer", async () => {
+            await expireAndAge(phase); // 1x liquidation price
+            const aliceZchf = await zchf.balanceOf(alice.address);
+            await hub.connect(carol).buyExpiredCollateral(positionAddr, ethers.MaxUint256);
+            expect(await token.balanceOf(carol.address)).to.equal(initial);
+            expect(await token.balanceOf(positionAddr)).to.equal(0n);
+            expect(await position.minted()).to.equal(0n);
+            expect(await zchf.balanceOf(alice.address)).to.be.gt(aliceZchf); // surplus goes to the owner
+            await expectHubClean();
+          });
+
+          it("buying an odd partial amount moves exactly that amount", async () => {
+            await expireAndAge(phase);
+            const part = 1000000000000000001n;
+            await hub.connect(carol).buyExpiredCollateral(positionAddr, part);
+            expect(await token.balanceOf(carol.address)).to.equal(part);
+            expect(await token.balanceOf(positionAddr)).to.equal(initial - part);
+            await expectHubClean();
+          });
+
+          it("buying in two parts sums up exactly", async () => {
+            await expireAndAge(phase);
+            const part = 1000000000000000001n;
+            await hub.connect(carol).buyExpiredCollateral(positionAddr, part);
+            await hub.connect(carol).buyExpiredCollateral(positionAddr, ethers.MaxUint256);
+            expect(await token.balanceOf(carol.address)).to.equal(initial);
+            expect(await token.balanceOf(positionAddr)).to.equal(0n);
+            expect(await position.minted()).to.equal(0n);
+            await expectHubClean();
+          });
+
+          it("free phase (price 0) clears the bad debt and leaves nothing behind", async () => {
+            await expireAndAge(2n * phase + 1n);
+            await hub.connect(carol).buyExpiredCollateral(positionAddr, ethers.MaxUint256);
+            expect(await token.balanceOf(carol.address)).to.equal(initial);
+            expect(await token.balanceOf(positionAddr)).to.equal(0n);
+            expect(await position.minted()).to.equal(0n);
+            await expectHubClean();
+          });
+
+          it("is blocked while a challenge is open", async () => {
+            await challenge(cfg.position.minCollateral);
+            await expireAndAge(phase);
+            await expect(hub.connect(carol).buyExpiredCollateral(positionAddr, ethers.MaxUint256)).to.be.reverted;
+          });
+        });
+      });
     });
   });
 };
