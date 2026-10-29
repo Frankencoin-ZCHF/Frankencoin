@@ -49,11 +49,21 @@ runCollateralChecks({
     const missing = amount - (await token.balanceOf(to.address));
     if (missing <= 0n) return;
     const [, , , , funder] = await ethers.getSigners();
-    await network.provider.send("hardhat_setBalance", [XAUH_HOLDER, "0x56BC75E2D63100000"]);
+    await network.provider.send("hardhat_setBalance", [
+      XAUH_HOLDER,
+      "0x56BC75E2D63100000",
+    ]);
     const holder = await ethers.getImpersonatedSigner(XAUH_HOLDER);
     const gross = missing + missing / 100n + 1000n;
-    await new ethers.Contract(XAUH, ERC20_ABI, holder).transfer(funder.address, gross);
-    const received = await new ethers.Contract(XAUH, ERC20_ABI, funder).balanceOf(funder.address);
+    await new ethers.Contract(XAUH, ERC20_ABI, holder).transfer(
+      funder.address,
+      gross
+    );
+    const received = await new ethers.Contract(
+      XAUH,
+      ERC20_ABI,
+      funder
+    ).balanceOf(funder.address);
     await new ethers.Contract(XAUH, ERC20_ABI, funder).approve(WXAUH, received);
     await new ethers.Contract(WXAUH, WRAPPER_ABI, funder).wrap(received);
     await token.connect(funder).transfer(to.address, missing);
@@ -66,7 +76,10 @@ describe("wXAUH specific checks", () => {
     // The fee only hits wrap/unwrap, never transfers of the wrapper token itself.
     const [, alice] = await ethers.getSigners();
     const holder = await ethers.getImpersonatedSigner(XAUH_HOLDER);
-    await network.provider.send("hardhat_setBalance", [XAUH_HOLDER, "0x56BC75E2D63100000"]);
+    await network.provider.send("hardhat_setBalance", [
+      XAUH_HOLDER,
+      "0x56BC75E2D63100000",
+    ]);
     const xauh = new ethers.Contract(XAUH, ERC20_ABI, holder);
     const w = new ethers.Contract(WXAUH, [...WRAPPER_ABI, ...ERC20_ABI], alice);
     await xauh.transfer(alice.address, 10n ** 18n);
@@ -93,7 +106,10 @@ describe("wXAUH specific checks", () => {
     // These are centralisation risks for a collateral, positions cannot move collateral while they are active.
     const w = new ethers.Contract(WXAUH, WRAPPER_ABI, ethers.provider);
     const admin = await ethers.getImpersonatedSigner(await w.owner());
-    await network.provider.send("hardhat_setBalance", [admin.address, "0x56BC75E2D63100000"]);
+    await network.provider.send("hardhat_setBalance", [
+      admin.address,
+      "0x56BC75E2D63100000",
+    ]);
     const [, alice] = await ethers.getSigners();
     await w.connect(admin).setAssetProtectionRole(admin.address);
     await w.connect(admin).freeze(alice.address);
