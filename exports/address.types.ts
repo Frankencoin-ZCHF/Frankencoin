@@ -218,6 +218,10 @@ export type ChainAddressBase = {
   ccipGovernance: Address;
   minterGovernance: Address;
 
+  // stablecoin swap bridges
+  stablecoinBridgeVCHF: Address;
+  vchfToken: Address;
+
   // utils
   svZCHF: Address;
   transferWithAuthorization: Address;
