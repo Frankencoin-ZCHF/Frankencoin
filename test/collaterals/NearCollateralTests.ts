@@ -7,16 +7,19 @@ import { runCollateralChecks } from "../helper/collateralChecks";
  * https://etherscan.io/token/0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4
  *
  * Plain OpenZeppelin 3.x ERC20 (solc 0.6.12) plus a bridge. Not upgradeable, no transfer fee,
- * no blacklist. The only admin switch (AdminControlled) pauses the bridge in/out, never ERC20 transfers.
+ * no blacklist. The admin (AdminControlled) pauses the bridge in/out, never ERC20 transfers, but can also
+ * write arbitrary storage and delegatecall (adminSstore, adminDelegatecall).
  * Funding impersonates a holder, minting requires a NEAR light client proof.
  */
 const ENEAR = "0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4";
-const HOLDER = "0xee8aaa362a75fbf8e0a38a50ddc27f38551e16ea"; // ~141k eNear at the fork block (contract, impersonated)
+const HOLDER = "0xee8aaa362a75fbf8e0a38a50ddc27f38551e16ea"; // Uniswap V3 NEAR/USDC 0.3% pool, ~141k eNear at the fork block (impersonated as funder)
 
 const ENEAR_ABI = [
   "function admin() view returns (address)",
   "function paused() view returns (uint256)",
   "function adminPause(uint256)",
+  "function adminSstore(uint256,uint256)",
+  "event TransferToNearInitiated(address indexed sender, uint256 amount, string accountId)",
   "function transferToNear(uint256,string)",
   "function decimals() view returns (uint8)",
   "function totalSupply() view returns (uint256)",
@@ -68,23 +71,42 @@ describe("eNear specific checks", () => {
     expect(await t.balanceOf(bob.address)).to.equal(UNIT / 2n);
   });
 
-  it("documents the admin risk: admin can pause bridge exits, but cannot freeze or move balances", async () => {
-    // Collateral stays transferable, so positions can always be liquidated or repaid. Supply can change via the bridge.
+  it("exit to NEAR reverts while paused and works after the admin unlocks the bridge", async () => {
     const [, alice] = await ethers.getSigners();
     const t = new ethers.Contract(ENEAR, ENEAR_ABI, ethers.provider);
+    expect(await t.paused()).to.equal(3n);
+
+    await network.provider.send("hardhat_setBalance", [HOLDER, "0x56BC75E2D63100000"]);
+    const holder = await ethers.getImpersonatedSigner(HOLDER);
+    await t.connect(holder).transfer(alice.address, UNIT);
+    const bal = await t.balanceOf(alice.address);
+    await expect(t.connect(alice).transferToNear(bal, "alice.near")).to.be.reverted;
+
     const admin = await ethers.getImpersonatedSigner(await t.admin());
     await network.provider.send("hardhat_setBalance", [admin.address, "0x56BC75E2D63100000"]);
     await t.connect(admin).adminPause(0);
     expect(await t.paused()).to.equal(0n);
 
-    // with the bridge open, any holder can burn their own tokens, the total supply shrinks accordingly
-    await network.provider.send("hardhat_setBalance", [HOLDER, "0x56BC75E2D63100000"]);
-    const holder = await ethers.getImpersonatedSigner(HOLDER);
-    await t.connect(holder).transfer(alice.address, UNIT);
-    const burn = await t.balanceOf(alice.address);
     const supply = await t.totalSupply();
-    await t.connect(alice).transferToNear(burn, "alice.near");
-    expect(await t.totalSupply()).to.equal(supply - burn);
+    await expect(t.connect(alice).transferToNear(bal, "alice.near"))
+      .to.emit(t, "TransferToNearInitiated")
+      .withArgs(alice.address, bal, "alice.near");
+    expect(await t.totalSupply()).to.equal(supply - bal);
     expect(await t.balanceOf(alice.address)).to.equal(0n);
+  });
+
+  it("documents the admin risk: admin can write any storage slot, i.e. mint or rewrite balances", async () => {
+    // AdminControlled exposes adminSstore and adminDelegatecall, so the admin is not limited to pausing the bridge.
+    // eNear is not upgradeable, but this gives the admin the same power as an upgrade key.
+    const [, alice] = await ethers.getSigners();
+    const t = new ethers.Contract(ENEAR, ENEAR_ABI, ethers.provider);
+    const admin = await ethers.getImpersonatedSigner(await t.admin());
+    await network.provider.send("hardhat_setBalance", [admin.address, "0x56BC75E2D63100000"]);
+
+    const slot = BigInt(ethers.solidityPackedKeccak256(["uint256", "uint256"], [alice.address, 0])); // _balances is slot 0
+    const before = await t.balanceOf(alice.address);
+    await t.connect(admin).adminSstore(slot, 1_000_000n * UNIT);
+    expect(await t.balanceOf(alice.address)).to.equal(1_000_000n * UNIT);
+    expect(before).to.not.equal(await t.balanceOf(alice.address));
   });
 });
