@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { runCollateralChecks } from "./helper/collateralChecks";
+import { runCollateralChecks } from "../helper/collateralChecks";
 
 /**
  * wXAUH, wrapper token for Swiss gold (Herculis Gold Coin, XAUH).

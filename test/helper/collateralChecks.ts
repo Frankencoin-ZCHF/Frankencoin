@@ -13,7 +13,7 @@ import { evm_increaseTime } from "./index";
  *  - the position balance is compared to the amounts moved, so there must be no fee and no rounding dust
  *    (e.g. xStocks leave 1 wei behind on transfers)
  *
- * Usage: call `runCollateralChecks({...})` from a test file, see SwissGoldCollateralTests.ts.
+ * Usage: call `runCollateralChecks({...})` from a test file, see test/collaterals/SwissGoldCollateralTests.ts.
  */
 export interface CollateralCheckConfig {
   /** Display name used in the describe block */
